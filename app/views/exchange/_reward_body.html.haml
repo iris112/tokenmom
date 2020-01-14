@@ -1,0 +1,56 @@
+#reward_body{:style => "flex-grow: 1; flex-shrink: 1;"}
+    .alert.alert-success.alert-reward{:style => 'display:none'}
+        %strong{'data-i18n' => 'success'} Success
+        %span{'data-i18n' => 'request_reward'} Your request has been sent.
+    .alert.alert-success.alert-fail-reward{:style => 'display:none'}
+        %strong{'data-i18n' => 'fail'} Fail
+        %span{'data-i18n' => 'request_reward_fail'} Your request has been failed.
+    .alert.alert-success.alert-fail-recommend{:style => 'display:none'}
+        %strong{'data-i18n' => 'fail'} Fail
+        %span{'data-i18n' => 'request_recommend_fail'} Your recommend request has been failed.
+    .header-text
+        %h2{"data-i18n" => "tokenmom_reward_system"} TOKENMOM REWARD SYSTEM
+    .invite-banner
+    .invite-info
+        .reward-info.row.flex-container
+            .col-md-6.flex.flex-1
+                .box.flex.flex-1.flex-column.pending
+                    .box-header
+                        %i.fas.fa-hourglass-end
+                        %span{"data-i18n" => "pending:"} Pending
+                        %span.pending-transaction
+                        %span.reward-request.disabled{"data-i18n" => "request"} Request
+                    .box-content.flex-1{:style => "min-height:350px;overflow-y:auto"}
+                        .flex.flex-1.flex-column
+                            %table.table.reward-pending
+                                %thead
+                                    %tr
+                                        %th{"data-i18n" => "time"} Time
+                                        %th{:style => "text-align: right","data-i18n" => "volume"} Volume
+                                        %th{:style => "text-align: right","data-i18n" => "tm_point"} TM Point
+                                %tbody
+            .col-md-6.flex.flex-1.flex-column
+                .box.flex.flex-1.flex-column.claimed
+                    .box-header
+                        %i.fas.fa-hand-holding-usd
+                        %span{"data-i18n" => "claimed:"} Claimed:
+                        %span.total-claimed-amount
+                    .box-content.flex-1{:style => "min-height:350px;overflow-y:auto"}
+                        .flex.flex-column
+                            %table.table.referral-claimed
+                                %thead
+                                    %tr
+                                        %th{"data-i18n" => "tx"} Tx
+                                        %th{:style => "text-align: center","data-i18n" => "time"} Time
+                                        %th{:style => "text-align: right","data-i18n" => "amount"} Amount
+                                        %th{:style => "text-align: right","data-i18n" => "approved"} Approved
+
+                                %tbody
+        .owner-info.row
+            .col-md-12.reward-wallet-not-connected
+                %span.not-connect-wallet-info{"data-i18n" => "wallet_not_connected"} Wallet is not connected.
+                %a.connect-btn{:href => "/exchange/TM-WETH","data-turbolinks" => "false"}
+                    %span{"data-i18n" => "connect"} Connect
+
+
+    .invite-rule

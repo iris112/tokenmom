@@ -1,0 +1,54 @@
+#orderbook.box.box-mb.flex-1.flex.flex-column
+  .box-header
+    %span{'data-i18n' => 'order_book'} ORDER BOOK
+  .flex-column
+    .orderbook-header.header-row.text-right
+      .col-xs-2.size
+        %span{'data-i18n' => 'size'} Size
+      .col-xs-3
+        %span{'data-i18n' => 'price'} Price
+      .col-xs-4
+        %span{'data-i18n' => 'amount'} Amount
+      .col-xs-3.depth
+        %span{'data-i18n' => 'depth'} Depth
+    .orderbook-container.flex-1
+      .orderbook{:max_amount => "0"}
+        .orderbook-asks
+          -# - if @sell_orders
+          -#   - @sell_orders.each do |order|
+          -#     .hover-row
+          -#       .bar{:style => "width:"+ order["depth"] + "%"}
+          -#       .amount-bar{:style => "width:"+ order["pro"] + "%"}
+          -#       .col-xs-3.col-xs-offset-2.text-danger.text-right.orderbook-price
+          -#         %strong.number                    
+          -#           0.038
+          -#           %span.p3.opacity-color
+          -#             #{order["zero_count"]}                     
+          -#       .col-xs-4.text-right.orderbook-amount
+          -#         %strong.number
+          -#           #{order["amount"]}            
+        .spread
+          .col-xs-2
+            %span{'data-i18n' => 'spread'} Spread
+          .col-xs-3.text-right
+            %strong.number
+              0.00
+          %strong.float-right.text-success
+            %i.fa.fa-circle{"aria-hidden" =>"true"}
+            %span{'data-i18n' => 'real_time'} Realtime
+        .orderbook-bids
+          -# - if @buy_orders
+          -#   - @buy_orders.each do |order|
+          -#     .hover-row
+          -#       .bar{:style => "width:"+ order["depth"] + "%"}
+          -#       .amount-bar{:style => "width:"+ order["pro"] + "%"}
+          -#       .col-xs-3.col-xs-offset-2.text-success.text-right.orderbook-price
+          -#         %strong.number
+          -#           #{order["price"]}
+          -#           %span.p3.opacity-color 
+          -#             #{order["zero_count"]}
+          -#       .col-xs-4.text-right.orderbook-amount
+          -#         %strong.number
+          -#           #{order["amount"]}    
+                    
+

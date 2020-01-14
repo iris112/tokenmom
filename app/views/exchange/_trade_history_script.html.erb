@@ -1,0 +1,60 @@
+<script type="text/javascript">
+    var global_var = 100;
+    jQuery(function($) {
+        $(document).ready(function() {
+            draw_trade_history();
+            //Change token list
+            $(".dropdown-menu.token-link").on("click", "li", function(){
+                let token_symbol = $(this).attr("value")
+                let base_token = "ETH"
+                console.log("TCCC:", token_symbol)
+                Trade.get_trade_histories(base_token,token_symbol);
+            });
+            //Click item in trade history table
+            $(document).on("click", ".cover-row",function(){
+                let table_name = $(this).parent().parent().parent().parent().attr('id');
+                let price;
+                let amount
+                if(table_name == "trade_history_all"){
+                    price =  ($(this).find(":nth-child(2)").find("strong").text());
+                    amount = ($(this).find(":nth-child(3)").find("strong").text());
+                    amount = Trade.removeTrailingZeros(amount);
+                    price = Trade.removeTrailingZeros(price);
+
+                }else if(table_name == "trade_history_me"){
+                    price =  ($(this).find(":nth-child(4)").find("strong").text());
+                    amount = ($(this).find(":nth-child(5)").find("strong").text());
+                    amount = Trade.removeTrailingZeros(amount);
+                    price = Trade.removeTrailingZeros(price);
+                }                
+                //Fill price and amount in trade widget
+                //$("#trade .price").val(price);
+                $(".price-buy").val(price);
+                $(".price-sell").val(price);
+                $(".amount-buy").val(amount);
+                $(".amount-sell").val(amount);
+                $(".amount-buy").trigger("change");
+                $(".amount-sell").trigger("change");
+                $(".price-buy").attr('data-lock','false');
+                $(".price-sell").attr('data-lock','false');
+                $(".price-buy").trigger("change");
+                $(".price-sell").trigger("change");
+            });
+            $(document).on('click','.market-status-row',function(){
+                let token_symbol = $(this).find(":nth-child(1)").find("div").attr("symbol");
+                //let base_token = "ETH";
+                that = $(this)
+                let token_pair = that.find(":nth-child(1)").find("div").text();
+                let base_token = token_pair.split("-")[1];
+                console.log("----click---")
+                Trade.get_trade_histories(base_token,token_symbol);
+            });
+            function draw_trade_history(){
+                let symbol = $(".token-info").attr("token_symbol");
+                let base_token = $(".token-info").attr("base_token");
+                Trade.get_trade_histories(base_token,symbol);
+            }
+            
+        });
+    });
+</script>

@@ -1,0 +1,36 @@
+
+#trade_workspace
+  =render :partial => 'header'
+  =render :partial => 'notice'
+  .row.tmom-row.react-tabs{"data-tabs" => "true"}
+    #market-panel.col-md-3.col-12.tmom-grid-item.tmom-grid-left.react-tabs__tab-panel.react-tabs__tab-panel--selected{"role" => "tabpanel", "aria-labelledby" => "react-tabs-1"}
+      =render :partial => 'market'
+    #tradeview-panel.col-md-6.col-12.tmom-grid-item.tmom-grid-middle.react-tabs__tab-panel
+      =render :partial => 'tradeview'
+    #orderbook-panel.col-md-3.col-12.tmom-grid-item.tmom-grid-right.react-tabs__tab-panel{"role" => "tabpanel", "aria-labelledby" => "react-tabs-2"}
+      =render :partial => 'orderbook'
+    #social-panel.col-md-3.col-12.tmom-grid-item.tmom-grid-left.react-tabs__tab-panel{"role" => "tabpanel", "aria-labelledby" => "react-tabs-5"}
+      =render :partial => 'social'
+    #trade-panel.col-md-6.col-12.tmom-grid-item.tmom-grid-middle.react-tabs__tab-panel{"role" => "tabpanel", "aria-labelledby" => "react-tabs-3"}
+      =render :partial => 'trade'
+    #trade-history-panel.col-md-3.col-12.tmom-grid-item.tmom-grid-right.react-tabs__tab-panel{"role" => "tabpanel", "aria-labelledby" => "react-tabs-4"}
+      =render :partial => 'trade_history'
+    %ul.react-tabs__tab-list{:role => "tablist"}
+      %li#react-tabs-1.react-tabs__tab.react-tabs__tab--selected{"role" => "tab", "data-i18n" => "markets", :aria => {:selected => "false", :disabled => "false", :controls => "market-panel"}} Markets
+      %li#react-tabs-2.react-tabs__tab{"role" => "tab", "data-i18n" => "trades", :aria => {:selected => "false", :disabled => "false", :controls => "trade-panel"}} Trades
+      %li#react-tabs-3.react-tabs__tab{"role" => "tab", "data-i18n" => "orders", :aria => {:selected => "false", :disabled => "false", :controls => "orderbook-panel"}} Orders
+      %li#react-tabs-4.react-tabs__tab{"role" => "tab", "data-i18n" => "history", :aria => {:selected => "false", :disabled => "false", :controls => "trade-history-panel"}} History
+      %li#react-tabs-5.react-tabs__tab{"role" => "tab", "data-i18n" => "chatting", :aria => {:selected => "false", :disabled => "false", :controls => "social-panel"}} Social
+    / #wallet_widget
+    /   =render :partial => 'wallet'
+    / #overview_widget
+    /   =render :partial => 'overview'
+
+=render :partial => 'index_script.html'
+=render :partial => 'wallet_script.html'
+=render :partial => 'trade_script.html'
+=render :partial => 'orderbook_script.html'
+=render :partial => 'trade_history_script.html'
+=render :partial => 'market_script.html'
+=render :partial => 'overview_script.html'
+=render :partial => 'utils_script.html'

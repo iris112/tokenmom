@@ -1,0 +1,100 @@
+%aside.wallet
+  .wallet-header
+    %span.wallet-title.left-item{'data-i18n' => 'wallet'} Wallet
+    %button.btn.btn-danger.closebtn
+      %i.fa.fa-power-off
+    .wallet-search.right-item
+      %input.wallet-search-input{:type => "text", 'data-i18n' => '[placeholder]search..'}
+      %a.wallet-search-btn{:href => "javascript:void(0)"}
+        .fa.fa-search.text-success
+    %label.wallet-my-tokens-label.right-item{:for=>"wallet_my_tokens",'data-i18n' => 'only_show_balance'}  Only show my balance
+    %input.wallet-my-tokens-input.right-item{:type=>"checkbox", :id=>"wallet_my_tokens", :name=>"wallet_my_tokens"}
+    %input.wallet-prev-search{:type=>"hidden", :value=>""}
+  .clear-float
+  .wallet-body
+    .box-content
+      .row.wrap-container
+        .col-md-6
+          .row
+            .col-sm-2
+              %label
+                %span ETH
+            .col-sm-6
+              %label.eth-balance
+                %i.fa.fa-spinner.fa-spin
+                %span{:style => "display:none"}
+            .col-sm-4
+              %label
+                %i.fa.fa-sync.eth-sync
+          .row
+            .col-sm-8
+              %input.form-control.wrap-amount{:autocomplete => "off", :placeholder => "0.00"}
+              %span.text-danger.wrap-alert
+            .col-sm-4
+              %button.btn.btn-success.btn-md.btn-wrap.disabled
+                %span{'data-i18n' => 'wrap'} WRAP
+        .col-md-6
+          .row
+            .col-sm-2
+              %label
+                %span WETH
+            .col-sm-6
+              %label.weth-balance
+                %i.fa.fa-spinner.fa-spin
+                %span{:style => "display:none"}
+            .col-sm-4.weth-allowance
+              %label
+                %i.fa.fa-sync.weth-sync
+              %label.float-right.wallet-weth-allow
+                %i.fa.fa-spinner.fa-spin
+                %label.switch{:style=>"display:none"}
+                  %input.wal-weth-allow{"data-toggle" => "toggle", :type =>"checkbox"}
+                  %span.slider.round
+          .row
+            .col-sm-8
+              %input.form-control.unwrap-amount{:autocomplete => "off", :placeholder => "0.00"}
+              %span.text-danger.unwrap-alert
+            .col-sm-4
+              %button.btn.btn-danger.btn-md.btn-unwrap.disabled
+                %span{'data-i18n' => 'unwrap'} UNWRAP
+
+    .hidden-token-contents
+      - @tokens_list.each do |token|
+        %input{:class=>"token-item token-item-" + token.symbol, :type=>"hidden", :"data-symbol"=>token.symbol, :"data-name"=>token.name, :"data-address"=>token.contract_address, :"data-decimal"=>token.token_decimals}
+    %table.wallet-token-table.table-striped
+      %thead
+        %tr
+          %th.wallet-token-symbol{'data-i18n' => 'symbol'} Token
+          %th.wallet-token-name{'data-i18n' => 'name'} Name
+          %th.wallet-token-etherscan{'data-i18n' => 'address'} Address
+          %th.wallet-token-balance{'data-i18n' => 'balance'} Balance
+          %th.wallet-token-tradable{'data-i18n' => 'tradable/untradable'} Tradable/Untradable
+          %th.wallet-token-tradable{'data-i18n' => 'transfer'} Transfer
+      %tbody.wallet-token-list
+    %ul.pagination#pagination
+#send_token_modal.modal.fade{:role => "dialog"}
+  .modal-dialog
+    .modal-content
+      .modal-header
+        %h4.modal-title Send token to Address
+      .modal-body
+        %form
+          .form-group
+            %input.form-control.send-token-info{:type => "hidden","data-address" =>"","data-decimal" => "","data-balance" => ""}/
+            %label Recipient Address:
+            %input.form-control.receive-wallet-address{:type => "text"}/
+            %label.ethereum-wallet-state{:style => "display:none"} Invalid ethereum address.
+          .form-group
+            %label Amount to send:
+            .btn-group.float-right{"data-toggle" => "buttons"}
+              %a.send-max-amount{:href => "javascript:void(0)", :tabindex => "-1"} Availabel Amount
+            %span.send-token-symbol
+            %input.form-control.receive-token-amount{:type => "text"}
+            %label.token-balance-state{:style => "display:none"} Insufficient balance.
+      .modal-footer
+        %button.btn.btn-danger.btn-cancel-tradebyaddr{:type => "button","data-dismiss" => "modal"}
+          %span{"data-i18n" => "cancel"}
+        %button.btn.btn-success.send-token-button.disabled{:type => "button","data-dismiss" => "modal"}
+          %span{"data-i18n" => "send"} Send
+
+

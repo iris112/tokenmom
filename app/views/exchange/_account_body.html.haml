@@ -1,0 +1,176 @@
+#account_body
+    .header-text
+        %h2{"data-i18n" => "tokenmom_account"} WALLET ACCOUNT
+    .invite-info
+        .account-info.row.flex-container
+            .col-md-3.flex.flex-1
+                .flex.flex-1.flex-column
+                    .walletList
+                        .newWallet
+                            %img.headerImg{"src" => "./assets/wallet_01.png"}
+                            .walletInfoTip New wallet
+                            .walletTip
+                                %p#tokenmom_desc{ :style => "display: block;"} Create a new browser wallet
+                                #tokenmom_logined{ :style => "display: none;" }
+                                    %div
+                                        .green-circle
+                                        %span{"data-i18n" => "ethereum_main"} Ethereum Main
+                                    %a#tokenmom_wallet_address{ :style => "margin-top: 0.9375rem;",:rel => "noopener noreferrer",:target => "_blank" }
+                                    %div
+                                        %span{} Nickname :
+                                        %span#tokenmom_nick_name
+                            #create_tokenmom_wallet.walletBtn
+                                %i.hoverBtn
+                                %span#tokenmom_connect_btn Create
+                            #create_tokenmom_wallet.gotoBtn{ :style => "display: none;"}
+                                %i.hoverBtn
+                                %span#tokenmom_goto_btn Go to Exchange
+
+            .col-md-3.flex.flex-1
+                .flex.flex-1.flex-column
+                    .walletList
+                        .metamask
+                            %img.headerImg{"src" => "./assets/MetaMask.png"}
+                            .walletInfoTip MetaMask
+                            .walletTip
+                                %p#metamask_desc{ :style => "display: block;"} Connect your wallet by MetaMask wallet
+                                #metamask_logined{ :style => "display: none;" }
+                                    %div
+                                        .green-circle
+                                        %span{"data-i18n" => "ethereum_main"} Ethereum Main
+                                    %a#wallet_address{ :style => "margin-top: 0.9375rem;",:rel => "noopener noreferrer",:target => "_blank" }
+                                    %div
+                                        %span{} Nickname :
+                                        %span#metamask_nick_name
+                            #metamask_login.walletBtn
+                                %i.hoverBtn
+                                %span#metamask_connect_btn Connect
+                            #metamask_login.gotoBtn{ :style => "display: none;"}
+                                %i.hoverBtn
+                                %span#metamask_goto_btn Go to Exchange
+
+            .col-md-3.flex.flex-1
+                .flex.flex-1.flex-column
+                    .walletList
+                        .memorizingWords
+                            %img.headerImg{"src" => "./assets/memorizingWords.png"}
+                            .walletInfoTip Private Key
+                            .walletTip
+                                %p#privatekey_desc Entering your Private Key to import wallet
+                                #privatekey_logined{ :style => "display: none;" }
+                                    %div
+                                        .green-circle
+                                        %span{"data-i18n" => "ethereum_main"} Ethereum Main
+                                    %a#privatekey_wallet_address{ :style => "margin-top: 0.9375rem;",:rel => "noopener noreferrer",:target => "_blank" }
+                                    %div
+                                        %span{} Nickname :
+                                        %span#privatekey_nick_name
+                            #import_tokenmom_wallet.walletBtn
+                                %i.hoverBtn
+                                %span#privatekey_connect_btn Import
+                            #import_tokenmom_wallet.gotoBtn{ :style => "display: none;"}
+                                %i.hoverBtn
+                                %span#privatekey_goto_btn Go to Exchange
+
+            .col-md-3.flex.flex-1
+                .flex.flex-1.flex-column
+                    .walletList
+                        .jsonWallet
+                            %img.headerImg{"src" => "./assets/jsonWallet.png"}
+                            .walletInfoTip JSON file
+                            .walletTip
+                                %p#json_desc Entering your Keystore JSON File to import wallet
+                                #json_logined{ :style => "display: none;" }
+                                    %div
+                                        .green-circle
+                                        %span{"data-i18n" => "ethereum_main"} Ethereum Main
+                                    %a#json_wallet_address{ :style => "margin-top: 0.9375rem;",:rel => "noopener noreferrer",:target => "_blank" }
+                                    %div
+                                        %span{} Nickname :
+                                        %span#json_nick_name
+                            #import_json_wallet.walletBtn
+                                %i.hoverBtn
+                                %span#json_connect_btn Import
+                            #import_json_wallet.gotoBtn{ :style => "display: none;"}
+                                %i.hoverBtn
+                                %span#json_goto_btn Go to Exchange
+
+
+
+    #enterNickName.modal.wallet-modal.fade{:role => "dialog"}
+        .modal-dialog
+            .modal-content
+                .modal-header
+                    %h4.modal-title{"data-i18n" => "enter_nick_name"}
+                .modal-body
+                    .control-wrapper
+                        .item-label
+                            %label{:title => "Private Key","data-i18n" => "Nickname"}
+                        .item-control.has-error
+                            %span
+                                %input.token-address-input{:name => "address", :placeholder => "", :type => "text", :value => "", :id => "nick_name"}
+                            %span.text-danger
+                        .item-label
+                            %label{:title => "description","data-i18n" => "Tokenmom doesn't require to signup and deposit"}
+                        .item-label
+                            %label{:title => "description","data-i18n" => "You have to input your nickname to create or import your wallet"}
+                    .modal-footer
+                        %button.btn.btn-danger.btn-cancel-tradebyaddr{:type => "button","data-dismiss" => "modal"}
+                            %span{"data-i18n" => "cancel"}
+                        %button.btn.btn-success.trade-by-address.disabled{:type => "button"}
+                            %span{"data-i18n" => "submit"}
+
+    #importBrowserWallet.modal.wallet-modal.fade{:role => "dialog"}
+        .modal-dialog
+            .modal-content
+                .modal-header
+                    %h4.modal-title{"data-i18n" => "import_an_existing_wallet"}
+                .modal-body
+                    .control-wrapper
+                        .item-label
+                            %label{:title => "Private Key","data-i18n" => "private_key"}
+                        .item-control.has-error
+                            %span
+                                %input.token-address-input{:name => "address", :placeholder => "0x0", :type => "text", :value => ""}
+                            %span.text-danger
+                    .modal-footer
+                        %button.btn.btn-danger.btn-cancel-tradebyaddr{:type => "button","data-dismiss" => "modal"}
+                            %span{"data-i18n" => "cancel"}
+                        %button.btn.btn-success.trade-by-address.disabled{:type => "button"}
+                            %span{"data-i18n" => "submit"}
+
+    #importJsonWallet.modal.wallet-modal.fade{:role => "dialog"}
+        .modal-dialog
+            .modal-content
+                .modal-header
+                    %h4.modal-title{"data-i18n" => "import_an_existing_wallet"}
+                .modal-body
+                    .control-wrapper
+                        .item-label
+                            %label{:title => "JSON File","data-i18n" => "JSON File"}
+                        .item-control.has-error
+                            %input#json_file.file-input{:name => "json_file", :type => "file"}
+                        .item-label
+                            %label{:title => "Password","data-i18n" => "Password"}
+                        .item-control.has-error
+                            %span
+                                %input#json_password.password-input{:name => "json_password", :placeholder => "password", :type => "password", :value => ""}
+                            %span.text-danger
+                    .modal-footer
+                        %button.btn.btn-danger.btn-cancel-tradebyaddr{:type => "button","data-dismiss" => "modal"}
+                            %span{"data-i18n" => "cancel"}
+                        %button.btn.btn-success.trade-by-address.disabled{:type => "button"}
+                            %span{"data-i18n" => "submit"}
+
+    #browserWalletResult.modal.wallet-modal.fade{:role => "dialog"}
+        .modal-dialog
+            .modal-content
+                .modal-header
+                    %h4.modal-title
+                .modal-body.result
+                    .item-label.text-message
+                        %label{:style =>"font-size:12px;"}
+                .modal-footer
+                    %button.btn.btn-danger.btn-cancel-tradebyaddr{:type => "button","data-dismiss" => "modal"}
+                        %span{"data-i18n" => "close"}
+

@@ -1,0 +1,92 @@
+#reward_body
+    .header-text
+        %h2{"data-i18n" => "tokenmom_referral_system"} TOKENMOM REFERRAL SYSTEM
+    .invite-banner
+    .invite-info
+        .friends-info.row.flex-container
+            .col-md-6.flex.flex-1
+                .box.flex.flex-1.flex-column
+                    .box-header
+                        %i.fas.fa-hand-holding-usd
+                        %span{"data-i18n" => "total_commission"} Total Commission :
+                        %span.total-commission-value
+                    .box-content.flex-1{:style => "min-height:350px;overflow-y:auto"}
+                        .flex.flex-column
+                            %table.table.friends-referral
+                                %thead
+                                    %tr
+                                        %th{"data-i18n" => "time"} Time
+                                        %th{:style => "text-align:right","data-i18n" => "referral_id"} Referral ID
+                                        %th{:style => "text-align:right","data-i18n" => "commission"} Commission
+                                %tbody
+            .col-md-6.flex.flex-1
+                .box.flex.flex-1.flex-column
+                    .box-header
+                        %i.fas.fa-users
+                        %span{"data-i18n" => "total_friends"} Total friends :
+                        %span.total-friends-number
+
+                    .box-content.flex-1{:style => "min-height:350px;overflow-y:auto"}
+                        .flex.flex-column
+                            %table.table.friends
+                                %thead
+                                    %tr
+                                        %th{"data-i18n" => "referral_id"} Referral ID
+                                        %th{:style => "text-align:right","data-i18n" => "time"} Time
+                                %tbody
+
+        .owner-info.row
+            .col-md-12.row.referral-wallet-connected
+                .col-sm-3
+                    .row
+                        .col
+                            #qrcode
+                .col-sm-9
+                    .row
+                        .col-sm-3
+                            %span{"data-i18n" => "my_referral_id"} My Referral ID:
+                        .col-sm-9.referral-id
+                            %span 12346532
+                    .row
+                        .col-sm-3
+                            %span{"data-i18n" => "referral_link"} Referral Link:
+                        .col-sm-7.referral-link
+                            %input{:readonly => "",:value => "https://tokenmom.com/?r=1234532",:style => "width:80%"}
+                            .copy-btn
+                                %i.fa.fa-copy
+                    .row
+                        .col-sm-3
+                            %span{"data-i18n" => "share"} SHARE:
+                        .col-sm-9.social-share
+                            %a.facebook{:onclick => "javascript:window.open('http://www.facebook.com/sharer/sharer.php?u=https://tokenmom.com?r=12345678&amp;t=Tokenmom referral system','_blank','width=800, height=500,top=200,left=300');void(0);"}
+                                %i.fab.fa-facebook{"aria-hidden" => "true"}
+                            %a.twitter{:href => "https://twitter.com/intent/tweet?text=It pays to have friends!&url=https://tokenmom.com/?r=35339374", :target => "_blank"}
+                                %i.fab.fa-twitter-square{"aria-hidden" => "true"}
+                            %a{:href => "http://www.linkedin.com/shareArticle?mini=true&ro=true&title=Tokenmom Referral Program&url=https://www.tokenmom.com/?r=35339374&summary=It pays to have friends!&source=It pays to have friends!&armin=armin", :target => "_blank"}
+                                %i.fab.fa-linkedin{"aria-hidden" => "true"}
+            .col-md-12.referral-wallet-not-connected
+                %span.not-connect-wallet-info{"data-i18n" => "wallet_not_connected"} Wallet is not connected.
+                %a.connect-btn{:href => "/exchange/TM-WETH","data-turbolinks" => "false"}
+                    %span{"data-i18n" => "connect"} Connect
+
+        .reward-info.row.flex-container
+            .col-md-12.flex.flex-1
+                .box.flex.flex-1.flex-column.claimed
+                    .box-header
+                        %i.fas.fa-hand-holding-usd
+                        %span{"data-i18n" => "claimed:"} Claimed:
+                        %span.total-claimed-amount
+                    .box-content.flex-1{:style => "min-height:350px;overflow-y:auto"}
+                        .flex.flex-column
+                            %table.table.referral-claimed
+                                %thead
+                                    %tr
+                                        %th{"data-i18n" => "tx"} Tx
+                                        %th{:style => "text-align: center","data-i18n" => "referral_id"} Referral ID
+                                        %th{:style => "text-align: center","data-i18n" => "time"} Time
+                                        %th{:style => "text-align: right","data-i18n" => "amount"} Amount
+                                        %th{:style => "text-align: right","data-i18n" => "approved"} Approved
+
+                                %tbody
+
+    .invite-rule

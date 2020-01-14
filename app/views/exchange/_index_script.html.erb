@@ -1,0 +1,933 @@
+<script type="text/javascript">
+  jQuery(function($) {
+        $(document).ready(function(){
+            init_webpage();
+            load_config();
+            //$('body').i18n();
+            $(document).on('click','#help_btn',function(){
+
+            });
+            //SWitch Day/Night mode
+            $('#theme_mode').on('click', function(){
+                if ($(this).hasClass('fa-sun')){
+                    $('#trade_workspace').removeClass('is-daymode');
+                    $('#trade_workspace').addClass('is-nightmode');
+                    $(this).removeClass('fa-sun');
+                    $(this).addClass('fa-moon');
+                    window.tvWidget.applyOverrides(override_dark);
+                    window.tvWidget.changeTheme("Dark");
+                    localStorage.setItem('theme_color', 'dark');
+                    var w = document.getElementById("twitter-widget-0").contentDocument;
+                    var s = document.createElement("link");
+                    s.rel = "stylesheet";
+                    s.type = "text/css";
+                    s.href = "https://platform.twitter.com/css/timeline.423c46b580a19b6615c16ce259577660.dark.ltr.css";
+                    w.head.appendChild(s);
+                }
+                else {
+                    $('#trade_workspace').removeClass('is-nightmode');
+                    $('#trade_workspace').addClass('is-daymode');
+                    $(this).removeClass('fa-moon');
+                    $(this).addClass('fa-sun');
+                    window.tvWidget.applyOverrides(override_light);
+                    window.tvWidget.changeTheme("Light");
+                    localStorage.setItem('theme_color', 'light');
+                    var w = document.getElementById("twitter-widget-0").contentDocument;
+                    var s = document.createElement("link");
+                    s.rel = "stylesheet";
+                    s.type = "text/css";
+                    s.href = "https://platform.twitter.com/css/timeline.423c46b580a19b6615c16ce259577660.light.ltr.css";
+                    w.head.appendChild(s);
+                }
+            });
+            //Prevent click event if has disabled class in elements
+            $(".btn").click(function(e){
+                if($(this).hasClass('disabled')){
+                    e.stopImmediatePropagation();
+                }
+            });
+
+            //Language Menu Select Event
+            /* $('.dropdown-toggle.nav-link').on("click",function(e){
+
+                $(this).next('ul').toggle();
+                e.stopPropagation();
+                e.preventDefault();
+            }); */
+
+            //Chat Channel language menu select event
+            $('.dropdown-toggle.language-link').on("click",function(e){
+                $(this).next('ul').toggle();
+                e.stopPropagation();
+                e.preventDefault();
+            });
+
+            //Token List Menu Change
+            $(".dropdown-menu.token-link").on("click", "li", function(){
+                let selText = $(this).children().first().text();
+                $(this).parent().prev().text(selText);
+            });
+
+            /* //Language Menu Change
+            $(".dropdown-menu.language").on("click", "li", function(){
+                let selText = $(this).text();
+                let selImg = $(this).find('img').attr('src');
+                //Change Language Menu Items
+                $(".dropdown-toggle.nav-link :nth-child(2)").html(selText);
+                $(".dropdown-toggle.nav-link :nth-child(1)").attr('src',selImg);
+                //Change Chat channel language items
+                $(".dropdown-toggle.language-link :nth-child(2)").html(selText);
+                $(".dropdown-toggle.language-link").val($(this).val());
+                $(".dropdown-toggle.language-link :nth-child(1)").attr('src',selImg);
+                $(".dropdown-toggle.nav-link").next("ul").toggle();
+            }); */
+            //Click Submit button in Trade by Address modal
+
+            $(document).on('click',"#tradebyAddress .trade-by-address",function(){
+                let token_addr = $("#tradebyAddress .token-address-input").val().toLowerCase();
+                check_address(token_addr);
+            });
+            //Trade by Address modal Hide event
+            $("#tradebyAddress").on('hidden.bs.modal', function (e){
+                $("#tradebyAddress .token-address-input").val("");
+            });
+            //Trade by Address show event
+            $(document).on('click', '.btn-trade-by-addr',function(){
+                $("#tradebyAddress").show();
+                $("#tradebyAddress").addClass("show");
+                $("#tradebyAddress").addClass("in");
+            });
+            $(document).on('click','.btn-no-token',function(){
+                $("#noToken").hide();
+            });
+            $(document).on('click','#tradebyAddress .btn-cancel-tradebyaddr',function(){
+                $("#tradebyAddress").hide();
+
+            });
+
+            $(document).on('change paste keyup', "#tradebyAddress .token-address-input", function(){
+                let hex_value = $("#tradebyAddress .token-address-input").val();
+                if(!isHex(hex_value)){
+                    let alert = "<span>Please enter valid token address</span>";
+                    $(this).parent().next().children().remove();
+                    $(this).parent().next().html(alert);
+                    $("#tradebyAddress .trade-by-address").addClass("disabled");
+                }else{
+                    $(this).parent().next().children().remove();
+                    $("#tradebyAddress .trade-by-address").removeClass("disabled");
+                }
+            });
+
+            //Create a Browser Wallet
+            // $(document).on('click', '#create_browser_wallet',function(){
+            //     $("#detect_popup").removeClass("show");
+            //     create_browser_wallet();
+            // });
+            // $(document).on('click','#createBrowserWallet .btn-cancel-tradebyaddr',function(){
+            //     $("#createBrowserWallet").hide();
+            // });
+
+            // Import a Browser Wallet
+            // $(document).on('click', '#import_browser_wallet',function(){
+            //     $("#detect_popup").removeClass("show");
+
+            //     $("#importBrowserWallet").show();
+            //     $("#importBrowserWallet").addClass("show");
+            //     $("#importBrowserWallets").addClass("in");
+            // });
+            // $("#importBrowserWallet").on('hidden.bs.modal', function (e){
+            //     $("#importBrowserWallet .token-address-input").val("");
+            //     $("#importBrowserWallet .trade-by-address").addClass("disabled");
+            // });
+            // $(document).on('click','#importBrowserWallet .btn-cancel-tradebyaddr',function(){
+            //     $("#importBrowserWallet").hide();
+            // });
+            // $(document).on('click','#importBrowserWallet .trade-by-address',function(){
+            //     $("#importBrowserWallet").hide();
+            //     import_browser_wallet();
+            // });
+            // $(document).on('change paste keyup', "#importBrowserWallet .token-address-input", function(){
+            //     let hex_value = $("#importBrowserWallet .token-address-input").val();
+            //     if(!isHex(hex_value)){
+            //         let alert = "<span>Please enter valid token address</span>";
+            //         $(this).parent().next().children().remove();
+            //         $(this).parent().next().html(alert);
+            //         $("#importBrowserWallet .trade-by-address").addClass("disabled");
+            //     }else{
+            //         $(this).parent().next().children().remove();
+            //         $("#importBrowserWallet .trade-by-address").removeClass("disabled");
+            //     }
+            // });
+
+
+            //Chat channel language change
+            $(".dropdown-language-menu").on("click", "li", function(){
+                let selText = $(this).text();
+                let selImg = $(this).find('img').attr('src');
+                $(".dropdown-toggle.language-link :nth-child(2)").html(selText);
+                $(".dropdown-toggle.language-link").val($(this).val());
+                $(".dropdown-toggle.language-link :nth-child(1)").attr('src',selImg);
+                $(".dropdown-toggle.language-link").next("ul").toggle();
+            });
+            $(document).on('click','.favorite',function(e){
+                console.log('favorite click');
+                market = $(this).parent().parent().parent().parent().attr("id");
+                if(market == "market_eth"){
+                    base_token = "WETH";
+
+                }else{
+                    base_token = "TM";
+
+                }
+                //Change tokens Favorite
+                //base_token = $(".token-info").attr("base_token");
+                let value;
+                value = $(this).children(1).attr('fav');
+                let token_id = $(this).children(1).attr('value');
+                if(value == 0){
+                    $(this).children(1).removeClass();
+                    $(this).children(1).addClass("fas");
+                    $(this).children(1).addClass("fa-star");
+                    $(this).children(1).attr('fav',1);
+                    localStorage.setItem(base_token + "token"+token_id, 1);
+                    //console.log(localStorage.getItem("token"+token_id))
+                }else if(value == 1){
+                    $(this).children(1).removeClass();
+                    $(this).children(1).addClass("far");
+                    $(this).children(1).addClass("fa-star");
+                    $(this).children(1).attr('fav',0);
+                    localStorage.setItem(base_token + "token"+token_id, 0);
+                }
+                e.stopPropagation();
+
+            });
+            var detect_popup_emt, name_emt,price_emt,pricechange_emt,volume_emt,detect_account_emt,metamask_login_emt,ledger_login_emt,favorite_emt, cancel_metamask_install_emt, cancel_metamask_login_emt, metamask_install_button_emt;
+
+            // detect_account_emt = document.getElementById("detect_account");
+            // detect_popup_emt = document.getElementById("detect_popup");
+            // $(window).click(function(evt) {
+            //     let targetElement = evt.target;
+            //     do {
+            //         if( targetElement == detect_account_emt ) {
+            //             detect_popup_emt.classList.toggle("show");
+            //             return;
+            //         } else if (targetElement == detect_popup_emt ) {
+            //             return;
+            //         } else {
+            //             targetElement = targetElement.parentNode;
+            //         }
+            //     } while (targetElement);
+            //     if( detect_popup_emt.classList.value.indexOf('show') !== -1 ) {
+            //         detect_popup_emt.classList.toggle("show");
+            //         $(detect_popup_emt).find(".text-danger").hide();
+            //     }
+            // });
+            //metamask_install_button_emt = document.getElementById("metamask_install_button");
+            //metamask_install_button_emt.onclick = function() { metamask_install() };
+
+            //cancel_metamask_login_emt = document.getElementById("cancel_metamask_login");
+            //cancel_metamask_login_emt.onclick = function() { metamask_cancel() };
+
+            //cancel_metamask_install_emt = document.getElementById("cancel_metamask_install");
+            //cancel_metamask_install_emt.onclick = function() { metamask_cancel() };
+            $(document).on('click', "#detect_account", function() {
+                $('.navbar-collapse').removeClass('in');
+            });
+            $(document).on('click','#pair_name',function(e){
+                that = $(this);
+                name_sort(that);
+            });
+            //Price sort function event
+            $(document).on('click','#price_name',function(e){
+                that = $(this);
+                price_sort(that);
+            });
+            volume_emt = document.getElementById("volume_name");
+            //Favorite sort function event
+            $(document).on('click','#favorite',function(e){
+                that = $(this);
+                change_favorite_order(that);
+            });
+            $(document).on('click','#volume_name',function(e){
+                that = $(this);
+                Trade.volume_sort(null,that);
+            });
+            $(document).on('click','#pricechange_name',function(e){
+                that = $(this);
+                pricechange_sort(that);
+            });
+            ledger_login_emt = document.getElementById("ledger_login");
+            ledger_login_emt.onclick = function(){ledger_login()};
+        });
+        function load_config(){
+            var theme_color = localStorage.getItem('theme_color');
+            if(theme_color=='dark'){
+                $('#trade_workspace').removeClass('is-daymode');
+                $('#trade_workspace').addClass('is-nightmode');
+                $('#theme_mode').removeClass('fa-sun');
+                $('#theme_mode').addClass('fa-moon');
+                //window.tvWidget.applyOverrides(override_dark);
+                //window.tvWidget.changeTheme("Dark");
+            }
+            else if(theme_color=='light'){
+                $('#trade_workspace').removeClass('is-nightmode');
+                $('#trade_workspace').addClass('is-daymode');
+                $('#theme_mode').removeClass('fa-moon');
+                $('#theme_mode').addClass('fa-sun');
+                //window.tvWidget.applyOverrides(override_light);
+                //window.tvWidget.changeTheme("Light");
+            }
+            else{
+                $('#theme_mode').removeClass('fa-sun');
+                $('#theme_mode').addClass('fa-moon');
+                $('#trade_workspace').removeClass('is-daymode');
+                $('#trade_workspace').addClass('is-nightmode');
+            }
+        };
+    });
+
+
+
+    function isHex(string){
+        let pre_value = string.substr(0,2);
+        if(pre_value != "0x"){
+            return false;
+        }
+        let last_value = string.substr(2);
+        for (i = 0; i < last_value.length; i ++ ){
+            if(isNaN(parseInt(last_value.charAt(i), 16))){
+                return false;
+            }
+        }
+        if(last_value.length != 40){
+            return false;
+        }else {
+            return true;
+        }
+    }
+    function check_address(token_addr){
+        let token_Address = "";
+        token_Address = token_addr;
+        address = currentWalletAddress    //Wallet Address
+        var contractAddress = token_Address; // Token Address
+        var contractABI = human_standard_token_abi;
+        //Get token balance;
+        var tokenContract = web3js.eth.contract(contractABI).at(contractAddress);
+        var data = {
+            "name":"",
+            "symbol":"",
+            "decimals":""
+        }
+        tokenContract.name((error,name)=>{
+            if(name != null){
+                data["name"] = name
+                tokenContract.decimals((error,decimal)=>{
+                    token_decimal = decimal.toNumber();
+                    data["decimals"] = token_decimal;
+                    tokenContract.symbol((error,symbol) =>{
+                        data["symbol"] = symbol;
+                        data["address"] = contractAddress;
+                        trade_by_address(data);
+                    });
+                });
+
+            }else{
+                invalid_address();
+            }
+        });
+    }
+    function metamask_install() {
+        var win = window.open('https://metamask.io/', '_blank');
+        win.focus();
+    }
+    function metamask_cancel() {
+        var connection_status_ele = document.getElementById("connection_status");
+        document.getElementById('sign_in').style.display = "block";
+        document.getElementById('metamask_logined').style.display = "none";
+        document.getElementById('metamask_install').style.display = "none";
+        document.getElementById('metamask_logoutted').style.display = "none";
+        //document.getElementById('connected_info').textContent = 'No accounts detected';
+        //document.getElementById('connected_wallet').textContent = 'Select Wallet';
+        $('#connected_wallet').attr('data-i18n','select_wallet');
+        $('#connected_wallet').text($j3.i18n('select_wallet'));
+        $('#connected_info').attr('data-i18n','no_accounts_detected');
+        $('#connected_info').text($j3.i18n('no_accounts_detected'));
+        connection_status_ele.classList.add("not-connected");
+        connection_status_ele.classList.remove("connection-issue");
+        connection_status_ele.classList.remove("connected");
+    }
+    function change_favorite_order(that){
+        let table, rows, switching, i, x, y, shouldSwitch,dir,switchcount = 0;
+
+        current_table = that.parent().parent().parent().parent().attr("id");
+        if(current_table == "market_eth"){
+            table = document.getElementById("market_eth").children[0];
+        }else if (current_table == "market_tm"){
+            table = document.getElementById("market_tm").children[0];
+        }else if (current_table == "market_usdc"){
+            table = document.getElementById("market_usdc").children[0];
+        }else if (current_table == "market_wbtc"){
+            table = document.getElementById("market_wbtc").children[0];
+        }
+        //table = document.getElementById("market_table");
+        switching = true;
+        dir = "asc";
+        while (switching) {
+            switching = false;
+            rows = table.getElementsByTagName("TR");
+            for (i = 1; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                x = rows[i].getElementsByTagName("TD")[4].children[0].getAttribute("fav");
+                y = rows[i + 1].getElementsByTagName("TD")[4].children[0].getAttribute("fav");
+                if(dir === "asc"){
+                    if (Number(x) > Number(y)) {
+                       shouldSwitch = true;
+                       break;
+                    }
+                } else if (dir === "desc"){
+                    if (Number(x) < Number(y)) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+            }
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                switchcount ++;
+            } else {
+                if (switchcount === 0 && dir === "asc") {
+                dir = "desc";
+                switching = true;
+                }
+            }
+        }
+    }
+    function name_sort(){
+        current_table = that.parent().parent().parent().parent().attr("id");
+        let base_token, sort, order
+        sort = 'symbol';
+        if(current_table == "market_eth"){
+            base_token="WETH"
+        }else if(current_table == "market_tm") {
+            base_token="TM"
+        }else if(current_table == "market_usdc") {
+            base_token="USDC"
+        }else if(current_table == "market_wbtc") {
+            base_token="WBTC"
+        }
+        order = localStorage.getItem("market_" + base_token.toLowerCase() + "_token_sort")
+
+        data = {
+            base_token:base_token,
+            sort:sort,
+            order:order
+        };
+        $.ajax({
+            url: '/exchange/get_market',
+            type: 'GET',
+            dataType: 'json',
+            data: data,
+            success: function(data) {
+                localStorage.setItem("market_" + base_token.toLowerCase() + "_token_sort", order == "asc" ? "desc" : "asc")
+                Trade.draw_market_table(data.tokens, base_token);
+            },
+            error: function(error) {
+                console.log(error);
+            }
+
+        });
+    }
+    function price_sort(that){
+        current_table = that.parent().parent().parent().parent().attr("id");
+        let base_token, sort, order
+
+        if(current_table == "market_eth"){
+            base_token="WETH"
+        }else if(current_table == "market_tm") {
+            base_token="TM"
+        }else if(current_table == "market_usdc") {
+            base_token="USDC"
+        }else if(current_table == "market_wbtc") {
+            base_token="WBTC"
+        }
+        sort = 'last_price_' + base_token.toLowerCase();
+        order = localStorage.getItem("market_" + base_token.toLowerCase() + "_last_price")
+
+        data = {
+            base_token:base_token,
+            sort:sort,
+            order:order
+        };
+        $.ajax({
+            url: '/exchange/get_market',
+            type: 'GET',
+            dataType: 'json',
+            data: data,
+            success: function(data) {
+                localStorage.setItem("market_" + base_token.toLowerCase() + "_last_price", order == "asc" ? "desc" : "asc")
+                Trade.draw_market_table(data.tokens, base_token);
+            },
+            error: function(error) {
+                console.log(error);
+            }
+
+        });
+    }
+    function pricechange_sort(that){
+        var table, rows, switching, i, x, y, shouldSwitch,dir,switchcount = 0;
+        current_table = that.parent().parent().parent().parent().attr("id");
+        if(current_table == "market_eth"){
+            table = document.getElementById("market_eth").children[0];
+        }else if(current_table == "market_tm"){
+            table = document.getElementById("market_tm").children[0];
+        }else if(current_table == "market_usdc"){
+            table = document.getElementById("market_usdc").children[0];
+        }else if(current_table == "market_wbtc"){
+            table = document.getElementById("market_wbtc").children[0];
+        }
+        //table = document.getElementById("market_table");
+        switching = true;
+        dir = "asc";
+        while (switching) {
+            switching = false;
+            rows = table.getElementsByTagName("TR");
+            for (i = 1; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                x = rows[i].getElementsByTagName("TD")[2].children[0];
+                y = rows[i + 1].getElementsByTagName("TD")[2].children[0];
+                x_value = x.getAttribute('value');
+                y_value = y.getAttribute('value');
+                if(dir == "asc"){
+                    if(isNaN(y_value) && !isNaN(x_value)){
+                        shouldSwitch = true;
+                        break;
+                    }else if (Number(x_value) > Number(y_value)) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                } else if (dir == "desc"){
+                    if(isNaN(x_value) && !isNaN(y_value)){
+                        shouldSwitch = true;
+                        break;
+                    }else if (Number(x_value) < Number(y_value)) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+            }
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                switchcount ++;
+            } else {
+                if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
+                }
+            }
+        }
+
+    }
+    function search_function(){
+        var input, filter, table, tr, td, i;
+        input = document.getElementById("symbol_input");
+        filter = input.value.toUpperCase();
+        let base_token = "TM";
+        let market_name = $("#market_tab").find("a.active").attr("data-target");
+        //console.log(market_name);
+
+        if(market_name == "#market_eth"){
+            table = document.getElementById("market_eth").children[0];
+        }else if(market_name == "#market_tm"){
+            table = document.getElementById("market_tm").children[0];
+        }else if(market_name == "#market_usdc"){
+            table = document.getElementById("market_usdc").children[0];
+        }else if(market_name == "#market_wbtc"){
+            table = document.getElementById("market_wbtc").children[0];
+        }
+        //table = document.getElementById("market_table");
+        console.log("Table:", table)
+        tr = table.getElementsByTagName("tr");
+        console.log("Tr:", tr);
+        for(i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[0];
+            if (td) {
+                if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+    function ledger_login(){
+    }
+    function normalize_string(complex) {
+        return complex.substring(0, 7) + '...' + complex.slice(-4);
+    }
+    function trade_by_address(datas){
+        //Get tokenExistinServer
+        let base_token = $(".token-info").attr("base_token");
+        let data = {
+            token_symbol:datas.symbol,
+            base_token:base_token
+        }
+        $.ajax({
+            url: 'find_token',
+            type: 'POST',
+            dataType: 'json',
+            data: data,
+            success: function(data) {
+                if(data.status == "ok"){
+                    update_header(data,datas);
+                }else if(data.status == "no_data"){
+                    update_header(data,datas);
+                }
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+        $(".token-address-input").val("");
+        //Hide modal
+        $("#tradebyAddress").removeClass("in");
+        $("body").removeClass("modal-open");
+        $(".modal-backdrop").remove();
+        $("#tradebyAddress").hide();
+    }
+    function invalid_address(){
+        //Hide modal
+        $("#tradebyAddress").removeClass("in");
+        $(".token-address-input").val("");
+        $("body").removeClass("modal-open");
+        $(".modal-backdrop").remove();
+        $("#tradebyAddress").hide();
+        //show error modal
+        $("#noToken").show();
+        $("#noToken").addClass("show");
+        $("#noToken").addClass("in");
+    }
+    function update_header(data,base_data){
+        localStorage.setItem("select_token",base_data.symbol);
+        localStorage.setItem("select_contract",base_data.address);
+        let token_address = base_data.address;
+        let token_decimal = base_data.decimals;
+        let token_symbol = base_data.symbol;
+        let token_name = base_data.name;
+        let last_price = data.l_price;
+        let h_price = data.h_price;
+        let h_volume = data.h_volume;
+        let contract_addr = normalize_string(token_address);
+        let last_price_tag;
+        let h_price_tag;
+        if(last_price == "--"){
+            last_price_tag =
+                "<strong>" +
+                    "<span>" + "0.000000" + " ETH" + "</span>" +
+                "</strong>";
+        }else {
+            if(last_price >= 0){
+                last_price_tag =
+                    "<strong class='text-success'>" +
+                        "<i aria-hidden='true' class='fa fa-caret-up'></i>" +
+                        "<span>" + last_price + " ETH" + "</span>" +
+                    "</strong>";
+            }else{
+                last_price_tag =
+                "<strong class='text-danger'>" +
+                    "<i aria-hidden='true' class='fa fa-caret-down'></i>" +
+                    "<span>" + last_price + " ETH" + "</span>" +
+                "</strong>";
+            }
+        }
+        if(h_price == "--"){
+            h_price_tag =
+                "<strong>" +
+                    "<span>" + h_price + "</span>" +
+                "</strong>";
+        }else {
+            if(h_price >= 0){
+                h_price_tag =
+                "<strong class='text-success'>" +
+                    "<i aria-hidden='true' class='fa fa-caret-up'></i>" +
+                    "<span>" + h_price + "%" + "</span>" +
+                "</strong>";
+            }else{
+                h_price_tag =
+                "<strong class='text-danger'>" +
+                    "<i aria-hidden='true' class='fa fa-caret-up'></i>" +
+                    "<span>" + h_price + "%" + "</span>" +
+                "</strong>";
+            }
+        }
+        //Header tag
+        let token_header_tag = $(".token-header");
+        //Fill data to token header
+        $(".token-info").attr("token_symbol",token_symbol);
+        $(".token-info").attr("data-name",token_name);
+        $(".token-info").attr("decimals",token_decimal);
+        $(".token-info").children("span").text(token_name + " (" + token_symbol + ")");
+        token_header_tag.find(":nth-child(1)").children(".contract-address").children("a").text(contract_addr);
+        token_header_tag.find(":nth-child(1)").children(".contract-address").children("a").attr("value",token_address);
+        token_header_tag.find(":nth-child(1)").children(".contract-address").children("a").attr("href",http_link + "token/"+token_address);
+        token_header_tag.find(":nth-child(2)").children("div").children(".last-price").children("strong").html(last_price_tag);
+        token_header_tag.find(":nth-child(3)").children("div").children("div").children("strong").html(h_price_tag);
+        token_header_tag.find(":nth-child(4)").children("div").children("div").children("strong").text(h_volume + " " + "ETH");
+        if(last_price == "--"){
+            $(".price-buy").val("");
+            $(".price-sell").val("");
+            $(".price-buy").attr('data-lock','true');
+            $(".price-sell").attr('data-lock','true');
+        }else{
+            $(".price-buy").val(last_price);
+            $(".price-sell").val(last_price);
+            $(".price-buy").attr('data-lock','false');
+            $(".price-sell").attr('data-lock','false');
+        }
+        $(".amount-buy").val("");
+        $(".amount-sell").val("");
+        $(".amount-buy").trigger("change");
+        $(".amount-sell").trigger("change");
+        $("#nav-tokens").children("div").children("li").children("a").text(token_symbol + "-" + "ETH");
+        $(".btn-buy span").text("BUY " + token_name + " (" + token_symbol + ")");
+        $(".btn-sell span").text("SELL " + token_name + " (" + token_symbol + ")");
+        $(".unit.buy").text(token_symbol);
+        $(".unit.sell").text(token_symbol);
+        changed_header(token_symbol);
+    }
+
+    function changed_header(token_symbol){
+        //let token_symbol =
+        let base_token = $(".token-info").attr("base_token");
+        //change trade view
+        change_trade_view();
+        //change order view
+        Trade.get_orders(token_symbol);
+        //change trade_history view
+        Trade.get_trade_histories(base_token,token_symbol);
+
+        Trade.draw_quick_balance();
+        Trade.get_open_orders();
+        //change charts
+        //Change tradingview chart
+        token_pair = token_symbol + "-" + base_token;
+        window.tvWidget.setSymbol(token_pair, '1D', function () {
+            console.log(token_symbol);
+        });
+    }
+    //Get Orders
+    function get_orders(symbol){
+        let base_token = $(".token-header").children("li").children("div").attr("base_token")
+        data = {
+            symbol:symbol,
+            base_token:base_token
+        };
+        $.ajax({
+            url: 'get_orders',
+            type: 'POST',
+            dataType: 'json',
+            data: data,
+            success: function(data) {
+                let buy = "buy";
+                let sell = "sell";
+                draw_orders(data.sell,data.max_amount,sell);
+                draw_orders(data.buy,data.max_amount,buy);
+                draw_spread(data.best_asks,data.best_bids);
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    }
+    //Draw spread
+    function draw_spread(best_asks,best_bids){
+        let spread = (best_asks - best_bids).toFixed(6);
+        //Set values
+        $(".spread").attr("best_asks",best_asks);
+        $(".spread").attr("best_bids",best_bids);
+        $(".spread").find(":nth-child(2)").children("strong").text(spread);
+    }
+    //Draw orders widget
+    function draw_orders(data,max_amount,type){
+        let tag;
+        let text_color;
+        $(".orderbook").attr("max_amount",max_amount)
+        if(type === "buy"){
+            tag = $(".orderbook-bids");
+            text_color = "text_success";
+        }else if(type === "sell"){
+            tag = $(".orderbook-asks");
+            text_color = "text_danger";
+        }
+
+        tag.html("");
+        let time_now = Date.now()/1000;
+        $.each(data, function(index, element){
+            let pro = 0;
+            let depth = 0;
+            let date_pro = (60*24*3600);
+            if(element.expire - time_now < 0 ){
+                depth = 0
+            }else{
+                depth = (date_pro-(element.expire - time_now))/date_pro * 100;
+            }
+            if(max_amount){
+                pro = amount_pro(max_amount,element.amount);
+            }else{
+                pro = 0;
+            }
+            let order =
+                "<div class='hover-row' value='" + element.detail_id +"'>" +
+                    "<div class='bar' style='width:" + depth + "%'></div>" +
+                    "<div class='amount-bar' style='width:" + pro + "%'></div>" +
+                    "<div class='col-xs-3 col-xs-offset-2 "+ text_color + " text-right orderbook-price'>" +
+                        "<strong class='number'>" + element.price + "</strong>" +
+                    "</div>" +
+                    "<div class='col-xs-4 text-right orderbook-amount'>" +
+                        "<strong class='number'>" + element.amount + "</strong>" +
+                    "</div>" +
+                "</div>"
+            tag.append(order);
+        });
+    }
+    function amount_pro(max,amount){
+        return ((amount / max)*16.667).toFixed(4);
+    }
+
+    //Draw tradeHistory
+    function get_trade_histories(base_token = "ETH",symbol="ZRX"){
+        let data = {
+            symbol:symbol,
+            base_token:base_token
+        };
+        $.ajax({
+            url: 'get_trade_history',
+            type: 'POST',
+            dataType: 'json',
+            data: data,
+            success: function(result) {
+                draw_trades(result.data)
+        },
+            error: function(error) {
+                console.log("get trade history error")
+                console.log(error);
+            }
+        });
+    }
+
+    function draw_trades(data){
+        let tag = $("#trade_history table tbody");
+        tag.html("");
+        $.each(data, function(index, element){
+            let time = element.created_at;
+            let price = element.price;
+            let amount = element.amount;
+            let type = element.type;
+            let time_format = get_timeformat(time);
+        let trade =
+                "<tr class = 'cover-row'>" +
+                    "<td>" + "<strong class = 'number'>" + time_format + "</strong>" + "</td>";
+            if(type === 1){
+                trade +=
+                    "<td class = 'text-right text-success'>" +
+                        "<strong class = 'number'>" + price + "</strong>" +
+                        "<i aira-hidden = 'true' class = 'fa fa-caret-up'>" + "</i>" +"</td>";
+        }else if(type === 0){
+                trade +=
+                    "<td class = 'text-right text-danger'>" +
+                        "<strong class = 'number'>" + price + "</strong>" +
+                        "<i aira-hidden = 'true' class = 'fa fa-caret-down'>" + "</i>" +"</td>";
+            }
+
+            trade +=
+                    "<td class = 'text-right'>" +
+                        "<strong class='number'>" + amount + "</strong>" + "</td>" +
+                "</tr>";
+            tag.append(trade);
+        });
+    }
+    function get_timeformat(t){
+        let time_format = "";
+        let time;
+        let format = t.split("T");
+        let day = format[0].split("-");
+        time = format[1].split(".")[0].split(":");
+        time_format += day[1] + "-" + day[2] + " " + time[0] + ":" + time[1] + ":" + time[2];
+        return time_format;
+    }
+    function change_trade_view(){
+        let token_contract_addr = $(".contract-address").children("a").attr("value");
+        let base_token = $(".token-info").attr("base_token");
+        get_token_amount(token_contract_addr,base_token);
+    }
+    function get_token_amount(token_contract_addr,base_token){
+        if(currentWalletAddress != "" && currentWalletAddress != null){
+            try{
+                address = currentWalletAddress    //Wallet Address
+                var contractAddress = token_contract_addr; // Token Address
+                var contractABI = human_standard_token_abi;
+                //Get token balance;
+                var tokenContract = web3js.eth.contract(contractABI).at(contractAddress);
+                var token_decimals = $(".token-info").attr("decimals");
+                tokenContract.balanceOf(address,(error,balance) =>{
+                    //token_balance = web3js.fromWei(balance.toNumber(), "ether" );
+                    token_balance = balance.toNumber() / (Math.pow(10,token_decimals));
+                    $(".token-amount").attr("value",token_balance);
+                });
+                //Get WETH balance;
+                var wethContract = web3js.eth.contract(contractABI).at(wethAddress);
+                wethContract.balanceOf(address,(error,balance) =>{
+                    weth_balance = web3js.fromWei(balance.toNumber(), "ether");
+                    $(".token-amount").attr("weth_balance",weth_balance);
+            });
+            }catch(e){
+                console.log("Error:get token amount");
+            }
+
+        }else{
+            console.log("wallet is not connected")
+        }
+    }
+    function init_webpage(){
+        symbol = localStorage.getItem("select_token");
+        base_token = $(".token-info").attr("base_token");
+        $(".sell-token-symbol").text(symbol);
+        if($("#trade_workspace").length ){
+            Trade.get_tokens_table(base_token,"init");
+            draw_orderbook();
+            if(base_token == "WETH"){
+                $("#market_tab a[data-target='#market_eth']").tab("show");
+                $("#market_tab").find(":nth-child(1)").find("a").addClass("active");
+                $("#market_tab").find(":nth-child(2)").find("a").removeClass("active");
+                $("#market_tab").find(":nth-child(3)").find("a").removeClass("active");
+                $("#market_tab").find(":nth-child(4)").find("a").removeClass("active");
+            }
+            if(base_token == "WBTC"){
+                $("#market_tab a[data-target='#market_wbtc']").tab("show");
+                $("#market_tab").find(":nth-child(1)").find("a").removeClass("active");
+                $("#market_tab").find(":nth-child(2)").find("a").addClass("active");
+                $("#market_tab").find(":nth-child(3)").find("a").removeClass("active");
+                $("#market_tab").find(":nth-child(4)").find("a").removeClass("active");
+            } else if ( base_token == "TM"){
+                $("#market_tab a[data-target='#market_tm']").tab("show");
+                $("#market_tab").find(":nth-child(1)").find("a").removeClass("active");
+                $("#market_tab").find(":nth-child(2)").find("a").removeClass("active");
+                $("#market_tab").find(":nth-child(3)").find("a").addClass("active");
+                $("#market_tab").find(":nth-child(4)").find("a").removeClass("active");
+            } else if ( base_token == "USDC"){
+                $("#market_tab a[data-target='#market_usdc']").tab("show");
+                $("#market_tab").find(":nth-child(1)").find("a").removeClass("active");
+                $("#market_tab").find(":nth-child(2)").find("a").removeClass("active");
+                $("#market_tab").find(":nth-child(3)").find("a").removeClass("active");
+                $("#market_tab").find(":nth-child(4)").find("a").addClass("active");
+            }
+        }
+
+
+    }
+    function draw_orderbook(){
+        let symbol = $(".token-info").attr("token_symbol");
+        Trade.get_orders(symbol);
+    }
+</script>

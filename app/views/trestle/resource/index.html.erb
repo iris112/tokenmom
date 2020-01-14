@@ -1,0 +1,16 @@
+<% content_for(:title, admin.t("titles.index", default: "Listing %{pluralized_model_name}")) %>
+
+<% content_for(:primary_toolbar) do %>
+  <%= admin_link_to action: :new, class: "btn btn-default btn-lg" do %>
+    <%= icon("fa fa-plus") %>
+    <span class="sr-only"><%= admin.t("buttons.new", default: "New %{model_name}") %></span>
+  <% end if admin.actions.include?(:new) %>
+<% end %>
+
+<% content_for(:utilities) do %>
+  <%= render "scopes" if admin.scopes.any? %>
+<% end if admin.scopes.any? %>
+
+<%= render layout: "layout" do %>
+  <%= render "table" %>
+<% end %>

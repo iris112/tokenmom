@@ -1,0 +1,502 @@
+#root
+  .home-page.theme-dark
+    .header-wrap
+      %nav.tm-header.navbar.navbar-default.navbar-expand.theme-dark
+        .container-fluid
+          .navbar-header
+            %a.navbar-brand{:href => "/"}
+              = image_tag("tmom_logo.png", id: "logo")
+          #bs-example-navbar-collapse-1.collapse.navbar-collapse
+            %div
+              %ul.hy-menu
+                %li.hy-menu-item
+                  %a.bar{:href => "/exchange/TM-WETH"}
+                    %span.nav-item.nav-trade
+                      %i.fas.fa-balance-scale
+                      %span{"data-i18n" => "trade"} TRADE
+                %li.hy-menu-item
+                  %a.bar{:href => "/reward"}
+                    %span.nav-item.nav-task
+                      %i.fas.fa-coins
+                      %span{"data-i18n" => "reward"} REWARD
+                %li.hy-menu-item
+                  %a.bar{:href => "/referral"}
+                    %span.nav-item.nav-task
+                      %i.fas.fa-coins
+                      %span{"data-i18n" => "referral"} REFERRAL
+                %li.hy-menu-item
+                  %a.bar{:href => "https://docs.tokenmom.com", :target => "_blank"}
+                    %span.nav-item.nav-task
+                      %i.fas.fa-coins
+                      %span{"data-i18n" => "api"} API
+                %li.hy-menu-item
+                  %a.bar{:href => "https://docs.google.com/forms/d/e/1FAIpQLSefBihzI5YD4kbFQMwAbsDrpGmtW_GFa_RUbY86L5FvqT_VHw/viewform", :target => "_blank"}
+                    %span.nav-item.nav-task
+                      %i.fas.fa-coins
+                      %span{"data-i18n" => "token_listing"} Token Listing
+                %li.hy-menu-item
+                  %a.bar{:href => "https://tokenmom.freshdesk.com", :target => "_blank"}
+                    %span.nav-item.nav-task
+                      %i.fas.fa-coins
+                      %span{"data-i18n" => "support_center", :target => "_blank"} HELP
+            .navbar-nav.ml-auto
+              %ul.hy-menu
+                %li.hy-menu-item
+                  %a.dropdown-toggle.nav-link{"aria-expanded" => "false", "aria-haspopup" => "true",  :href => "javascript:void(0)", :role => "button"}
+                    %img.country-icon{:alt => "", :src => "/assets/en.fba4238a.svg"}/
+                    %span English
+                    %span.caret
+                  %ul.dropdown-menu.language
+                    %li.lang-switch{:value => "1","data-locale" => "en"}
+                      %a{:href => "javascript:void(0)"}
+                        %img.country-icon{:alt => "", :src => "/assets/en.fba4238a.svg"}>/
+                        English
+                    %li.lang-switch{:value => "2","data-locale" => "ko"}
+                      %a{:href => "javascript:void(0)"}
+                        %img.country-icon{:alt => "", :src => "/assets/ko.4d71266b.svg"}>/
+                        한국어
+                    %li.lang-switch{:value => "3","data-locale" => "zh"}
+                      %a{:href => "javascript:void(0)"}
+                        %img.country-icon{:alt => "", :src => "/assets/zh.fee5842f.svg"}>/
+                        简体中文
+                    %li.lang-switch{:value => "4","data-locale" => "ja"}
+                      %a{:href => "javascript:void(0)"}
+                        %img.country-icon{:alt => "", :src => "/assets/ja.e0b7a3ef.svg"}>/
+                        日本語
+                    %li.lang-switch{:value => "6","data-locale" => "es"}
+                      %a{:href => "javascript:void(0)"}
+                        %img.country-icon{:alt => "", :src => "/assets/es.df343f44.svg"}>/
+                        Español
+                    %li.lang-switch{:value => "7","data-locale" => "ru"}
+                      %a{:href => "javascript:void(0)"}
+                        %img.country-icon{:alt => "", :src => "/assets/ru.ru563p41.svg"}>/
+                        русский
+                    %li.lang-switch{:value => "8","data-locale" => "de"}
+                      %a{:href => "javascript:void(0)"}
+                        %img.country-icon{:alt => "", :src => "/assets/de.5d71266b.svg"}>/
+                        Deutsch
+                    %li.lang-switch{:value => "9","data-locale" => "fr"}
+                      %a{:href => "javascript:void(0)"}
+                        %img.country-icon{:alt => "", :src => "/assets/fr.faa5842f.svg"}>/
+                        français
+                    %li.lang-switch{:value => "10","data-locale" => "it"}
+                      %a{:href => "javascript:void(0)"}
+                        %img.country-icon{:alt => "", :src => "/assets/it.e0b7a3it.svg"}>/
+                        italiano
+                    %li.lang-switch{:value => "11","data-locale" => "ar"}
+                      %a{:href => "javascript:void(0)"}
+                        %img.country-icon{:alt => "", :src => "/assets/ar.da343r44.svg"}>/
+                        العربية
+                    %li.lang-switch{:value => "12","data-locale" => "hi"}
+                      %a{:href => "javascript:void(0)"}
+                        %img.country-icon{:alt => "", :src => "/assets/hi.iu563h41.svg"}>/
+                        हिन्दी
+                    %li.lang-switch{:value => "13","data-locale" => "vi"}
+                      %a{:href => "javascript:void(0)"}
+                        %img.country-icon{:alt => "", :src => "/assets/vi.5e71211b.svg"}>/
+                        tiếng Việt
+                    %li.lang-switch{:value => "14","data-locale" => "tr"}
+                      %a{:href => "javascript:void(0)"}
+                        %img.country-icon{:alt => "", :src => "/assets/tr.4e31t64b.svg"}>/
+                        Türk
+                    %li.lang-switch{:value => "15","data-locale" => "th"}
+                      %a{:href => "javascript:void(0)"}
+                        %img.country-icon{:alt => "", :src => "/assets/th.3l75t62z.svg"}>/
+                        ไทย
+                    %li.lang-switch{:value => "16","data-locale" => "pl"}
+                      %a{:href => "javascript:void(0)"}
+                        %img.country-icon{:alt => "", :src => "/assets/pl.9h36y78d.svg"}>/
+                        Polski
+                    %li.lang-switch{:value => "17","data-locale" => "nl"}
+                      %a{:href => "javascript:void(0)"}
+                        %img.country-icon{:alt => "", :src => "/assets/nl.5u79dep4.svg"}>/
+                        Nederlands
+                    %li.lang-switch{:value => "18","data-locale" => "pt"}
+                      %a{:href => "javascript:void(0)"}
+                        %img.country-icon{:alt => "", :src => "/assets/pt.4is16jb9.svg"}>/
+                        Português
+                    %li.lang-switch{:value => "19","data-locale" => "ms"}
+                      %a{:href => "javascript:void(0)"}
+                        %img.country-icon{:alt => "", :src => "/assets/ms.j45t4dsa.svg"}>/
+                        Malay
+                    %li.lang-switch{:value => "20","data-locale" => "fa"}
+                      %a{:href => "javascript:void(0)"}
+                        %img.country-icon{:alt => "", :src => "/assets/fa.d645hf3s.svg"}>/
+                        فارسی
+                    %li.lang-switch{:value => "21","data-locale" => "uk"}
+                      %a{:href => "javascript:void(0)"}
+                        %img.country-icon{:alt => "", :src => "/assets/uk.dh57sf19.svg"}>/
+                        Українська
+          %button.navbar-toggle.collapsed{:type => "button", "aria-expanded" => "false", :data => {:toggle => "collapse", :target => "#bs-example-navbar-collapse-1"}}
+            %span.sr-only Toggle navigation
+            %span.icon-bar
+            %span.icon-bar
+            %span.icon-bar
+    %nav.vertical-social
+      %ul
+        %li
+          %a{:href => "https://t.me/tokenmom", :target => "_blank"}
+            %i.fab.fa-telegram{"aria-hidden" => "true"}
+        %li
+          %a{:href => "https://twitter.com/Token_Mom", :target => "_blank"}
+            %i.fab.fa-twitter{"aria-hidden" => "true"}
+        %li
+          %a{:href => "https://www.facebook.com/tokenmom", :target => "_blank"}
+            %i.fab.fa-facebook{"aria-hidden" => "true"}
+        %li
+          %a{:href => "https://www.reddit.com/r/tokenmom", :target => "_blank"}
+            %i.fab.fa-reddit{"aria-hidden" => "true"}
+        %li
+          %a{:href => "https://medium.com/@tokenmmom", :target => "_blank"}
+            %i.fab.fa-medium-m{"aria-hidden" => "true"}
+    .home-main-wrap
+      .home-main.theme-dark
+        %div
+        .section.section-one
+          #particles-js
+          .container
+            .show-grid
+              .column-1.left.mobile-flex.left-animated
+                .section-one-title-wrap
+                  %h5
+                    %span{"data-i18n" => "tokenmom"} TOKENMOM
+                  %h5
+                    %span{"data-i18n" => "invest_future"} Invest in Future Value
+                .parting-line
+                %p.desc
+                  %span{"data-i18n" => "korea_first_decentral"} KOREA's First Futuristic Real Decentralized Exchage
+                %p.desc
+                  %span{"data-i18n" => "our_goal_is"} Our goal is your investment success not ours!
+                %p.desc
+                  %span{"data-i18n" => "tm_ieo_latoken"} Buy TM token on LATOKEN DIRECT as IEO LAUNCHPAD!
+                %p.desc
+                  %a{:href => "https://bit.ly/2MHijrU", :target => "_blank"}
+                    %img{:alt => "Buy TM Token on LATOKEN", :src => "/assets/latoken.png"}/
+                .inline-btn-wrapper
+                  %a.start-trading-btn{:href => "/exchange/TM-WETH"}
+                    %span{"data-i18n" => "start_trading"} Start Trading
+                  %a.start-trading-btn{:href => "https://bit.ly/2MHijrU"}
+                    %span{"data-i18n" => "buy_tm_token"} Buy TM on LATOKEN
+                  = link_to 'Whitepaper(Eng)', "/whitepaper_eng_1.1.pdf", :class => 'start-trading-btn whitepaper', 'target' => '_blank', 'data-i18n' => 'whitepaper_eng'
+                  = link_to 'Whitepaper(Kor)', "/whitepaper_kor_1.1.pdf", :class => 'start-trading-btn whitepaper', 'target' => '_blank', 'data-i18n' => 'whitepaper_kor'
+              .column-2
+                = image_tag('laptop.png', class: "desc-image right-animated")
+        .section.section-two.background
+          .container
+            .heading.text-center
+              %h6.sub-title{"data-i18n" => "advantage"} ADVANTAGES
+            .show-grid.reverse
+              .column-1(data-aos="fade-right")
+                = image_tag('no.png', class: "desc-image")
+              .mobile-flex.column-2
+                .desc-item(data-aos="fade-up")
+                  %h5
+                    %span{"data-i18n" => "no_sign_up_required"} No Sign Up Required
+                  %p.description
+                    %span{"data-i18n" => "no_sign_up_required_detail"} Tokenmom is anonymous and do not need to sign up for trading. It is true decentralized exchange that helps to trade in realtime between individuals by using personal wallets(Metamask, Ledger nano hardware wallet)
+                .desc-item(data-aos="fade-up")
+                  %h5
+                    %span{"data-i18n" => "no_kyc"} No KYC For Confirming Personal Identification
+                  %p.description
+                    %span{"data-i18n" => "no_kyc_detail"} Start securely trading without any identity verification. No personal information is required.
+                .desc-item(data-aos="fade-up")
+                  %h5
+                    %span{"data-i18n" => "no_deposit"} No Deposit/Withdraw
+                  %p.description
+                    %span{"data-i18n" => "no_deposit_detail"} Tokenmom does not ask additional deposit and withdrawal. Only with Metamask and Ledger Nano S hardware wallet, users can trade their tokens in real-time anywhere, anytime.
+                .desc-item(data-aos="fade-up")
+                  %h5
+                    %span{"data-i18n" => "no_hacking"} No Hacking
+                  %p.description
+                    %span{"data-i18n" => "no_hacking_detail"} Even if Tokenmom exchange is hacked or closed, it does not have to worry about it because users own still the assets in their personal wallet.
+        .section.section-three.light-bg.background
+          .container
+            .heading.text-center
+              %h6.sub-title{"data-i18n" => "key_points"} KEY POINTS
+            .show-grid
+              .column-1.mobile-flex(data-aos="fade-up")
+                .desc-item(data-aos="fade-up")
+                  %h5
+                    %span{"data-i18n" => "easy_interface"} Easy & Simple Interface
+                .desc-item(data-aos="fade-up")
+                  %h5
+                    %span{"data-i18n" => "lowest_fee"} Lowest Trading Fee
+                  %p.description
+                    %span{"data-i18n" => "lowest_fee_detail"} At the same time as Tokenmom is opened, the FEE for buy/sell or maker/taker for all transactions is 0%.
+                .desc-item(data-aos="fade-up")
+                  %h5
+                    %span{"data-i18n" => "ethereum_based_trading"} All Ethereum Based Token's Trading
+                  %p.description
+                    %span{"data-i18n" => "ethereum_based_trading_detail"} Don't just wait for your tokens to be listed on the exchange. Any ethereum based token's trade is possible as you want.
+                .desc-item(data-aos="fade-up")
+                  %h5
+                    %span{"data-i18n" => "multi_languages_supported"} Multi Languages Supported Interface
+                  %p.description
+                    %span{"data-i18n" => "multi_languages_supported_detail"} Tokenmom supports English, Korean, Chinese and Japanese too. More and more languages coming soon.
+              .column-2(data-aos="fade-down")
+                = image_tag('tokenmom_key.png', class: "desc-image")
+        .section.section-four.background
+          .container
+            .heading.text-center
+              %h6.sub-title{"data-i18n" => "our_token"} Tokenmom token
+            .show-grid.reverse
+              .column-1(data-aos="fade-down-right")
+                = image_tag('ethereum-token-relayer-liquidity.png', class: "desc-image")
+              .column-2.mobile-flex(data-aos="fade-down-left")
+                %h5
+                  %span{"data-i18n" => "tokenmom_exchange_token"} Tokenmom Exchange Token(TM)
+                %p.description
+                  %span{"data-i18n" => "tokenmom_introduce"} Tokenmom Exchange introduces it's own TM token.
+                %p.desc
+                  %span{"data-i18n" => "tokenmom_introduce_1"} It sells only 30% of total supply, and it does not proceed with ICO etc, which can only be purchased on Tokenmom Exchange. We do not know whether it will be listed in other exchanges.
+                %p.desc
+                  %span{"data-i18n" => "tokenmom_introduce_2"} In order to maximize the profit of the initial investors, the price will be differentiated step by step and so the earlier investment profit will be maximized.
+                %p.desc
+                  %span{"data-i18n" => "tokenmom_introduce_3"} The target price of TM Token is 0.001$(about 11.6 KRW). Thus, investors who invest first become more profitable. We also aim to operate TM Market and the fee will be lower than ETH market, and the fee will be received as TM token, which helps Tokenmom exchange to regain TM token and so more profitable for investors. This depends on the success of both TM token's sales and Tokenmom exchange.
+        .section.section-five.background
+          .container
+            .heading.text-center
+              %h6.sub-title{"data-i18n" => "token_distribution"} Token Distribution
+            .show-grid.reverse
+              .column-1(data-aos="fade-down-right")
+                = image_tag('distribution.png', class: "desc-image")
+              .column-2.mobile-flex(data-aos="fade-down-left")
+                %h5
+                  %span{"data-i18n" => "usage"} Usage
+                %p.description
+                  %span{"data-i18n" => "usage_40"} - 40%(8,000,000,000) Free TM token to exchange users
+                %p.desc
+                  %span{"data-i18n" => "usage_30"} - 30%(6,000,000,000) Founder, team, exchange maintenance
+                %p.desc
+                  %span{"data-i18n" => "usage_20"} - 20%(4,000,000,000) Price stability and maintenance of TM token
+                %p.desc
+                  %span{"data-i18n" => "usage_10"} - 10%(2,000,000,000) Reserved funds to prepare for problems
+        .section.section-seven.light-bg.background
+          .container
+            .heading.text-center
+              %h6.sub-title{"data-i18n" => "ROADMAP"} TOKENMOM TM COIN ROADMAP
+              %br
+                = image_tag('roadmapeng.png', class: "desc-image")
+        .community-wrap.background.faq
+          .heading.text-center
+            %h6.sub-title{"data-i18n" => "question"} QUESTION
+          .container.collapse-icon
+            #accordion
+              .card(data-aos="fade-up")
+                .card-header
+                  %a.collapsed.card-link{"data-toggle" => "collapse", :href => "#collapseOne"}
+                    %span.icon{"data-i18n" => "what_is_tokenmom"} What is the Tokenmom?
+
+                #collapseOne.collapse{"data-parent" => "#accordion"}
+                  .card-body{"data-i18n" => "what_is_tokenmom_answer"} TokenMom is the Korean's First Futuristic Real Decentralized Exchange
+
+              .card(data-aos="fade-up")
+                .card-header
+                  %a.collapsed.card-link{"data-toggle" => "collapse", :href => "#collapseTwo"}
+                    %span.icon{"data-i18n" => "how_purchase_tm_token"} How can I purchase TM token?
+
+                #collapseTwo.collapse{"data-parent" => "#accordion"}
+                  .card-body{"data-i18n" => "how_purchase_tm_token_answer"} Tokenmom does not proceed with ICO etc, which can only be purchased on Tokenmom Exchange.
+
+              .card(data-aos="fade-up")
+                .card-header
+                  %a.collapsed.card-link{"data-toggle" => "collapse", :href => "#collapseThree"}
+                    %span.icon{"data-i18n" => "how_much_trade_fee"} How much is the trade fee?
+
+                #collapseThree.collapse{"data-parent" => "#accordion"}
+                  .card-body{"data-i18n" => "how_much_trade_fee_answer"} Free trading fee for 2 months, After 2 months, the highest fee shall be 0.05% or less
+        .section.section-seven.light-bg.background
+          .container
+            .heading.text-center
+              %h6.sub-title{"data-i18n" => "contact_us"} Contact Us
+              %br
+              %p{'data-i18n' => 'have_question'} Have questions? We're happy to help.
+              %p{'data-i18n' => 'contact_us_with_question'} Contact us with any questions regarding TokenMom exchange.
+            .show-grid.reverse
+              .contact-info
+                %div.text-center{"accept-charset" => "utf-8"}
+                  %input.form-control.send-message-name{:name => "name", :placeholder => "Your Name", :style => "animation-delay: 0.8s; opacity: 1;", :type => "text"}/
+                  %input.form-control.send-message-email{:name => "mail", :placeholder => "Your Mail", :style => "animation-delay: 0.9s; opacity: 1;", :type => "text"}/
+                  %textarea.form-control.send-message-contents{:name => "message", :placeholder => "Your Massage", :rows => "4", :style => "animation-delay: 1s; opacity: 1;"}
+                  %button.btn.send-message-button{'data-i18n' => 'send_message', :style => "animation-delay: 1.1s; opacity: 1;"} Send Message
+    .footer-wrap
+      .tm-footer-wrap.theme-dark
+        .container
+          .row
+            .col-12.col-md-3.col-xl-3
+              .more-entry-wrap
+                %p.entry-title
+                  %span{'data-i18n' => 'tokenmom'} TokenMom
+                .entry-list.text-center
+                  = link_to 'Terms and Conditions', '/terms.pdf', 'target' => '_blank', 'data-i18n' => 'terms_and_conditions'
+                  = link_to 'Privacy Policy', '/privacy.pdf', 'target' => '_blank', 'data-i18n' => 'privacy_policy'
+                  = link_to 'Company', 'https://bit.ly/2WGAoL9', 'target' => '_blank', 'data-i18n' => 'company'
+            .col-12.col-md-3.col-xl-3
+              .more-entry-wrap
+                %p.entry-title
+                  %span{'data-i18n' => 'tools'} Tools
+                .entry-list.text-center
+                  = link_to 'API', 'https://docs.tokenmom.com', 'data-i18n' => 'api', :target => '_blank'
+            .col-12.col-md-3.col-xl-3
+              .more-entry-wrap
+                %p.entry-title
+                  %span{'data-i18n' => 'support'} Support
+                .entry-list.text-center
+                  = link_to 'Token Listing', 'https://docs.google.com/forms/d/e/1FAIpQLSefBihzI5YD4kbFQMwAbsDrpGmtW_GFa_RUbY86L5FvqT_VHw/viewform', 'data-i18n' => 'token_listing', :target => '_blank'
+                  = link_to 'Support Center', 'https://tokenmom.freshdesk.com', 'data-i18n' => 'support_center', :target => '_blank'
+            .col-12.col-md-6.col-xl-3
+              .image-entry-wrap
+                %p.entry-title
+                  %span{'data-i18n' => 'contact'} Contact
+                .image-entries
+                  %a{:href => "https://t.me/tokenmom", :rel => "noopener noreferrer", :target => "_blank"}
+                    %span.image-wrap
+                      %span.image.telegram
+                  %a{:href => "https://twitter.com/Token_Mom", :rel => "noopener noreferrer", :target => "_blank"}
+                    %span.image-wrap
+                      %span.image.twitter
+                  %a{:href => "https://open.kakao.com/o/gW7ydlJ", :rel => "noopener noreferrer", :target => "_blank"}
+                    %span.image-wrap
+                      %span.image.kakao
+                  %a{:href => "https://line.me/ti/g2/UEIRX5L8KA", :rel => "noopener noreferrer", :target => "_blank"}
+                    %span.image-wrap
+                      %span.image.line
+                  %a{:href => "https://medium.com/@tokenmmom", :rel => "noopener noreferrer", :target => "_blank"}
+                    %span.image-wrap
+                      %span.image.medium
+            .copy-right-wrap.col-md-12
+              %div COPYRIGHT 2018 © TOKENMOM.COM ALL RIGHTS RESERVED
+            .alert.alert-success.alert-email{:style => 'display:none'}
+              %strong{'data-i18n' => 'success'} Success
+              %span{'data-i18n' => 'send_message_success'} You have sent message successfully!
+            .alert.alert-success.alert-fail-email{:style => 'display:none'}
+              %strong{'data-i18n' => 'fail'} Fail
+              %span{'data-i18n' => 'send_message_fail'} Your message has been failed!
+%script{:src => "https://unpkg.com/aos@next/dist/aos.js"}
+%script{:src => "http://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"}
+=render :partial => 'utils_script.html'
+:javascript
+  AOS.init({
+    disable: false, // accepts following values: 'phone', 'tablet', 'mobile', boolean, expression or function
+    startEvent: 'DOMContentLoaded', // name of the event dispatched on the document, that AOS should initialize on
+    initClassName: 'aos-init', // class applied after initialization
+    animatedClassName: 'aos-animate', // class applied on animation
+    useClassNames: false, // if true, will add content of `data-aos` as classes on scroll
+    offset: 50, // offset (in px) from the original trigger point
+    delay: 0, // values from 0 to 3000, with step 50ms
+    duration: 800, // values from 0 to 3000, with step 50ms
+    easing: 'ease', // default easing for AOS animations
+    once: false, // whether animation should happen only once - while scrolling down
+    mirror: false, // whether elements should animate out while scrolling past them
+    anchorPlacement: 'top-bottom', // defines which position of the element regarding to window should trigger the animation
+  });
+  particlesJS("particles-js", {
+    "particles": {
+      "number": {
+        "value": 80,
+        "density": {
+          "enable": true,
+          "value_area": 800
+        }
+      },
+      "color": {
+        "value": "#ffffff"
+      },
+      "shape": {
+        "type": "circle",
+        "stroke": {
+          "width": 0,
+          "color": "#000000"
+        },
+        "polygon": {
+          "nb_sides": 5
+        },
+        "image": {
+        "src": "img/github.svg",
+        "width": 100,
+        "height": 100
+        }
+      },
+      "opacity": {
+        "value": 0.5,
+        "random": false,
+        "anim": {
+          "enable": false,
+          "speed": 1,
+          "opacity_min": 0.1,
+          "sync": false
+        }
+      },
+      "size": {
+        "value": 3,
+        "random": true,
+        "anim": {
+          "enable": false,
+          "speed": 40,
+          "size_min": 0.1,
+          "sync": false
+        }
+      },
+      "line_linked": {
+        "enable": true,
+        "distance": 150,
+        "color": "#ffffff",
+        "opacity": 0.4,
+        "width": 1
+      },
+      "move": {
+        "enable": true,
+        "speed": 4,
+        "direction": "none",
+        "random": false,
+        "straight": false,
+        "out_mode": "out",
+        "bounce": false,
+        "attract": {
+          "enable": false,
+          "rotateX": 600,
+          "rotateY": 1200
+        }
+      }
+    },
+    "interactivity": {
+      "detect_on": "canvas",
+      "events": {
+        "onhover": {
+          "enable": true,
+          "mode": "repulse"
+        },
+        "onclick": {
+          "enable": true,
+          "mode": "push"
+        },
+        "resize": true
+      },
+      "modes": {
+        "grab": {
+          "distance": 400,
+          "line_linked": {
+            "opacity": 1
+          }
+        },
+        "bubble": {
+          "distance": 400,
+          "size": 40,
+          "duration": 2,
+          "opacity": 8,
+          "speed": 3
+        },
+        "repulse": {
+          "distance": 100,
+          "duration": 0.4
+        },
+        "push": {
+          "particles_nb": 4
+        },
+        "remove": {
+          "particles_nb": 2
+        }
+      }
+    },
+    "retina_detect": true
+  });

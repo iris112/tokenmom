@@ -1,0 +1,68 @@
+#trade_history.box.box-mb.flex-1.flex.flex-column
+  .box-header
+    %span{'data-i18n' => 'trade_history'} TRADE HISTORY
+  %ul.nav.nav-tabs
+    %li.nav-item{:style => "width:50%"}
+      %a.nav-link.active{'data-toggle' => 'tab','data-target' => '#trade_history_all', "data-i18n" => "all_trades"} All TRADES
+    %li.nav-item{:style => "width:50%"}
+      %a.nav-link{'data-toggle' => 'tab','data-target' => '#trade_history_me', "data-i18n" => "my_trades"} My TRADES
+  .tab-content.flex.flex-column.flex-1{:role => 'tablelist'}
+    .relative.active.tab-pane.flex-1#trade_history_all{:role => 'tabpanel'}
+      .box-content.trade-histories.ps.ps--active-y
+        %table.table
+          %thead
+            %tr
+              %th
+                %span{'data-i18n' => 'time'} Time
+              %th.text-right
+                %span{'data-i18n' => 'price'} Price
+              %th.text-right
+                %span{'data-i18n' => 'amount'} Amount
+          %tbody
+            - if @trade_histories
+              - @trade_histories.each do |trade|
+                %tr.cover-row
+                  %td
+                    %strong.number
+                      #{trade["time"]}
+                  %td.text-right.text-danger
+                    %strong.number
+                      #{trade["price"]}
+                      %span.p3.opacity-color 0000
+                    %i.fa.fa-caret-down{"aira-hidden" => "true"}
+                  %td.text-right
+                    %strong.number
+                      #{trade["amount"]}
+
+
+    .relative.tab-pane.flex-1#trade_history_me{:role => 'tabpanel'}
+      .box-content.trade-histories.ps.ps--active-y
+        %table.table
+          %thead
+            %tr
+              %th
+                %i.fa.fa-link{"aria-hidden" => "true"}
+              %th
+                %span{'data-i18n' => 'side'} Side
+              %th
+                %span{'data-i18n' => 'time'} Time
+              %th.text-right
+                %span{'data-i18n' => 'price'} Price
+              %th.text-right
+                %span{'data-i18n' => 'amount'} Amount
+          %tbody
+  .alert.alert-success.alert-order{:style => 'display:none'}
+    %strong{'data-i18n' => 'success'} Success
+    %span{'data-i18n' => 'create_order'} You have been created order in successfully!
+  .alert.alert-success.alert-trade{:style => 'display:none'}
+    %strong{'data-i18n' => 'success'} Success
+    %span{'data-i18n' => 'create_trade'} Your order has been successfully completed.
+  .alert.alert-success.alert-fail-trade{:style => 'display:none'}
+    %strong{'data-i18n' => 'fail'} Fail
+    %span{'data-i18n' => 'create_trade_fail'} Your order has been failed.
+  .alert.alert-success.alert-balance{:style => 'display:none'}
+    %strong{'data-i18n' => 'fail'} Fail
+    %span{'data-i18n' => 'balance_empty'} You have not enough balance.
+
+
+

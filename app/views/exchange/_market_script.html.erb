@@ -1,0 +1,158 @@
+<script type="text/javascript">
+    jQuery(function($) {
+        $(document).ready(function() {            
+            $(document).on('click','.market-status-row',function(){
+                let that = $(this);                
+                let token_pair = that.find(":nth-child(1)").find("div").text();
+                let base_token = token_pair.split("-")[1];
+                let token_contract_addr = that.attr("value");
+                let token_decimals = that.attr("token_symbol");
+                let token_name = that.find(":nth-child(1)").find("div").attr("name");
+                let token_symbol = that.find(":nth-child(1)").find("div").attr("symbol");
+                $(".token-info").attr("base_token",base_token);
+                $(".buy-token-symbol").text(base_token);
+                let token_last_price = that.find(":nth-child(2)").find("strong").attr("value");
+                let token_h_price = that.find(":nth-child(3)").find("strong").attr("value");
+                let token_h_volume = that.find(":nth-child(4)").find("strong").attr("value");
+                localStorage.setItem("select_token",token_symbol);                
+                data = {
+                    token_contract_addr:token_contract_addr,
+                    token_name:token_name,
+                    token_symbol:token_symbol,
+                    token_last_price:token_last_price,
+                    token_h_price:token_h_price,
+                    token_h_volume:token_h_volume,
+                    token_decimals:token_decimals,
+                    base_token:base_token
+                };
+                Trade.change_header_info(data,"change");
+                Trade.get_open_orders();
+                Trade.draw_quick_balance();
+                Trade.get_token_amount(token_contract_addr,base_token);
+                Trade.get_orders(token_symbol);            
+                //Change tradingview chart
+                symbol_pair = token_symbol + "-" + base_token;
+                window.tvWidget.setSymbol(symbol_pair, '1D', function () {
+                    console.log(symbol_pair);
+                });
+                history.pushState(null, '', token_symbol + "-" + base_token);
+            });
+            $(document).on('click','#market_tab a',function(){
+                
+                $("#symbol_input").val("");
+                console.log($(this).attr("data-target"));
+                let market_name = $(this).attr("data-target");
+                if(market_name == "#market_tm"){
+                    table = document.getElementById("market_eth").children[0];
+                    tr = table.getElementsByTagName("tr");
+                    for(i = 0; i < tr.length; i++) {
+                        td = tr[i].getElementsByTagName("td")[0];
+                        if (td) {                            
+                            tr[i].style.display = "";                            
+                        }
+                    }
+                    table = document.getElementById("market_usdc").children[0];
+                    tr = table.getElementsByTagName("tr");
+                    for(i = 0; i < tr.length; i++) {
+                        td = tr[i].getElementsByTagName("td")[0];
+                        if (td) {                            
+                            tr[i].style.display = "";                            
+                        }
+                    }
+                    table = document.getElementById("market_wbtc").children[0];
+                    tr = table.getElementsByTagName("tr");
+                    for(i = 0; i < tr.length; i++) {
+                        td = tr[i].getElementsByTagName("td")[0];
+                        if (td) {                            
+                            tr[i].style.display = "";                            
+                        }
+                    }
+                } else if(market_name == "#market_eth"){
+                    table = document.getElementById("market_tm").children[0];
+                    tr = table.getElementsByTagName("tr");
+                    for(i = 0; i < tr.length; i++) {
+                        td = tr[i].getElementsByTagName("td")[0];
+                        if (td) {                            
+                            tr[i].style.display = "";                            
+                        }
+                    }
+                    table = document.getElementById("market_usdc").children[0];
+                    tr = table.getElementsByTagName("tr");
+                    for(i = 0; i < tr.length; i++) {
+                        td = tr[i].getElementsByTagName("td")[0];
+                        if (td) {                            
+                            tr[i].style.display = "";                            
+                        }
+                    }
+                    table = document.getElementById("market_wbtc").children[0];
+                    tr = table.getElementsByTagName("tr");
+                    for(i = 0; i < tr.length; i++) {
+                        td = tr[i].getElementsByTagName("td")[0];
+                        if (td) {                            
+                            tr[i].style.display = "";                            
+                        }
+                    }
+                } else if(market_name == "#market_usdc"){
+                    table = document.getElementById("market_tm").children[0];
+                    tr = table.getElementsByTagName("tr");
+                    for(i = 0; i < tr.length; i++) {
+                        td = tr[i].getElementsByTagName("td")[0];
+                        if (td) {                            
+                            tr[i].style.display = "";                            
+                        }
+                    }
+                    table = document.getElementById("market_eth").children[0];
+                    tr = table.getElementsByTagName("tr");
+                    for(i = 0; i < tr.length; i++) {
+                        td = tr[i].getElementsByTagName("td")[0];
+                        if (td) {                            
+                            tr[i].style.display = "";                            
+                        }
+                    }
+                    table = document.getElementById("market_wbtc").children[0];
+                    tr = table.getElementsByTagName("tr");
+                    for(i = 0; i < tr.length; i++) {
+                        td = tr[i].getElementsByTagName("td")[0];
+                        if (td) {                            
+                            tr[i].style.display = "";                            
+                        }
+                    }
+                } else if(market_name == "#market_wbtc"){
+                    table = document.getElementById("market_tm").children[0];
+                    tr = table.getElementsByTagName("tr");
+                    for(i = 0; i < tr.length; i++) {
+                        td = tr[i].getElementsByTagName("td")[0];
+                        if (td) {                            
+                            tr[i].style.display = "";                            
+                        }
+                    }
+                    table = document.getElementById("market_eth").children[0];
+                    tr = table.getElementsByTagName("tr");
+                    for(i = 0; i < tr.length; i++) {
+                        td = tr[i].getElementsByTagName("td")[0];
+                        if (td) {                            
+                            tr[i].style.display = "";                            
+                        }
+                    }
+                    table = document.getElementById("market_usdc").children[0];
+                    tr = table.getElementsByTagName("tr");
+                    for(i = 0; i < tr.length; i++) {
+                        td = tr[i].getElementsByTagName("td")[0];
+                        if (td) {                            
+                            tr[i].style.display = "";                            
+                        }
+                    }
+                }
+                
+            });
+            
+            function isDecimal(num){
+                return (num ^ 0) !== num;
+            }            
+            function decimalPlaces(n){
+                let result = /^-?[0-9]+\.([0-9]+)$/.exec(n);
+                return result === null ? 0 : result[1].length;
+            }
+        });
+    });
+</script>

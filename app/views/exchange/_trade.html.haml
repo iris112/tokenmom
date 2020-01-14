@@ -1,0 +1,319 @@
+#trade.box.box-mb.flex.flex-1.flex-column
+  .tab-handles.flex.flex-column
+    %ul.nav.nav-tabs
+      %li.nav-item.col-md-4
+        %a.nav-link.active{'data-toggle' => 'tab', 'data-target' => '#trade_panel','data-i18n' => 'trade'} TRADE
+      %li.nav-item.col-md-4
+        %a.nav-link#open_order_tab{'data-toggle' => 'tab', 'data-target' => '#open_order_panel','data-i18n' => 'opne_order'} OPEN ORDER
+      %li.nav-item.col-md-4
+        %a.nav-link#open_order_tab{'data-toggle' => 'tab', 'data-target' => '#quick_balance','data-i18n' => 'quick_balance'} BALANCE
+  .tab-content.flex.flex-column.flex-1{:role => 'tablelist'}
+    .tab-pane.active#trade_panel{'role' => 'tabpanel'}
+      .row
+        .col-md-6.buy-tag
+          %div
+            %div
+              .form-group.token-infomation{:style => "margin-bottom:0.1rem"}
+                %table.table.wallet-state
+                  %tbody
+                    %tr
+                      %th.text-left{'data-i18n' => 'symbol',:style => 'min-width:25px'} Symbol
+                      %th.text-right
+                        %span{'data-i18n' => 'allowance'} Tradable
+                        %i.fa.fa-question-circle{"aria-hidden" => "true"}
+                          %span.fee-tip.text-left
+                            %div
+                              %span{'data-i18n' => 'tradable_help'}
+                      %th.text-right{'data-i18n' => 'balance'} Balance
+                      %th.text-right{'data-i18n' => 'available'} Available
+                    %tr
+                      %td.text-left
+                        %span.buy-token-symbol #{@base_token}
+                      %td.text-left
+                        %label.float-right.trade-buy-allow
+                          %i.fa.fa-spinner.fa-spin{:style => 'font-size: 16px; display:none;'}
+                          %label.switch
+                            %input.quick-allow{"data-toggle" => "toggle", :type => "checkbox"}
+                            %span.slider.round
+                      %td.text-right
+                        %span.buy-token-balance
+                      %td.text-right
+                        %span.buy-token-available
+              .form-group
+                %label
+                  %span{'data-i18n' => 'limit_price'} Limit Price
+                .btn-group.float-right.trade-utils{"data-toggle" => "buttons"}
+                  %a.util{:href => "javascript:void(0)", :tabindex => "-1"}
+                    %span.buy-ask{'data-i18n' => 'best_ask'} Best Ask
+                  %a.util{:href => "javascript:void(0)", :tabindex => "-1"}
+                    %span.buy-bid{'data-i18n' => 'best_bid'} Best Bid
+
+                %span.usd-price
+
+                %span.unit.base-unit #{@base_token}
+                - if @zrxtoken.last_price(@base_token) != "--"
+                  %input.form-control.price-buy{:autocomplete => "off", :name => "price", :placeholder => "0.00", :value => @zrxtoken.last_price(@base_token) ,"data-lock" => "false"}/
+                - else
+                  %input.form-control.price-buy{:autocomplete => "off", :name => "price", :placeholder => "0.00", :value => 0 ,"data-lock" => "true"}/
+                %span.text-danger
+              .form-group
+                %label
+                  %span.token-amount{'data-i18n' => 'amount'} Amount
+                .btn-group.float-right.trade-utils{"data-toggle" => "buttons"}
+                  %a.util.buy-25{:href => "javascript:void(0)", :tabindex => "-1"} 25%
+                  %a.util.buy-50{:href => "javascript:void(0)", :tabindex => "-1"} 50%
+                  %a.util.buy-75{:href => "javascript:void(0)", :tabindex => "-1"} 75%
+                  %a.util.buy-100{:href => "javascript:void(0)", :tabindex => "-1"} 100%
+                %span.unit.buy #{@zrxtoken.symbol}
+                %input.form-control.amount-buy{:autocomplete => "off", :name => "amount", :placeholder => "0.00", :value => "0","data-lock" => "true"}/
+                %span.text-danger
+
+              .costs.row{:style => "margin-bottom: 10px;"}
+                .total-amount.col-md-7
+                  %span{'data-i18n' => 'total≈'} Total ≈
+                  %span.total-buy{:style => "display: inline-block; vertical-align: top; margin-left: 5px;"}0.00
+                  %span.base-unit #{@base_token}
+                .fee.col-md-5{"data-original-title" => "", :style => "cursor: pointer;", :title => ""}
+                  %span.fee-buy{:value => "0.00",'data-i18n' => 'fee≈'} Fee ≈
+                  %span 0.00
+                  %span.base-unit #{@base_token}
+                  %i.fa.fa-question-circle{"aria-hidden" => "true"}
+                    %span.fee-tip
+                      %div
+                        %span Ethereum tx fee :
+                        %span.ether-tx-fee 0.0002
+                        %span WETH
+                      %div
+                        %span Tokenmom fee :
+                        %span.tokenmom-fee 0.0002
+                        %span WETH
+                .order-addr-buy{:style => "display:hidden", :value => 0}
+              %button.btn.btn-success.btn-block.btn-style.btn-buy.disabled
+                %span{'data-i18n' => 'buy'} BUY
+                %span{} ZRX
+        .col-md-6.sell-tag
+          .form-group.token-infomation{:style => "margin-bottom:0.1rem"}
+            %table.table.wallet-state
+              %tbody
+                %tr
+                  %th.text-left{'data-i18n' => 'symbol',:style => 'min-width:25px'} Symbol
+                  %th.text-right
+                    %span{'data-i18n' => 'allowance'} Tradable
+                    %i.fa.fa-question-circle{"aria-hidden" => "true"}
+                      %span.fee-tip.text-left
+                        %div
+                          %span{'data-i18n' => 'tradable_help'}
+                  %th.text-right{'data-i18n' => 'balance'} Balance
+                  %th.text-right{'data-i18n' => 'available'} Available
+                %tr
+                  %td.text-left
+                    %span.sell-token-symbol
+                  %td.text-left
+                    %label.float-right.trade-sell-allow
+                      %i.fa.fa-spinner.fa-spin{:style => 'font-size: 16px; display:none;'}
+                      %label.switch
+                        %input.quick-allow{"data-toggle" => "toggle", :type => "checkbox"}
+                        %span.slider.round
+                  %td.text-right
+                    %span.sell-token-balance
+                  %td.text-right
+                    %span.sell-token-available
+          .form-group
+            %label
+              %span{'data-i18n' => 'limit_price'} Limit Price
+            .btn-group.float-right.trade-utils{"data-toggle" => "buttons"}
+              %a.util{:href => "javascript:void(0)", :tabindex => "-1"}
+                %span.sell-ask{'data-i18n' => 'best_ask'} Best Ask
+              %a.util{:href => "javascript:void(0)", :tabindex => "-1"}
+                %span.sell-bid{'data-i18n' => 'best_bid'} Best Bid
+            %span.usd-price
+            %span.unit.base-unit #{@base_token}
+            - if @zrxtoken.last_price(@base_token) != "--"
+              %input.form-control.price-sell{:autocomplete => "off", :name => "price", :placeholder => "0.00", :value => @zrxtoken.last_price(@base_token) ,"data-lock" => "false"}/
+            - else
+              %input.form-control.price-sell{:autocomplete => "off", :name => "price", :placeholder => "0.00", :value => 0 ,"data-lock" => "true"}/
+            %span.text-danger
+
+          .form-group
+            %label
+              %span.token-amount{'data-i18n' => 'amount'} Amount
+            .btn-group.float-right.trade-utils{"data-toggle" => "buttons"}
+              %a.util.sell-25{:href => "javascript:void(0)", :tabindex => "-1"} 25%
+              %a.util.sell-50{:href => "javascript:void(0)", :tabindex => "-1"} 50%
+              %a.util.sell-75{:href => "javascript:void(0)", :tabindex => "-1"} 75%
+              %a.util.sell-100{:href => "javascript:void(0)", :tabindex => "-1"} 100%
+            %span.unit.sell #{@zrxtoken.symbol}
+            %input.form-control.amount-sell{:autocomplete => "off", :name => "amount", :placeholder => "0.00", :value => "0","data-lock" => "true"}
+
+            %span.text-danger
+
+          .costs.row{:style => "margin-bottom: 10px;"}
+            .total-amount.col-md-7
+              %span{'data-i18n' => 'total≈'} Total ≈
+              %span.total-sell{:style => "display: inline-block; vertical-align: top; margin-left: 5px;"}0.00
+              %span.base-unit #{@base_token}
+            .fee.col-md-5{"data-original-title" => "", :style => "cursor: pointer;", :title => ""}
+              %span.fee-sell{:value => "0.00",'data-i18n' => 'fee≈'} Fee ≈
+              %span 0.00
+              %span.base-unit #{@base_token}
+              %i.fa.fa-question-circle{"aria-hidden" => "true"}
+                %span.fee-tip
+                  %div
+                    %span Ethereum tx fee :
+                    %span.ether-tx-fee 0.0002
+                    %span WETH
+                  %div
+                    %span Tokenmom fee :
+                    %span.tokenmom-fee 0.0002
+                    %span WETH
+            .order-addr-sell{:style => "display:hidden", :value => 0}
+          %button.btn.btn-danger.btn-block.btn-style.btn-sell.disabled
+            %span{'data-i18n' => 'sell'} SELL
+            %span{} ZRX
+    .tab-pane.flex-column#open_order_panel{'role' => 'tabpanel'}
+      .no-order-wrap.text-center.flex.flex-column
+        %table.table.flex-column.d-flex
+          %thead
+            %tr
+              %th
+                %span{'data-i18n' => 'side'}
+              %th
+                %span{'data-i18n' => 'state'}
+              %th.text-right
+                %span{'data-i18n' => 'amount'}
+              %th.text-right
+                %span{'data-i18n' => 'price'}
+              %th.text-right.float-right
+                %span{'data-i18n' => 'action'}
+          %tbody
+        -# %p.no-order-name
+        -#   %span MAKE A TRADE
+        -# %p.no-order-content
+        -#   %span Once you buy or sell SS, your pending orders will be shown here.
+    .tab-pane#quick_balance
+      .row
+        .col-md-6
+          .row.token-label
+            .col-sm-6
+              %span{'data-i18n' => 'token'} Token
+            .col-sm-6{:style => "text-align:right"}
+              %span{'data-i18n' => 'balance'} Balance
+            .col-sm-6
+              %label
+                %span.eth-name ETH
+            .col-sm-6
+              %label.float-right.eth-balance
+                %i.fa.fa-spinner.fa-spin
+                %span
+          .row
+            .col
+              %input.form-control.eth-input{:autocomplete => 'off', :placeholder => '0.00'}
+              %span.text-danger
+          .row
+            .col
+              %button.btn.btn-success.btn-block.wrap-button.disabled
+                %span{'data-i18n' => 'wrap'} WRAP
+                %i.fa.fa-question-circle{"aria-hidden" => "true"}
+                  %span.fee-tip.text-left
+                    %div
+                      %span{'data-i18n' => 'tradable_help'}
+
+        .col-md-6
+          .row.token-label
+            .col-sm-3
+              %span{'data-i18n' => 'token'} Token
+            .col-sm-5{:style => "text-align:right"}
+              %span{'data-i18n' => 'balance'} Balance
+            .col-sm-4{:style => "text-align:right"}
+              %span{'data-i18n' => 'allowance'} Allowance
+              %i.fa.fa-question-circle{"aria-hidden" => "true"}
+                %span.fee-tip.text-left
+                  %div
+                    %span{'data-i18n' => 'wrap_eth_help'}
+            .col-sm-3
+              %label
+                %span.weth-name WETH
+            .col-sm-5
+              %label.float-right.weth-balance
+                %i.fa.fa-spinner.fa-spin
+                %span
+            .col-sm-4
+              %label.float-right.weth-allow
+                %i.fa.fa-spinner.fa-spin
+                %label.switch
+                  %input.quick-allow{"data-toggle" => "toggle", :type => "checkbox"}/
+                  %span.slider.round
+          .row
+            .col
+              %input.form-control.weth-input{:autocomplete => 'off', :placeholder => '0.00'}
+              %span.text-danger
+          .row
+            .col
+              %button.btn.btn-danger.btn-block.unwrap-button.disabled
+                %span{'data-i18n' => 'unwrap'} UNWRAP
+
+      .row
+        .col-md-12
+          .row.token-label
+            .col-sm-2
+              %span{'data-i18n' => 'token'} Token
+            .col-sm-4
+              %span{'data-i18n' => 'name'} Name
+            .col-sm-4{:style => "text-align:right"}
+              %span{'data-i18n' => 'balance'} Balance
+            .col-sm-2{:style => "text-align:right"}
+              %span{'data-i18n' => 'allowance'} Allowance
+              %i.fa.fa-question-circle{"aria-hidden" => "true"}
+                %span.fee-tip.text-left
+                  %div
+                    %span{'data-i18n' => 'tradable_help'}
+          .row
+      -# .no-balance-wrap.text-center
+      -#   %h6.no-balance-name
+      -#     %span Wallet is not connected
+      -#   %p.no-balance-content
+      -#     %span You need to connect your wallet from the top menu
+
+.dialog.tutor
+  .fade.modal-backdrop
+  .fade.modal{"role" => "dialog", "tabindex" => "-1", "style" => "display: block;"}
+    .modal-dialog
+      .modal-content{"role" => "document"}
+        .modal-body
+          .tutor_steps
+            .tutor_step_item.current{"data-step" => "first", "data-step-id" => "1"}
+              .tutor_step_number 1
+              .tutor_step_item_content
+                .tutor_step_item_id{"data-i18n" => "step_1"} STEP 1
+                .tutor_step_item_title{"data-i18n" => "getting_started"} Getting Started
+            .tutor_step_item{"data-step" => "normal", "data-step-id" => "2"}
+              .tutor_step_number 2
+              .tutor_step_item_content
+                .tutor_step_item_id{"data-i18n" => "step_2"} STEP 2
+                .tutor_step_item_title{"data-i18n" => "connect_a_Wallet"} Connect a Wallet
+            .tutor_step_item{"data-step" => "normal", "data-step-id" => "3"}
+              .tutor_step_number 3
+              .tutor_step_item_content
+                .tutor_step_item_id{"data-i18n" => "step_3"} STEP 3
+                .tutor_step_item_title{"data-i18n" => "add_eth"} Add ETH
+            .tutor_step_item{"data-step" => "normal", "data-step-id" => "4"}
+              .tutor_step_number 4
+              .tutor_step_item_content
+                .tutor_step_item_id{"data-i18n" => "step_4"} STEP 4
+                .tutor_step_item_title{"data-i18n" => "wrap_eth"} Wrap ETH
+            .tutor_step_item{"data-step" => "end", "data-step-id" => "5"}
+              .tutor_step_number 5
+              .tutor_step_item_content
+                .tutor_step_item_id{"data-i18n" => "step_5"} STEP 5
+                .tutor_step_item_title{"data-i18n" => "unlock_tokens"} Unlock Tokens
+          .tutor_detail_panel
+            .tutor_detail_content
+              .tutor_detail_title
+              .tutor_detail_description
+              .tutor_detail_image_container
+                -# %img{:src => "/assets/step1.png"}
+              %div
+                %button.btn.btn-black#skip_this{"data-i18n" => "skip_this", "data-katalon-id" => "button_skip_this"} Skip This
+                %button.btn.btn-black#prev_step{"data-i18n" => "prev_step"} Previous
+                %button.btn.btn-primary#next_step{"data-i18n" => "next_step"} Next Step
+                %button.btn.btn-primary#end_tutor{"data-i18n" => "end_tutor"} Finish

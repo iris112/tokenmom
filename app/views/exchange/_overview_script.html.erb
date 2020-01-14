@@ -1,0 +1,278 @@
+<script type="text/javascript">
+    jQuery(function($) {
+        $(document).ready(function() {
+            var interval = setInterval(function () {
+                if (is_wallet_loaded) {
+                    clearInterval(interval);
+                    if(location.href.indexOf("/orders") != -1) {
+                        $("#overview_widget").children("aside").addClass("is-active");
+                        get_owner_data();
+                    }
+                }
+            }, 100);
+            $(document).on('click','#overview_btn', function(e){
+                var url = window.location.protocol + "//" + window.location.host + "/" + $(this).data("url");
+                if (e.ctrlKey){
+                    window.open(url, '_blank');
+                } else {
+                    window.location = url;
+                }
+                // $("#wallet_widget").children("aside").removeClass("is-active");
+                // $("#overview_widget").children("aside").addClass("is-active");
+                // get_owner_data();
+            });
+
+            $(document).on('click','.btn-close-overview',function(){
+                $("#overview_widget").children("aside").removeClass("is-active");
+            });
+            $(document).on('click','.cancel-order-btn',function(){
+                let order_id = $(this).data("id")
+                data = {
+                    order_id:order_id
+                }
+                let that = $(this);
+                $.ajax({
+                    url: 'delete_my_order',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: data,
+                    success: function(data) {
+                        if(data.status == "ok")
+                            that.parent().parent().remove();
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
+
+            });
+            $(document).on('click','.cancel-all-btn',function(){
+                if(currentWalletAddress != undefined){
+                    data = {
+                        account_address:currentWalletAddress
+                    }
+                    $.ajax({
+                    url: 'delete_my_orders',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: data,
+                    success: function(data) {
+                        if(data.status == "ok"){
+                            $(".my-orders").html("");
+                            $(".total-orders").html("");
+                            $(".cancel-all-btn").text("");
+                        }
+
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
+                }
+            });
+            function get_owner_data(){
+                if(currentWalletAddress !== undefined){
+                    let base_token = $(".token-info").attr("base_token");
+                    data = {
+                        account_address:currentWalletAddress,
+                        base_token:base_token
+                    };
+                    $.ajax({
+                    url: 'get_owner_data',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: data,
+                    success: function(data) {
+                        draw_my_orders(data.order_exist,data.orders);
+                        draw_my_trades(data.trade_exist,data.trades);
+                    },
+                    error: function(error) {
+                        console.log(error);
+
+                    }
+
+                });
+                }
+            }
+            function draw_my_orders(exist,orders){
+                if(exist){
+                    let tag = $(".my-orders").children("tbody");
+                    $(".my-orders").parent().parent().parent().prev().children(".cancel-all-btn").removeClass("d-none");
+                    let order_head;
+                    let orders_array;
+                    let total = 0;
+                    let buy = 0;
+                    let sell = 0;
+                    tag.html("");
+                    order_head =
+                        "<tr>" +
+                            "<th>" + "<span>" + "Time" + "</span>" + "</th>" +
+                            "<th>" + "<span>" + "Token" + "</span>" + "</th>" +
+                            "<th>" + "<span>" + "Side" + "</span>" + "</th>" +
+                            "<th class='text-right'>" + "<span>" + "Price" + "</span>" + "</th>" +
+                            "<th class='text-right'>" + "<span>" + "Amount" + "</span>" + "</th>" +
+                            "<th class='text-right'>" + "<span>" + "Action" + "</span>" + "</th>" +
+                        "</tr>";
+
+                    $.each(orders, function(index, element){
+                        let time_format = get_timeformat(element.created_at);
+                        let side;
+                        if(element.type == 1){
+                            side = "buy";
+                        }else if(element.type == 0){
+                            side = "sell";
+                        }
+                        let order =
+                            "<tr>" +
+                                "<td>" +
+                                    "<span>" + time_format +"</span>" +
+                                "</td>" +
+                                "<td>"+
+                                    "<span>" + element.token_symbol +"</span>" +
+                                "</td>" +
+                                "<td>";
+                                if(element.type == 1){
+                                    buy ++;
+                                    order += "<span class='side btn-success' data-i18n='"+side+"'>" + side +"</span>";
+                                }else if(element.type == 0){
+                                    sell ++;
+                                    order += "<span class='side btn-danger' data-i18n='"+side+"'>" + side +"</span>";
+                                }
+                                order +=
+                                "</td>" +
+                                "<td class='text-right'>" +
+                                    "<span>" + element.price +"</span>" +
+                                "</td>" +
+                                "<td class='text-right'>" +
+                                    "<span>" + element.amount +"</span>" +
+                                "</td>" +
+                                "<td class='text-right'>" +
+                                    "<span class='btn-danger cancel-order-btn' data-id='" + element.id + "' data-i18n='cancel'>" + "Cancel" +"</span>" +
+                                "</td>" +
+                            "</tr>";
+                        total ++;
+
+                        orders_array += order;
+
+                    });
+                    tag.append(orders_array);
+                    $(".total-orders").removeClass("d-none");
+                    $(".total-orders").children(":nth-child(2)").text(total + " / ");
+                    $(".total-orders").children(":nth-child(3)").text(buy);
+                    $(".total-orders").children(":nth-child(4)").text(" / ");
+                    $(".total-orders").children(":nth-child(5)").text(sell);
+                }else{
+                    let tag = $(".my-orders").children("tbody");
+                    $(".my-orders").parent().parent().parent().prev().children(".cancel-all-btn").addClass("d-none");
+                    $(".total-orders").addClass("d-none");
+                    tag.html("");
+                    let no_data =
+                        "<tr>" +
+                            "<td class='text-center'>" + "<span>" + "No more data" + "</span>" + "</td>" +
+                        "</tr>";
+                    tag.append(no_data);
+                }
+            }
+            function draw_my_trades(exist,trades){
+                if(exist){
+                    let tag = $(".my-trades").children("tbody");
+                    tag.html("");
+                    let trade_head;
+                    let trades_array;
+                    let total = 0;
+                    let buy = 0;
+                    let sell = 0;
+                    trade_head =
+                        "<tr>" +
+                            "<th>" + "<i aria-hidden='true' class='fa fa-link'>"+"</i>" + "</th>" +
+                            "<th>" + "<span data-i18n='time'>" + 'Time' +"</span>" + "</th>" +
+                            "<th>" + "<span>" + "Token" + "</span>" + "</th>" +
+                            "<th>" + "<span>" + "Side" + "</span>" + "</th>" +
+                            "<th class='text-right'>" + "<span>" + "Price" + "</span>" + "</th>" +
+                            "<th class='text-right'>" + "<span>" + "Amount" + "</span>" + "</th>" +
+                        "</tr>";
+
+                    $.each(trades, function(index, element){
+                        let time_format = get_timeformat(element.created_at);
+                        let side;
+                        if(element.type == 1){
+                            if(element.maker_address == currentWalletAddress){
+                                side = "buy";
+                            }else{
+                                side = "sell";
+                            }
+                        }else if(element.type == 0){
+                            if(element.maker_address == currentWalletAddress){
+                                side = "sell";
+                            }else{
+                                side = "buy";
+                            }
+                        }
+                        let trade =
+                            "<tr>" +
+                                "<td class='text-left'>" +
+                                    "<a target='_blank' rel='noopener noreferrer' href='https://etherscan.io/tx/" + element.txHash +"'>" +
+                                        "<i class='fa fa-link' aria-hidden='true'>" + "</i>" +
+                                    "</a>" +
+                                "</td>" +
+                                "<td>" +
+                                    "<span>" + time_format +"</span>" +
+                                "</td>" +
+                                "<td>"+
+                                    "<span>" + element.token_symbol +"</span>" +
+                                "</td>" +
+                                "<td>";
+                                if(side == "buy"){
+                                    buy ++;
+                                    trade += "<span class='side btn-success' data-i18n='"+side+"'>" + side +"</span>";
+                                }else if(side == "sell"){
+                                    sell ++
+                                    trade += "<span class='side btn-danger' data-i18n='"+side+"'>" + side +"</span>";
+                                }
+                                trade +=
+                                "</td>" +
+                                "<td class='text-right'>" +
+                                    "<span>" + element.price +"</span>" +
+                                "</td>" +
+                                "<td class='text-right'>" +
+                                    "<span>" + element.amount +"</span>" +
+                                "</td>" +
+                            "</tr>";
+                        total ++;
+
+                        trades_array += trade;
+
+                    });
+
+                    tag.append(trades_array);
+                    $(".total-trades").removeClass("d-none");
+                    $(".total-trades").children(":nth-child(2)").text( total + " / ");
+                    $(".total-trades").children(":nth-child(3)").text(buy);
+                    $(".total-trades").children(":nth-child(4)").text(" / ");
+                    $(".total-trades").children(":nth-child(5)").text(sell);
+
+                }else{
+                    let tag = $(".my-trades").children("tbody");
+                    $(".total-trades").addClass("d-none");
+                    tag.html("");
+                    let no_data =
+                        "<tr>" +
+                            "<td class='text-center'>" + "<span>" + "No more data" + "</span>" + "</td>" +
+                        "</tr>";
+                    tag.append(no_data);
+
+                }
+            }
+            function get_timeformat(t){
+                let time_format = "";
+                let time;
+                let format = t.split("T");
+                let day = format[0].split("-");
+                time = format[1].split(".")[0].split(":");
+                time_format += day[1] + "-" + day[2] + " " + time[0] + ":" + time[1] + ":" + time[2];
+                return time_format;
+            }
+        });
+
+    });
+</script>

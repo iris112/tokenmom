@@ -1,0 +1,88 @@
+:root {
+    /*Dark Theme*/
+    --main-bg-color-dark: #141414;
+    --second-bg-color-dark: #242323;
+
+    --main-text-color-dark: #7d7d7d;
+
+
+    /*Light Theme*/
+    --main-bg-color-light: #ffffff;
+    --second-bg-color-light: #b2b2b2;
+
+    --main-text-color-light: #555;
+}
+
+div.group.header-group-symbol-search, div.group.header-group-bars-style, div.group.header-group-properties, div.group.header-group-compare, div.group.header-group-undo-redo, div.group.header-group-screenshot {
+    display: none !important;
+}
+
+span.tv-close-panel {
+    display: none !important;
+}
+
+div.group div.favored-list-container span.interval-dialog-button{
+    display: none !important;
+}
+
+/*Dark Theme*/
+body.chart-page.on-widget.tm-theme-dark{
+    background-color: var(--main-bg-color-dark) !important;
+}
+
+.tm-theme-dark .chart-container{
+    border-color: var(--main-bg-color-dark) !important;
+}
+
+.tm-theme-dark .chart-controls-bar{
+    background-color: var(--main-bg-color-dark) !important;
+    color: var(--main-text-color-dark) !important;
+}
+
+.tm-theme-dark .group .favored-list-container span {
+    background-color: var(--second-bg-color-dark) !important;
+    color: var(--main-text-color-dark) !important;
+    border-color: var(--second-bg-color-dark) !important;
+}
+
+.tm-theme-dark .group .button{
+    background-color: var(--second-bg-color-dark) !important;
+    color: var(--main-text-color-dark) !important;
+    border-color: var(--second-bg-color-dark) !important;
+}
+
+.tm-theme-dark .charts-popup-list {
+    overflow: auto;
+    border-color: var(--second-bg-color-dark) !important;
+    background: var(--second-bg-color-dark) !important;
+}
+
+.tm-theme-dark .charts-popup-list span {
+    color: var(--main-text-color-dark) !important;
+}
+
+/*Light Theme*/
+body.chart-page.on-widget.tm-theme-light{
+    background-color: var(--main-bg-color-light) !important;
+}
+
+.tm-theme-light .chart-container{
+    border-color: var(--main-bg-color-light) !important;
+}
+
+.tm-theme-light .chart-controls-bar{
+    background-color: var(--main-bg-color-light) !important;
+    color: var(--main-text-color-light) !important;
+}
+
+.tm-theme-light .group .favored-list-container span {
+    background-color: var(--second-bg-color-light) !important;
+    color: var(--main-text-color-light) !important;
+    border-color: var(--second-bg-color-light) !important;
+}
+
+.tm-theme-light .group .button{
+    background-color: var(--second-bg-color-light) !important;
+    color: var(--main-text-color-light) !important;
+    border-color: var(--second-bg-color-light) !important;
+}

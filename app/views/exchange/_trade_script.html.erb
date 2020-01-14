@@ -1,0 +1,2268 @@
+<script type="text/javascript">
+    jQuery(function($) {
+        $(document).ready(function() {
+            const gas_limit = 0.02;
+            const DECIMALS = 18;
+            //load_trade("ZRX");
+            //Tab change event
+
+            setTimeout(() => TxWatch.checkTx(), 5000);
+
+            $(".fa-question-circle").hover(function(){
+
+                total_fee = parseFloat($(this).prev().prev().text());
+                base_token = $(this).prev().text();
+
+                if(total_fee == 0){
+                    $(this).find(".fee-tip").find(".ether-tx-fee").text("0.0000");
+                    $(this).find(".fee-tip").find(".ether-tx-fee").next().text(base_token);
+                    $(this).find(".fee-tip").find(".tokenmom-fee").text("0.0000");
+                    $(this).find(".fee-tip").find(".tokenmom-fee").next().text(base_token);
+
+                }else{
+                    if(base_token == "WETH"){
+                        eth_fee = initial_fee;
+                        tm_fee = (total_fee - eth_fee).toFixed(5);
+                        $(this).find(".fee-tip").find(".ether-tx-fee").text(eth_fee);
+                        $(this).find(".fee-tip").find(".ether-tx-fee").next().text(base_token);
+                        $(this).find(".fee-tip").find(".tokenmom-fee").text(tm_fee);
+                        $(this).find(".fee-tip").find(".tokenmom-fee").next().text(base_token);
+                    }else if(base_token == "TM"){
+                        eth_fee = initial_tm_fee;
+                        tm_fee = (total_fee - eth_fee).toFixed(3);
+                        $(this).find(".fee-tip").find(".ether-tx-fee").text(eth_fee);
+                        $(this).find(".fee-tip").find(".ether-tx-fee").next().text(base_token);
+                        $(this).find(".fee-tip").find(".tokenmom-fee").text(tm_fee);
+                        $(this).find(".fee-tip").find(".tokenmom-fee").next().text(base_token);
+                    }else if(base_token == "USDC"){
+                        eth_fee = initial_usdc_fee;
+                        tm_fee = (total_fee - eth_fee).toFixed(3);
+                        $(this).find(".fee-tip").find(".ether-tx-fee").text(eth_fee);
+                        $(this).find(".fee-tip").find(".ether-tx-fee").next().text(base_token);
+                        $(this).find(".fee-tip").find(".tokenmom-fee").text(tm_fee);
+                        $(this).find(".fee-tip").find(".tokenmom-fee").next().text(base_token);
+                    }else if(base_token == "WBTC"){
+                        eth_fee = initial_wbtc_fee;
+                        tm_fee = (total_fee - eth_fee).toFixed(3);
+                        $(this).find(".fee-tip").find(".ether-tx-fee").text(eth_fee);
+                        $(this).find(".fee-tip").find(".ether-tx-fee").next().text(base_token);
+                        $(this).find(".fee-tip").find(".tokenmom-fee").text(tm_fee);
+                        $(this).find(".fee-tip").find(".tokenmom-fee").next().text(base_token);
+                    }
+                }
+
+            });
+            $(document).on('click','#open_order_tab',function(){
+                Trade.get_open_orders();
+            });
+            //Cancel order event
+            $(document).on('click', '.cancel-order', function(){
+                let order_id = $(this).parent().parent().attr("order_id");
+                data = {
+                    order_id:order_id
+                }
+                let that = $(this);
+                $.ajax({
+                    url: 'delete_my_order',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: data,
+                    success: function(data) {
+                        if(data.status == "ok")
+                            that.parent().parent().remove();
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
+            });
+            //Tab change quick balance click
+            $(document).on('click','#quick_balance',function(){
+
+            });
+            $(document).on('change','.quick-allow',function(){
+                web3js.eth.getBalance(currentWalletAddress,(error,balance)=>{
+                    let eth_balance = parseFloat(web3js.fromWei(balance.toNumber(),"ether"));
+                    let status = $(this).prop("checked");
+                    let parent = $(this).parent().parent();
+                    if (eth_balance < 0.01) {
+                        $(this).prop("checked", !status);
+                        Trade.allow_token_fail_alert();
+                        return;
+                    }
+
+                    parent.children("i").css("display","block");
+                    $(this).parent().css("display","none");
+                    let contract_address;
+                    if(parent.hasClass("token-allow")){
+                        contract_address = $(this).parent().parent().data('address');
+                    } else if(parent.hasClass("base-token-allow")) {
+                        contract_address = $(this).parent().parent().data('address');
+                    } else if(parent.hasClass("weth-allow")){
+                        contract_address = wethAddress;
+                    } else if (parent.hasClass("trade-buy-allow") || parent.hasClass("trade-sell-allow")) {
+                        let base_token = $(".token-info").attr("base_token");
+                        let tokenSymbol = $(".token-info").attr("token_symbol");
+                        let token_name;
+                        if (parent.hasClass("trade-buy-allow"))
+                            token_name = $(".buy-token-symbol").text();
+                        else
+                            token_name = $(".sell-token-symbol").text();
+
+                        if (base_token != token_name)
+                        {
+                            if (tokenSymbol == "TM")
+                                contract_address = tmAddress;
+                            else
+                                contract_address = $(".contract-address").children("a").attr("value");
+                        } else {
+                            if(base_token == "WETH")
+                                contract_address = wethAddress;
+                            else if (base_token == "TM")
+                                contract_address = tmAddress;
+                            else if (base_token == "USDC")
+                                contract_address = usdcAddress;
+                            else if (base_token == "WBTC")
+                                contract_address = wbtcAddress;
+                        }
+                    }
+
+                    if(status){
+                        $(this).prop("checked",false);
+                        var set_allowance = async () =>{
+                            try {
+                                const setAllowTxHash = await zeroEx.erc20Token.setUnlimitedProxyAllowanceAsync(contract_address, currentWalletAddress, txOpts);
+                                const reception_message   = await zeroEx._web3Wrapper.awaitTransactionMinedAsync(setAllowTxHash);
+                                if(reception_message.status === 1){
+                                    $(this).prop('checked', true);
+                                }
+                            } catch (e) {
+                                console.log(e);
+                            } finally {
+                                parent.children("i").css("display","none");
+                                $(this).parent().css("display","block");
+                            }
+                        };
+                        set_allowance().catch(console.error);
+
+                    }else{
+                        $(this).prop("checked",true);
+                        var set_unallowance = async () =>{
+                            try {
+                                const unallowamount     = new BigNumber(0);
+                                const setUnallowTxHash  = await zeroEx.erc20Token.setProxyAllowanceAsync(contract_address, currentWalletAddress, unallowamount, txOpts);
+                                const reception_message_unallowance = await zeroEx._web3Wrapper.awaitTransactionMinedAsync(setUnallowTxHash);
+                                if(reception_message_unallowance.status === 1){
+                                    $(this).prop('checked', false);
+                                }
+                            } catch (e) {
+                                console.log(e);
+                            } finally {
+                                parent.children("i").css("display","none");
+                                $(this).parent().css("display","block");
+                            }
+                        };
+                        set_unallowance().catch(console.error);
+                    }
+                });
+            });
+            //Change Token item in token List
+            //$(".token-link-item").on("click", function(){
+            //    let token_symbol = $(this).attr("value");
+            //    localStorage.setItem("select_token",token_symbol);
+            //    change_header_info($(this));
+            //    change_trade_info($(this));
+            //    let token_contract_addr = $(this).attr("addr");
+            //    //let base_token = $(this)
+            //    Trade.get_token_amount(token_contract_addr);
+            //    get_open_orders();
+            //    Trade.draw_quick_balance();
+            //    window.tvWidget.setSymbol(token_symbol, '1D', function () {
+            //        console.log(token_symbol);
+            //    });
+            //});
+            //Change amount in buy widget
+            $(".amount-buy").on("change paste keyup",function() {
+                let amount = $(this).val();
+                change_amount(amount,$(this),"buy");
+            });
+            //Change amount in sell widget
+            $(".amount-sell").on("change paste keyup",function() {
+                let amount = $(this).val();
+                change_amount(amount,$(this),"sell");
+            });
+            //Change buy price value
+            $(".price-buy").on("change paste keyup", function () {
+                base_token = $(".token-info").attr("base_token");
+                if(base_token == "WETH"){
+                    that = $(this);
+                    change_eth_usd_price(that);
+                }
+                let price = $(this).val();
+                change_price(price,$(this), "buy");
+            });
+            $(".price-sell").on("focusin", function () {
+                base_token = $(".token-info").attr("base_token");
+                if(base_token == "WETH"){
+                    that = $(this);
+                    get_eth_usd_price(that);
+                }
+            });
+            $(".price-sell").on("focusout", function () {
+                //console.log("focus sell input out---");
+                base_token = $(".token-info").attr("base_token");
+                if(base_token == "WETH"){
+                    $(this).parent().find(".usd-price").css("visibility","hidden");
+                }
+                //$(".usd-price").css("visibility","hidden");
+            });
+            $(".price-buy").on("focusin", function () {
+                base_token = $(".token-info").attr("base_token");
+                if(base_token == "WETH"){
+                    that = $(this);
+                    get_eth_usd_price(that);
+                }
+            });
+            $(".price-buy").on("focusout", function () {
+                base_token = $(".token-info").attr("base_token");
+                //console.log("focus sell input out---");
+                if(base_token == "WETH"){
+                    $(this).parent().find(".usd-price").css("visibility","hidden");
+                }
+
+                //$(".usd-price").css("visibility","hidden");
+            });
+            //Change sell price value
+            $(".price-sell").on("change paste keyup", function () {
+                base_token = $(".token-info").attr("base_token");
+                if(base_token == "WETH"){
+                    that = $(this);
+                    change_eth_usd_price(that);
+                }
+
+                let price = $(this).val();
+                change_price(price,$(this), "sell");
+            });
+            //Buy order event
+            $(".btn-buy").on("click", function (event) {
+                let trade = "buy";
+                check_order_value(trade);
+                event.preventDefault();
+            });
+            //Sell order event
+            $(".btn-sell").on("click", function (event) {
+                let trade = "sell";
+                check_order_value(trade);
+                event.preventDefault();
+            });
+            //Change asks and bids button event
+            $(document).on('click','.buy-ask',function(){
+                let best_asks = $(".spread").attr("best_asks") ? $(".spread").attr("best_asks"):0;
+                $(".price-buy").val(best_asks);
+                $(".amount-buy").trigger("change");
+            });
+            $(document).on('click','.buy-bid',function(){
+                let best_bids = $(".spread").attr("best_asks") ? $(".spread").attr("best_bids"):0;
+                $(".price-buy").val(best_bids);
+                $(".amount-buy").trigger("change");
+            });
+            $(document).on('click','.sell-ask',function(){
+                let best_asks = $(".spread").attr("best_asks") ? $(".spread").attr("best_asks"):0;
+                $(".price-sell").val(best_asks);
+                //$(".price-sell").trigger("change");
+                $(".amount-sell").trigger("change");
+            });
+            $(document).on('click','.sell-bid',function(){
+                let best_bids = $(".spread").attr("best_asks") ? $(".spread").attr("best_bids"):0;
+                $(".price-sell").val(best_bids);
+                //$(".price-sell").trigger("change");
+                $(".amount-sell").trigger("change");
+            });
+            $(document).on('click','.buy-25',function(){
+                change_buy_amount_with_pro(25);
+            });
+            $(document).on('click','.buy-50',function(){
+                change_buy_amount_with_pro(50);
+            });
+            $(document).on('click','.buy-75',function(){
+                change_buy_amount_with_pro(75);
+            });
+            $(document).on('click','.buy-100',function(){
+                change_buy_amount_with_pro(100);
+            });
+            $(document).on('click','.sell-25',function(){
+                change_sell_amount_with_pro(25);
+            });
+            $(document).on('click','.sell-50',function(){
+                change_sell_amount_with_pro(50);
+            });
+            $(document).on('click','.sell-75',function(){
+                change_sell_amount_with_pro(75);
+            });
+            $(document).on('click','.sell-100',function(){
+                change_sell_amount_with_pro(100);
+            });
+            //Wrap amount change event
+            $(document).on('change paste keyup','.eth-input',function(){
+                let type = 'wrap';
+                let amount = parseFloat($(this).val());
+                check_wu_amount(type,amount,$(this));
+            });
+            //UnWrap amount change event
+            $(document).on('change paste keyup','.weth-input',function(){
+                let type = 'unwrap';
+                let amount = parseFloat($(this).val());
+                check_wu_amount(type,amount,$(this));
+
+            });
+            $(document).on('click', '.wrap-button', function(){
+                let amount = parseFloat($(".eth-input").val());
+                wrap_eth(amount);
+
+            });
+            $(document).on('click', '.unwrap-button',function(){
+                let amount = parseFloat($(".weth-input").val());
+                unwrap_weth(amount);
+
+            });
+            function wrap_eth(amount){
+                let wrap_ether = async () => {
+                    $(".wrap-button").addClass("disabled");
+                    $(".wrap-button").append("<i class='fa fa-spinner fa-spin'></i>");
+
+                    const ethAmount = new BigNumber(amount.toString());
+                    const ethToConvert = zeroEx._web3Wrapper.constructor.toBaseUnitAmount(ethAmount,DECIMALS);
+                    const weth_addr = wethAddress;
+
+                    try{
+                        const convertEthTxHash = await zeroEx.etherToken.depositAsync(weth_addr,ethToConvert,currentWalletAddress,txOpts);
+                        await zeroEx._web3Wrapper.awaitTransactionMinedAsync(convertEthTxHash);
+                        //fresh amount
+                        refresh_eth_amount();
+                        Trade.get_open_orders();
+
+                    }catch(e){
+
+                    }finally{
+                        $(".wrap-button").find("i").remove();
+                        $(".eth-input").val("");
+                    }
+                };
+                wrap_ether().catch(console.error);
+            }
+            function unwrap_weth(amount){
+                let unwrap_weths = async () => {
+                    $(".unwrap-button").addClass("disabled");
+                    $(".unwrap-button").append("<i class='fa fa-spinner fa-spin'></i>");
+
+                    const ethAmount = new BigNumber(amount.toString());
+                    const ethToConvert = zeroEx._web3Wrapper.constructor.toBaseUnitAmount(ethAmount,DECIMALS);
+                    const weth_addr = wethAddress;
+
+                    try{
+                        const convertEthTxHash = await zeroEx.etherToken.withdrawAsync(weth_addr,ethToConvert,currentWalletAddress,txOpts);
+                        await zeroEx._web3Wrapper.awaitTransactionMinedAsync(convertEthTxHash);
+                        //fresh amount
+                        refresh_eth_amount();
+                        Trade.get_open_orders();
+
+                    }catch(e){
+
+                    }finally{
+                        $(".unwrap-button").find("i").remove();
+                        $(".weth-input").val("");
+
+                    }
+                };
+                unwrap_weths().catch(console.error)
+            }
+            function refresh_eth_amount(){
+                $(".eth-balance").children("span").css("display","none");
+                $(".eth-balance").children("i").css("display","block");
+                $(".weth-balance").children("span").css("display","none");
+                $(".weth-balance").children("i").css("display","block");
+                let contract_abi = human_standard_token_abi;
+                let token_contract_addr = wethAddress;  // WETH Address;
+                let token_contract = web3js.eth.contract(contract_abi).at(token_contract_addr);
+                try{
+                    token_contract.balanceOf(currentWalletAddress,(error,balance) =>{
+                        let weth_balance = parseFloat(web3js.fromWei(balance.toNumber(),"ether")).toFixed(6);
+                        $(".weth-balance").children("span").text(weth_balance);
+                    });
+                    //get eth balance
+                    web3js.eth.getBalance(currentWalletAddress,(error,balance)=>{
+                        let eth_balance = parseFloat(web3js.fromWei(balance.toNumber(),"ether")).toFixed(6);
+                        $(".eth-balance").children("span").text(eth_balance);
+                    });
+
+                }catch(e){
+
+                }finally{
+                    $(".eth-balance").children("span").css("display","block");
+                    $(".eth-balance").children("i").css("display","none");
+                    $(".weth-balance").children("span").css("display","block");
+                    $(".weth-balance").children("i").css("display","none");
+
+                }
+
+            }
+            function check_wu_amount(type,amount,obj){;
+                let that = obj;
+                let alert_tag = that.next();
+                let button_tag = that.parent().parent().next().children().children("button");
+                alert_tag.text("");
+                if(amount == null || amount == ""){
+                    alert_tag.text("Amount required");
+                    button_tag.addClass("disabled");
+                    return false;
+                }else{
+                    if(isNaN(amount)){
+                        alert_tag.text("Amount must be a number");
+                        button_tag.addClass("disabled");
+                        return false;
+
+                    }else{
+                        if(amount == 0){
+                            alert_tag.text("Amount cannot be 0");
+                            button_tag.addClass("disabled");
+                            return false;
+                        }else{
+                            let wallet_amount = parseFloat(that.parent().parent().prev().children(":nth-child(2)").children().children("span").text());
+                            if(amount > wallet_amount){
+                                alert_tag.text("Insuffient Amount");
+                                button_tag.addClass("disabled");
+                                return false;
+                            }else{
+                                if(amount + gas_limit > wallet_amount){
+                                    alert_tag.text("You have to think of gas costs");
+                                    button_tag.addClass("disabled");
+                                    return false;
+                                }else{
+                                    button_tag.removeClass("disabled");
+                                    return true;
+                                }
+
+                            }
+                        }
+
+                    }
+                }
+
+            }
+            function change_buy_amount_with_pro(pro){
+                let token_amount = $(".token-amount").attr("value");
+                let balance = parseFloat($(".buy-token-available").text());
+                if(currentWalletAddress){
+                    let token_decimal = $(".token-info").attr("decimals");
+                    let places = 0;
+                    let price = $(".price-buy").val();
+                    let price_lock = $(".price-buy").attr("data-lock");
+                    if(!isNaN(price) && price != "" && price != 0 && price_lock == "false"){
+                        if(token_decimal > 8){
+                            places = 6;
+                        }else{
+                            places = token_decimal;
+                        }
+                        if(!isNaN(parseFloat(balance))){
+                            base_token = $(".token-info").attr('base_token');
+                            let fee = calculate_fee(balance,base_token);
+                            let real_weth = balance - fee;
+                            let total = Math.floor((real_weth/(100 / pro)) * Math.pow(10, 6)) / Math.pow(10, 6);
+                            let price = $(".price-buy").val();
+                            let token_amount = parseFloat((total / price).toFixed(places));
+                            $(".amount-buy").val((token_amount));
+                            $(".amount-buy").trigger('change');
+                        }
+                    }else{
+                        $(".price-buy").next().children().remove();
+                        let alert = "<span>Price requirment</span>";
+                        $(".price-buy").next().append(alert);
+                    }
+
+
+                }
+
+            }
+            function change_sell_amount_with_pro(pro){
+                //let token_amount = $(".token-amount").attr("value");
+                let token_amount = parseFloat($(".sell-token-available").text());
+                let token_decimal = $(".token-info").attr("decimals");
+                let places = 0;
+                if(token_decimal > 8){
+                    places = 6;
+                }else{
+                    places = token_decimal;
+                }
+                if(!isNaN(token_amount)){
+                    $(".amount-sell").val(parseFloat((token_amount/100 * pro).toFixed(places)));
+                    $(".amount-sell").trigger('change');
+                }
+            }
+            function load_trade(symbol){
+                let token_contract_addr = $(".contract-address").children("a").attr("value");
+                let token_last_price = $(".trade-info-number.last-price").children("strong").children("strong").children("span").text().split(" ")[0];
+                let base_token = $(".token-info").attr("base_token");
+                if(parseFloat(token_last_price) == 0){
+                    //$("#trade .price").val("");
+                    $(".price-buy").val("");
+                    $(".price-sell").val("");
+                    $(".price-buy").attr('data-lock','true');
+                    $(".price-sell").attr('data-lock','true');
+
+                }else{
+                    //$("#trade .price").val(token_last_price);
+                    $(".price-buy").val(token_last_price);
+                    $(".price-sell").val(token_last_price);
+                    // Change price lock function
+                    $(".price-buy").attr('data-lock','false');
+                    $(".price-sell").attr('data-lock','false');
+                    $(".price-buy").trigger('change');
+                }
+                Trade.get_token_amount(token_contract_addr,base_token);
+                Trade.draw_quick_balance();
+            }
+            function check_order_value(tra){
+                console.log("check order value");
+                let trade = tra;
+                let symbol;
+                let amount;
+                let price;
+                if(trade == 'buy'){
+                    symbol = $(".unit.buy").text();
+                    amount = parseFloat($(".amount-buy").val());
+                    price = parseFloat($(".price-buy").val());
+                }else if(trade == 'sell'){
+                    symbol = $(".unit.sell").text();
+                    amount = parseFloat($(".amount-sell").val());
+                    price = parseFloat($(".price-sell").val());
+                }
+                if(isNaN(amount) || amount == 0 || price == 0 || isNaN(price)){
+
+                }else{
+                    if(currentWalletAddress == "" || currentWalletAddress == null){
+
+                    }else{
+                        if(trade == "buy"){
+                            $(".btn-buy").append("<i class='fa fa-spinner fa-spin'></i>");
+                            get_allowance = async () => {
+                                if(base_token == "WETH"){
+                                    let weth_addr = wethAddress;
+                                    let allow_status = await zeroEx.erc20Token.getProxyAllowanceAsync(weth_addr, currentWalletAddress);
+                                    if (allow_status.toNumber() === 0) {
+                                        $(".btn-buy > :nth-child(2)").remove();
+                                        let alert = "<span>Please set your token tradable</span>";
+                                        $(".amount-buy").next().children().remove();
+                                        $(".amount-buy").next().append(alert);
+                                        $(".btn-buy").addClass("disabled");
+                                    } else {
+                                        let balance_status = await zeroEx.erc20Token.getBalanceAsync(weth_addr,currentWalletAddress);
+                                        let balance = web3js.fromWei(balance_status.toNumber(), "ether" );
+                                        if(balance < amount * price){
+                                            $(".btn-buy > :nth-child(2)").remove();
+                                            let alert = "<span>Insufficient Balance</span>";
+                                            $(".amount-buy").next().children().remove();
+                                            $(".amount-buy").next().append(alert);
+                                            $(".btn-buy").addClass("disabled");
+                                        }else{
+                                            $(".btn-buy").addClass("disabled");
+                                            get_matching_orders(trade,symbol,price,amount);
+                                        }
+                                    }
+                                }else if(base_token == "TM"){
+                                    let tm_addr = tmAddress;
+                                    let allow_status = await zeroEx.erc20Token.getProxyAllowanceAsync(tm_addr, currentWalletAddress);
+                                    if (allow_status.toNumber() === 0) {
+                                        $(".btn-buy > :nth-child(2)").remove();
+                                        let alert = "<span>Please set your token tradable</span>";
+                                        $(".amount-buy").next().children().remove();
+                                        $(".amount-buy").next().append(alert);
+                                        $(".btn-buy").addClass("disabled");
+                                    } else {
+                                        let balance_status = await zeroEx.erc20Token.getBalanceAsync(tm_addr,currentWalletAddress);
+                                        let balance = (balance_status.toNumber() / Math.pow(10,tm_decimals)).toFixed(6);
+                                        if(balance < amount * price){
+                                            $(".btn-buy > :nth-child(2)").remove();
+                                            let alert = "<span>Insufficient Balance</span>";
+                                            $(".amount-buy").next().children().remove();
+                                            $(".amount-buy").next().append(alert);
+                                            $(".btn-buy").addClass("disabled");
+                                        }else{
+                                            $(".btn-buy").addClass("disabled");
+                                            get_matching_orders(trade,symbol,price,amount);
+                                        }
+                                    }
+
+                                }else if(base_token == "USDC"){
+                                    let usdc_addr = usdcAddress;
+                                    let allow_status = await zeroEx.erc20Token.getProxyAllowanceAsync(usdc_addr, currentWalletAddress);
+                                    if (allow_status.toNumber() === 0) {
+                                        $(".btn-buy > :nth-child(2)").remove();
+                                        let alert = "<span>Please set your token tradable</span>";
+                                        $(".amount-buy").next().children().remove();
+                                        $(".amount-buy").next().append(alert);
+                                        $(".btn-buy").addClass("disabled");
+                                    } else {
+                                        let balance_status = await zeroEx.erc20Token.getBalanceAsync(usdc_addr,currentWalletAddress);
+                                        let balance = (balance_status.toNumber() / Math.pow(10,usdc_decimals)).toFixed(6);
+                                        if(balance < amount * price){
+                                            $(".btn-buy > :nth-child(2)").remove();
+                                            let alert = "<span>Insufficient Balance</span>";
+                                            $(".amount-buy").next().children().remove();
+                                            $(".amount-buy").next().append(alert);
+                                            $(".btn-buy").addClass("disabled");
+                                        }else{
+                                            $(".btn-buy").addClass("disabled");
+                                            get_matching_orders(trade,symbol,price,amount);
+                                        }
+                                    }
+                                }else if(base_token == "WBTC"){
+                                    let wbtc_addr = wbtcAddress;
+                                    let allow_status = await zeroEx.erc20Token.getProxyAllowanceAsync(wbtc_addr, currentWalletAddress);
+                                    if (allow_status.toNumber() === 0) {
+                                        $(".btn-buy > :nth-child(2)").remove();
+                                        let alert = "<span>Please set your token tradable</span>";
+                                        $(".amount-buy").next().children().remove();
+                                        $(".amount-buy").next().append(alert);
+                                        $(".btn-buy").addClass("disabled");
+                                    } else {
+                                        let balance_status = await zeroEx.erc20Token.getBalanceAsync(wbtc_addr,currentWalletAddress);
+                                        let balance = (balance_status.toNumber() / Math.pow(10,wbtc_decimals)).toFixed(6);
+                                        if(balance < amount * price){
+                                            $(".btn-buy > :nth-child(2)").remove();
+                                            let alert = "<span>Insufficient Balance</span>";
+                                            $(".amount-buy").next().children().remove();
+                                            $(".amount-buy").next().append(alert);
+                                            $(".btn-buy").addClass("disabled");
+                                        }else{
+                                            $(".btn-buy").addClass("disabled");
+                                            get_matching_orders(trade,symbol,price,amount);
+                                        }
+                                    }
+
+                                }
+
+                            };
+                            get_allowance().catch(console.error);
+
+                        }else if(trade == "sell"){
+                            $(".btn-sell").append("<i class='fa fa-spinner fa-spin'></i>");
+                            get_allowance = async () => {
+                                let token_addr = $(".contract-address").children("a").attr("value");
+                                console.log("-----------------");
+                                console.log(token_addr);
+                                let tokenSymbol = $(".token-info").attr("token_symbol");
+                                if (tokenSymbol == "TM")
+                                    token_addr = tmAddress;
+
+                                if(token_addr != "" && token_addr != null){
+                                    token_addr = token_addr.toLowerCase();
+                                    let allow_status = await zeroEx.erc20Token.getProxyAllowanceAsync(token_addr, currentWalletAddress);
+                                    if (allow_status.toNumber() === 0) {
+                                        $(".btn-sell > :nth-child(2)").remove();
+                                        let alert = "<span>Please set your token tradable</span>";
+                                        $(".amount-sell").next().children().remove();
+                                        $(".amount-sell").next().append(alert);
+                                        $(".btn-sell").addClass("disabled");
+                                    } else {
+                                        let token_decimals = parseInt($(".token-info").attr("decimals"));
+                                        let balance_status = await zeroEx.erc20Token.getBalanceAsync(token_addr,currentWalletAddress);
+                                        let balance = (balance_status.toNumber() / Math.pow(10,token_decimals));
+                                        if(balance < amount){
+                                            $(".btn-sell > :nth-child(2)").remove();
+                                            let alert = "<span>Insufficient Balance</span>";
+                                            $(".amount-sell").next().children().remove();
+                                            $(".amount-sell").next().append(alert);
+                                            $(".btn-sell").addClass("disabled");
+                                        }else{
+                                            $(".btn-sell").addClass("disabled");
+                                            get_matching_orders(trade,symbol,price,amount);
+                                        }
+                                    }
+
+                                }
+
+                            };
+                            get_allowance().catch(console.error);
+                        }
+                    }
+                }
+            }
+            function check_wallet_state(trade,symbol,amount,price)
+            {
+                const autoload = async () => {
+                    const accounts = await zeroEx._web3Wrapper.getAvailableAddressesAsync();
+                    const wallet_Address = accounts[0];
+                    const token_addr = $(".contract-address").children("a").attr("value");
+                    let tokenSymbol = $(".token-info").attr("token_symbol");
+                    if (tokenSymbol == "TM")
+                        token_addr = tmAddress;
+
+                    allow_status = await zeroEx.erc20Token.getProxyAllowanceAsync(token_addr, wallet_Address);
+                    if(allow_status.toNumber() == 0){
+                        console.log("Not allow token from wallet");
+                    }else{
+
+                    }
+                    try{
+                        const setTakerAllowTxHash = await zeroEx.erc20Token.setUnlimitedProxyAllowanceAsync(token_addr, wallet_Address,txOpts);
+                        const reception_message = await zeroEx._web3Wrapper.awaitTransactionMinedAsync(setTakerAllowTxHash);
+                        if(reception_message.status == 1){
+                            console.log("allowed token");
+                        }
+                    }catch(e){
+                        console.log("catch" + e )
+                    }
+                };
+                autoload().catch(console.error);
+            }
+            function get_matching_orders(trade,symbol,price,amount){
+
+                let base_token = $(".token-header").children("li").children("div").attr("base_token");
+                generate_order(trade,symbol,price,amount,base_token);
+            }
+            function fill_order(trade,symbol,price,amount,base_token,data,status,db_amount = 0){
+                let signed_order = JSON.parse(data.signedorder);
+                //let signed_order[0] = JSON.parse(data.signedorder);
+                let order_detail_id = data.id;
+                let maker_addr = signed_order.maker;
+                let makerTokenAmount = signed_order.makerTokenAmount;
+                let takerTokenAmount = signed_order.takerTokenAmount;
+                let makerFee = signed_order.makerFee;
+                let takerFee = signed_order.takerFee;
+                let expirationUnixTimestampSec = signed_order.expirationUnixTimestampSec;
+                signed_order.makerTokenAmount = new BigNumber(makerTokenAmount.toString());
+                signed_order.takerTokenAmount = new BigNumber(takerTokenAmount);
+                signed_order.makerFee = new BigNumber(makerFee.toString());
+                signed_order.takerFee = new BigNumber(takerFee.toString());
+                signed_order.expirationUnixTimestampSec = new BigNumber(expirationUnixTimestampSec.toString());
+                const fill_order = async () => {
+                    const WETH_ADDRESS = wethAddress;
+                    const Token_ADDRESS = $(".contract-address").children("a").attr("value").toLowerCase();
+                    let token_decimals = parseInt($(".token-info").attr("decimals"));
+                    const accounts = await zeroEx._web3Wrapper.getAvailableAddressesAsync();
+                    takerAddress = accounts[0];
+                    trade_amount = amount;
+                    let taker_decimals;
+                    if(trade == "buy"){
+                        takerTokenAmount = (amount * price).toFixed(6);
+                        taker_token_addr = WETH_ADDRESS;
+                        taker_decimals = DECIMALS;
+                        type = 0;
+                    }else if(trade == "sell"){
+                        takerTokenAmount = amount;
+                        taker_token_addr = Token_ADDRESS;
+                        taker_decimals = token_decimals;
+                        type = 1;
+                    }
+                    if(status == "small_match"){
+                        if(trade == "buy"){
+                            takerTokenAmount = (db_amount * price).toFixed(6);
+                        }else if(trade == "sell"){
+                            takerTokenAmount = db_amount;
+                        }
+                        trade_amount = db_amount;
+                    }
+                    const shouldThrowOnInsufficientBalanceOrAllowance = true;
+                    const fillTakerTokenAmount = zeroEx._web3Wrapper.constructor.toBaseUnitAmount(new BigNumber(takerTokenAmount.toString()),taker_decimals);
+                    let gasPrice = new BigNumber(20000000000)
+                    const OrderTransactionOpts = {
+                        gasPrice:gasPrice
+                    };
+                    try{
+                        let fill_valid = await zeroEx.exchange.validateOrderFillableOrThrowAsync(signed_order);
+                        const txHash = await zeroEx.exchange.fillOrderAsync(
+                            signed_order,
+                            fillTakerTokenAmount,
+                            shouldThrowOnInsufficientBalanceOrAllowance,
+                            takerAddress,
+                            OrderTransactionOpts
+                        );
+                        const txReceipt = await zeroEx.awaitTransactionMinedAsync(txHash);
+                        if(status == "matched"){
+                            delete_order(order_detail_id);
+                            create_trade_history(price,trade_amount,maker_addr,takerAddress,type,symbol,base_token,txHash);
+                            if(trade == "buy"){
+                                $(".btn-buy > :nth-child(2)").remove();
+                                $(".amount-buy").val("");
+                                $(".btn-buy").addClass("disabled");
+                            }else if( trade == "sell"){
+                                $(".btn-sell > :nth-child(2)").remove();
+                                $(".amount-sell").val("");
+                                $(".btn-sell").addClass("disabled");
+                            }
+                        }else if(status == "large_match"){
+                            db_amount -= amount;
+                            update_order(order_detail_id,parseFloat(db_amount));
+                            create_trade_history(price, trade_amount,maker_addr,takerAddress,type,symbol,base_token,txHash);
+                            if(trade == "buy"){
+                                $(".btn-buy > :nth-child(2)").remove();
+                                $(".amount-buy").val("");
+                                $(".btn-buy").addClass("disabled");
+                            }else if( trade == "sell"){
+                                $(".btn-sell > :nth-child(2)").remove();
+                                $(".amount-sell").val("");
+                                $(".btn-sell").addClass("disabled");
+                            }
+                        }else if(status == "small_match"){
+                            delete_order(order_detail_id);
+                            create_trade_history(price, trade_amount,maker_addr,takerAddress,type,symbol,base_token,txHash);
+                            dis_amount = amount - db_amount;
+                            generate_order(trade,symbol,price,dis_amount,base_token);
+                        }
+                    }catch(e){
+                        delete_order(order_detail_id);
+                        if(trade == "buy"){
+                            $(".btn-buy > :nth-child(2)").remove();
+                            $(".amount-buy").val("");
+                            $(".btn-buy").addClass("disabled");
+                        }else if( trade == "sell"){
+                            $(".btn-sell > :nth-child(2)").remove();
+                            $(".amount-sell").val("");
+                            $(".btn-sell").addClass("disabled");
+                        }
+                    }
+                };
+                fill_order().catch(console.error);
+
+            }
+            function generate_order(trade,symbol,price,amount,base_token){
+                if(base_token == "WETH"){
+                    const gen_order_with_ETH = async () => {
+                        BigNumber.config({ EXPONENTIAL_AT:[-9,30]});
+                        const DECIMALS = 18;
+                        const WETH_ADDRESS = wethAddress; // The wrapped ETH token contract
+                        //const TOKEN_ADDRESS = $(".contract-address").children("a").attr("value").toLowerCase();
+
+
+                        let TOKEN_ADDRESS = $(".contract-address").children("a").attr("value");
+                        let tokenSymbol = $(".token-info").attr("token_symbol");
+                        if (tokenSymbol == "TM")
+                            TOKEN_ADDRESS = tmAddress;
+                        TOKEN_ADDRESS = TOKEN_ADDRESS.toLowerCase();
+                        let token_decimals = parseInt($(".token-info").attr("decimals"));
+                        /* const EXCHANGE_ADDRESS = zeroEx.exchange.getContractAddress(); */
+                        const EXCHANGE_ADDRESS = zeroEx.exchange.address;;
+                        const accounts = await zeroEx._web3Wrapper.getAvailableAddressesAsync();
+                        const makerAddress = accounts[0];
+                        /* const feeRecipient = ZeroEx.ZeroEx.NULL_ADDRESS;
+                        const takerAddress = ZeroEx.ZeroEx.NULL_ADDRESS; */
+                        const feeRecipient = serverAddress;
+                        const takerAddress = serverAddress;
+                        const salt = ZeroEx.generatePseudoRandomSalt();
+                        const expire = Math.floor(Date.now()/1000) + (60*24*60*60);
+                        const fee = 0;
+                        const makerFee = new BigNumber(fee.toString());
+                        const takerFee = new BigNumber(fee.toString());
+                        const decimals = DECIMALS
+                        let taker_token_addr;
+                        let maker_token_addr;
+                        let taker_amount;
+                        let maker_amount;
+                        let type;
+                        let maker_decimal;
+                        let taker_decimal;
+                        let trade_fee = 0;
+                        var contractABI = human_standard_token_abi;
+                        //Get token balance;
+                        contractAddress = TOKEN_ADDRESS;
+                        var tokenContract = web3js.eth.contract(contractABI).at(contractAddress);
+                        if(trade == "buy"){
+                            type = 1;
+                            maker_token_addr = WETH_ADDRESS;
+                            taker_token_addr = TOKEN_ADDRESS;
+                            maker_amount = Number($(".total-buy").attr("value"));
+                            taker_amount = amount;
+                            maker_decimal = DECIMALS;
+                            taker_decimal = token_decimals;
+                            trade_fee = parseFloat($("#trade .fee-buy").next().text());
+                        }else if(trade == "sell"){
+                            type = 0;
+                            maker_token_addr = TOKEN_ADDRESS;
+                            taker_token_addr = WETH_ADDRESS;
+                            maker_amount = amount;
+                            taker_amount = Number($(".total-sell").attr("value"));
+                            maker_decimal = token_decimals;
+                            taker_decimal = DECIMALS;
+                            trade_fee = parseFloat($("#trade .fee-sell").next().text());
+                        }
+                        // Generate order
+                        try{
+                            const order = {
+                                exchangeAddress: EXCHANGE_ADDRESS,
+                                makerAddress: makerAddress,
+                                takerAddress: null_address,
+                                senderAddress: null_address,
+                                feeRecipientAddress: null_address,
+                                expirationTimeSeconds: new BigNumber(expire*1000),
+                                salt: salt,
+                                makerAssetAmount: zeroEx._web3Wrapper.constructor.toBaseUnitAmount(new BigNumber(maker_amount.toString()), maker_decimal),
+                                takerAssetAmount: zeroEx._web3Wrapper.constructor.toBaseUnitAmount(new BigNumber(taker_amount.toString()), taker_decimal),
+                                makerAssetData: ZeroEx.assetDataUtils.encodeERC20AssetData(maker_token_addr),
+                                takerAssetData: ZeroEx.assetDataUtils.encodeERC20AssetData(taker_token_addr),
+                                makerFee: makerFee,
+                                takerFee: takerFee,
+                            };
+                            // Get OrderHash
+                            const orderHash = ZeroEx.orderHashUtils.getOrderHashHex(order);
+                            // Signing orderHash -> ecSignature
+                            const shouldAddPersonalMessagePrefix = true;
+                            //Signing to Order
+                            // const signature = await ZeroEx.signatureUtils.ecSignHashAsync(providerEngine, orderHash, makerAddress);
+                            // const signedOrder = {
+                            //     ...order,
+                            //     signature,
+                            //     maker_token_addr,
+                            //     taker_token_addr,
+                            // };
+                            const signature = await ZeroEx.signatureUtils.ecSignOrderAsync(providerEngine, order, makerAddress);
+                            const signedOrder = {
+                                ...signature,
+                                maker_token_addr,
+                                taker_token_addr,
+                            };
+
+                            let data = {
+                                state:0,
+                                type:type,
+                                base_token:base_token,
+                                token_symbol:symbol,
+                                maker_addr:makerAddress,
+                                amount:amount,
+                                price:price,
+                                order_hash:orderHash,
+                                expire:Math.floor(expire),
+                                expire_date:expire,
+                                taker_amount:taker_amount,
+                                maker_amount:maker_amount,
+                                token_addr:TOKEN_ADDRESS,
+                                trade_fee:trade_fee,
+                                signed_order:JSON.stringify(signedOrder)
+                            };
+
+                            $.ajax({
+                                // url: 'order/create',
+                                url: 'http://localhost:3001/order/create',
+                                // url: 'create_order',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: data,
+                                success: function(data) {
+                                    if(trade == "buy"){
+                                        $(".btn-buy").find("i").remove();
+                                        $(".amount-buy").val("");
+                                        $(".btn-buy").addClass("disabled");
+                                    }else if( trade == "sell"){
+                                        $(".btn-sell").find("i").remove();
+                                        $(".amount-sell").val("");
+                                        $(".btn-sell").addClass("disabled");
+                                    }
+                                    
+                                    if (data['status'] === 'fail') {
+                                        Trade.trade_fail_alert();
+                                    }
+                                },
+                                error: function(error) {
+                                    console.log(error);
+                                    if(trade == "buy"){
+                                        $(".btn-buy").find("i").remove();
+                                        $(".amount-buy").val("");
+                                        $(".btn-buy").addClass("disabled");
+                                    }else if( trade == "sell"){
+                                        $(".btn-sell").find("i").remove();
+                                        $(".amount-sell").val("");
+                                        $(".btn-sell").addClass("disabled");
+                                    }
+                                }
+                            });
+                        }catch(e){
+                            console.log(e);
+                            if(trade == 'buy'){
+                                $(".btn-buy").find("i").remove();
+                                $(".amount-buy").val("");
+                                $(".btn-buy").addClass("disabled");
+                            }else if (trade == 'sell'){
+                                $(".btn-sell").find("i").remove();
+                                $(".amount-sell").val("");
+                                $(".btn-sell").addClass("disabled");
+                            }
+                        }
+
+                    };
+                    gen_order_with_ETH().catch(console.error)
+
+                }else if(base_token == "TM"){
+                    const gen_order_with_TM = async () => {
+                        BigNumber.config({ EXPONENTIAL_AT:[-9,30]});
+                        const DECIMALS = tm_decimals;
+                        const TM_ADDRESS = tmAddress.toLowerCase(); // The wrapped ETH token contract
+                        //const TOKEN_ADDRESS = $(".contract-address").children("a").attr("value").toLowerCase();
+                        let TOKEN_ADDRESS = $(".contract-address").children("a").attr("value");
+                        let tokenSymbol = $(".token-info").attr("token_symbol");
+                        if (tokenSymbol == "TM")
+                            TOKEN_ADDRESS = tmAddress;
+
+                        TOKEN_ADDRESS = TOKEN_ADDRESS.toLowerCase();
+                        let token_decimals = parseInt($(".token-info").attr("decimals"));
+                        const EXCHANGE_ADDRESS = zeroEx.exchange.address;
+                        const accounts = await zeroEx._web3Wrapper.getAvailableAddressesAsync();
+                        const makerAddress = currentWalletAddress;
+                        const feeRecipient = serverAddress;
+                        const takerAddress = serverAddress;
+                        const salt = ZeroEx.generatePseudoRandomSalt();
+                        const expire = Math.floor(Date.now()/1000) + (60*24*60*60);
+                        const fee = 0;
+                        const makerFee = new BigNumber(fee);
+                        const takerFee = new BigNumber(fee);
+                        const decimals = DECIMALS;
+                        let taker_token_addr;
+                        let maker_token_addr;
+                        let taker_amount;
+                        let maker_amount;
+                        let type;
+                        let maker_decimal;
+                        let taker_decimal;
+                        let trade_fee = 0;
+                        var contractABI = human_standard_token_abi;
+                        //Get token balance;
+
+                        contractAddress = TOKEN_ADDRESS;
+                        //var tokenContract = web3js.eth.contract(contractABI).at(contractAddress);
+                        if(trade == "buy"){
+                            type = 1;
+                            maker_token_addr = TM_ADDRESS;
+                            taker_token_addr = TOKEN_ADDRESS;
+                            maker_amount = Number($(".total-buy").attr("value"));
+                            taker_amount = amount;
+                            maker_decimal = DECIMALS;
+                            taker_decimal = token_decimals;
+                            trade_fee = parseFloat($("#trade .fee-buy").next().text());
+                        }else if(trade == "sell"){
+                            type = 0;
+                            maker_token_addr = TOKEN_ADDRESS;
+                            taker_token_addr = TM_ADDRESS;
+                            maker_amount = amount;
+                            taker_amount = Number($(".total-sell").attr("value"));
+                            maker_decimal = token_decimals;
+                            taker_decimal = DECIMALS;
+                            trade_fee = parseFloat($("#trade .fee-sell").next().text());
+                        }
+                        console.log("generate");
+                        // Generate order
+                        try{
+                            const order = {
+                                exchangeAddress: EXCHANGE_ADDRESS,
+                                makerAddress: makerAddress,
+                                takerAddress: null_address,
+                                senderAddress: null_address,
+                                feeRecipientAddress: null_address,
+                                expirationTimeSeconds: new BigNumber(expire*1000),
+                                salt: salt,
+                                makerAssetAmount: zeroEx._web3Wrapper.constructor.toBaseUnitAmount(new BigNumber(maker_amount.toString()), maker_decimal),
+                                takerAssetAmount: zeroEx._web3Wrapper.constructor.toBaseUnitAmount(new BigNumber(taker_amount.toString()), taker_decimal),
+                                makerAssetData: ZeroEx.assetDataUtils.encodeERC20AssetData(maker_token_addr),
+                                takerAssetData: ZeroEx.assetDataUtils.encodeERC20AssetData(taker_token_addr),
+                                makerFee: makerFee,
+                                takerFee: takerFee  ,
+                            };
+                            console.log(order);
+                            // Get OrderHash
+                            const orderHash = ZeroEx.orderHashUtils.getOrderHashHex(order);
+                            console.log("get order hash----");
+                            console.log(orderHash);
+                            // Signing orderHash -> ecSignature
+                            const shouldAddPersonalMessagePrefix = true;
+
+                            //Signing to Order
+                            // const signature = await ZeroEx.signatureUtils.ecSignHashAsync(providerEngine, orderHash, makerAddress);
+                            // const signedOrder = {
+                            //     ...order,
+                            //     signature,
+                            //     maker_token_addr,
+                            //     taker_token_addr,
+                            // };
+
+                            const signature = await ZeroEx.signatureUtils.ecSignOrderAsync(providerEngine, order, makerAddress);
+                            const signedOrder = {
+                                ...signature,
+                                maker_token_addr,
+                                taker_token_addr,
+                            };
+
+                            let data = {
+                                state:0,
+                                type:type,
+                                base_token:base_token,
+                                token_symbol:symbol,
+                                maker_addr:makerAddress,
+                                amount:amount,
+                                price:price,
+                                order_hash:orderHash,
+                                expire:Math.floor(expire),
+                                expire_date:expire,
+                                taker_amount:taker_amount,
+                                maker_amount:maker_amount,
+                                token_addr:TOKEN_ADDRESS,
+                                trade_fee:trade_fee,
+                                signed_order:JSON.stringify(signedOrder)
+                            };
+
+                            $.ajax({
+                                // url: 'order/create',
+                                url: 'http://localhost:3001/order/create',
+                                // url: 'create_order',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: data,
+                                success: function(data) {
+                                    if(trade == "buy"){
+                                        $(".btn-buy").find("i").remove();
+                                        $(".amount-buy").val("");
+                                        $(".btn-buy").addClass("disabled");
+                                    }else if( trade == "sell"){
+                                        $(".btn-sell").find("i").remove();
+                                        $(".amount-sell").val("");
+                                        $(".btn-sell").addClass("disabled");
+                                    }
+
+                                    if (data['status'] === 'fail') {
+                                        Trade.trade_fail_alert();
+                                    }
+                                },
+                                error: function(error) {
+                                    console.log(error);
+                                }
+                            });
+                        }catch(e){
+                            console.log(e);
+                            if(trade == 'buy'){
+                                $(".btn-buy").find("i").remove();
+                                $(".amount-buy").val("");
+                                $(".btn-buy").addClass("disabled");
+                            }else if (trade == 'sell'){
+                                $(".btn-sell").find("i").remove();
+                                $(".amount-sell").val("");
+                                $(".btn-sell").addClass("disabled");
+                            }
+                        }
+
+                    };
+                    gen_order_with_TM().catch(console.error)
+
+                }else if(base_token == "USDC"){
+                    const gen_order_with_USDC = async () => {
+                        BigNumber.config({ EXPONENTIAL_AT:[-9,30]});
+                        const DECIMALS = usdc_decimals;
+                        const USDC_ADDRESS = usdcAddress.toLowerCase(); // The wrapped ETH token contract
+                        //const TOKEN_ADDRESS = $(".contract-address").children("a").attr("value").toLowerCase();
+                        let TOKEN_ADDRESS = $(".contract-address").children("a").attr("value");
+                        let tokenSymbol = $(".token-info").attr("token_symbol");
+                        if (tokenSymbol == "TM")
+                            TOKEN_ADDRESS = tmAddress;
+
+                        TOKEN_ADDRESS = TOKEN_ADDRESS.toLowerCase();
+                        let token_decimals = parseInt($(".token-info").attr("decimals"));
+                        const EXCHANGE_ADDRESS = zeroEx.exchange.address;
+                        const accounts = await zeroEx._web3Wrapper.getAvailableAddressesAsync();
+                        const makerAddress = currentWalletAddress;
+                        const feeRecipient = serverAddress;
+                        const takerAddress = serverAddress;
+                        const salt = ZeroEx.generatePseudoRandomSalt();
+                        const expire = Math.floor(Date.now()/1000) + (60*24*60*60);
+                        const fee = 0;
+                        const makerFee = new BigNumber(fee);
+                        const takerFee = new BigNumber(fee);
+                        const decimals = DECIMALS;
+                        let taker_token_addr;
+                        let maker_token_addr;
+                        let taker_amount;
+                        let maker_amount;
+                        let type;
+                        let maker_decimal;
+                        let taker_decimal;
+                        let trade_fee = 0;
+                        var contractABI = human_standard_token_abi;
+                        //Get token balance;
+
+                        contractAddress = TOKEN_ADDRESS;
+                        //var tokenContract = web3js.eth.contract(contractABI).at(contractAddress);
+                        if(trade == "buy"){
+                            type = 1;
+                            maker_token_addr = USDC_ADDRESS;
+                            taker_token_addr = TOKEN_ADDRESS;
+                            maker_amount = Number($(".total-buy").attr("value"));
+                            taker_amount = amount;
+                            maker_decimal = DECIMALS;
+                            taker_decimal = token_decimals;
+                            trade_fee = parseFloat($("#trade .fee-buy").next().text());
+                        }else if(trade == "sell"){
+                            type = 0;
+                            maker_token_addr = TOKEN_ADDRESS;
+                            taker_token_addr = USDC_ADDRESS;
+                            maker_amount = amount;
+                            taker_amount = Number($(".total-sell").attr("value"));
+                            maker_decimal = token_decimals;
+                            taker_decimal = DECIMALS;
+                            trade_fee = parseFloat($("#trade .fee-sell").next().text());
+                        }
+                        console.log("generate");
+                        // Generate order
+                        try{
+                            const order = {
+                                exchangeAddress: EXCHANGE_ADDRESS,
+                                makerAddress: makerAddress,
+                                takerAddress: null_address,
+                                senderAddress: null_address,
+                                feeRecipientAddress: null_address,
+                                expirationTimeSeconds: new BigNumber(expire*1000),
+                                salt: salt,
+                                makerAssetAmount: zeroEx._web3Wrapper.constructor.toBaseUnitAmount(new BigNumber(maker_amount.toString()), maker_decimal),
+                                takerAssetAmount: zeroEx._web3Wrapper.constructor.toBaseUnitAmount(new BigNumber(taker_amount.toString()), taker_decimal),
+                                makerAssetData: ZeroEx.assetDataUtils.encodeERC20AssetData(maker_token_addr),
+                                takerAssetData: ZeroEx.assetDataUtils.encodeERC20AssetData(taker_token_addr),
+                                makerFee: makerFee,
+                                takerFee: takerFee  ,
+                            };
+                            console.log(order);
+                            // Get OrderHash
+                            const orderHash = ZeroEx.orderHashUtils.getOrderHashHex(order);
+                            console.log("get order hash----");
+                            console.log(orderHash);
+                            // Signing orderHash -> ecSignature
+                            const shouldAddPersonalMessagePrefix = true;
+
+                            //Signing to Order
+                            // const signature = await ZeroEx.signatureUtils.ecSignHashAsync(providerEngine, orderHash, makerAddress);
+                            // const signedOrder = {
+                            //     ...order,
+                            //     signature,
+                            //     maker_token_addr,
+                            //     taker_token_addr,
+                            // };
+
+                            const signature = await ZeroEx.signatureUtils.ecSignOrderAsync(providerEngine, order, makerAddress);
+                            const signedOrder = {
+                                ...signature,
+                                maker_token_addr,
+                                taker_token_addr,
+                            };
+
+                            let data = {
+                                state:0,
+                                type:type,
+                                base_token:base_token,
+                                token_symbol:symbol,
+                                maker_addr:makerAddress,
+                                amount:amount,
+                                price:price,
+                                order_hash:orderHash,
+                                expire:Math.floor(expire),
+                                expire_date:expire,
+                                taker_amount:taker_amount,
+                                maker_amount:maker_amount,
+                                token_addr:TOKEN_ADDRESS,
+                                trade_fee:trade_fee,
+                                signed_order:JSON.stringify(signedOrder)
+                            };
+
+                            $.ajax({
+                                // url: 'order/create',
+                                url: 'http://localhost:3001/order/create',
+                                // url: 'create_order',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: data,
+                                success: function(data) {
+                                    if(trade == "buy"){
+                                        $(".btn-buy").find("i").remove();
+                                        $(".amount-buy").val("");
+                                        $(".btn-buy").addClass("disabled");
+                                    }else if( trade == "sell"){
+                                        $(".btn-sell").find("i").remove();
+                                        $(".amount-sell").val("");
+                                        $(".btn-sell").addClass("disabled");
+                                    }
+
+                                    if (data['status'] === 'fail') {
+                                        Trade.trade_fail_alert();
+                                    }
+                                },
+                                error: function(error) {
+                                    console.log(error);
+                                }
+                            });
+                        }catch(e){
+                            console.log(e);
+                            if(trade == 'buy'){
+                                $(".btn-buy").find("i").remove();
+                                $(".amount-buy").val("");
+                                $(".btn-buy").addClass("disabled");
+                            }else if (trade == 'sell'){
+                                $(".btn-sell").find("i").remove();
+                                $(".amount-sell").val("");
+                                $(".btn-sell").addClass("disabled");
+                            }
+                        }
+
+                    };
+                    gen_order_with_USDC().catch(console.error)
+                }else if(base_token == "WBTC"){
+                    const gen_order_with_WBTC = async () => {
+                        BigNumber.config({ EXPONENTIAL_AT:[-9,30]});
+                        const DECIMALS = wbtc_decimals;
+                        const WBTC_ADDRESS = wbtcAddress.toLowerCase(); // The wrapped ETH token contract
+                        //const TOKEN_ADDRESS = $(".contract-address").children("a").attr("value").toLowerCase();
+                        let TOKEN_ADDRESS = $(".contract-address").children("a").attr("value");
+                        let tokenSymbol = $(".token-info").attr("token_symbol");
+                        if (tokenSymbol == "TM")
+                            TOKEN_ADDRESS = tmAddress;
+
+                        TOKEN_ADDRESS = TOKEN_ADDRESS.toLowerCase();
+                        let token_decimals = parseInt($(".token-info").attr("decimals"));
+                        const EXCHANGE_ADDRESS = zeroEx.exchange.address;
+                        const accounts = await zeroEx._web3Wrapper.getAvailableAddressesAsync();
+                        const makerAddress = currentWalletAddress;
+                        const feeRecipient = serverAddress;
+                        const takerAddress = serverAddress;
+                        const salt = ZeroEx.generatePseudoRandomSalt();
+                        const expire = Math.floor(Date.now()/1000) + (60*24*60*60);
+                        const fee = 0;
+                        const makerFee = new BigNumber(fee);
+                        const takerFee = new BigNumber(fee);
+                        const decimals = DECIMALS;
+                        let taker_token_addr;
+                        let maker_token_addr;
+                        let taker_amount;
+                        let maker_amount;
+                        let type;
+                        let maker_decimal;
+                        let taker_decimal;
+                        let trade_fee = 0;
+                        var contractABI = human_standard_token_abi;
+                        //Get token balance;
+
+                        contractAddress = TOKEN_ADDRESS;
+                        //var tokenContract = web3js.eth.contract(contractABI).at(contractAddress);
+                        if(trade == "buy"){
+                            type = 1;
+                            maker_token_addr = WBTC_ADDRESS;
+                            taker_token_addr = TOKEN_ADDRESS;
+                            maker_amount = Number($(".total-buy").attr("value"));
+                            taker_amount = amount;
+                            maker_decimal = DECIMALS;
+                            taker_decimal = token_decimals;
+                            trade_fee = parseFloat($("#trade .fee-buy").next().text());
+                        }else if(trade == "sell"){
+                            type = 0;
+                            maker_token_addr = TOKEN_ADDRESS;
+                            taker_token_addr = WBTC_ADDRESS;
+                            maker_amount = amount;
+                            taker_amount = Number($(".total-sell").attr("value"));
+                            maker_decimal = token_decimals;
+                            taker_decimal = DECIMALS;
+                            trade_fee = parseFloat($("#trade .fee-sell").next().text());
+                        }
+                        console.log("generate");
+                        // Generate order
+                        try{
+                            const order = {
+                                exchangeAddress: EXCHANGE_ADDRESS,
+                                makerAddress: makerAddress,
+                                takerAddress: null_address,
+                                senderAddress: null_address,
+                                feeRecipientAddress: null_address,
+                                expirationTimeSeconds: new BigNumber(expire*1000),
+                                salt: salt,
+                                makerAssetAmount: zeroEx._web3Wrapper.constructor.toBaseUnitAmount(new BigNumber(maker_amount.toString()), maker_decimal),
+                                takerAssetAmount: zeroEx._web3Wrapper.constructor.toBaseUnitAmount(new BigNumber(taker_amount.toString()), taker_decimal),
+                                makerAssetData: ZeroEx.assetDataUtils.encodeERC20AssetData(maker_token_addr),
+                                takerAssetData: ZeroEx.assetDataUtils.encodeERC20AssetData(taker_token_addr),
+                                makerFee: makerFee,
+                                takerFee: takerFee  ,
+                            };
+                            console.log(order);
+                            // Get OrderHash
+                            const orderHash = ZeroEx.orderHashUtils.getOrderHashHex(order);
+                            console.log("get order hash----");
+                            console.log(orderHash);
+                            // Signing orderHash -> ecSignature
+                            const shouldAddPersonalMessagePrefix = true;
+
+                            //Signing to Order
+                            // const signature = await ZeroEx.signatureUtils.ecSignHashAsync(providerEngine, orderHash, makerAddress);
+                            // const signedOrder = {
+                            //     ...order,
+                            //     signature,
+                            //     maker_token_addr,
+                            //     taker_token_addr,
+                            // };
+
+                            const signature = await ZeroEx.signatureUtils.ecSignOrderAsync(providerEngine, order, makerAddress);
+                            const signedOrder = {
+                                ...signature,
+                                maker_token_addr,
+                                taker_token_addr,
+                            };
+
+                            let data = {
+                                state:0,
+                                type:type,
+                                base_token:base_token,
+                                token_symbol:symbol,
+                                maker_addr:makerAddress,
+                                amount:amount,
+                                price:price,
+                                order_hash:orderHash,
+                                expire:Math.floor(expire),
+                                expire_date:expire,
+                                taker_amount:taker_amount,
+                                maker_amount:maker_amount,
+                                token_addr:TOKEN_ADDRESS,
+                                trade_fee:trade_fee,
+                                signed_order:JSON.stringify(signedOrder)
+                            };
+
+                            $.ajax({
+                                // url: 'order/create',
+                                url: 'http://localhost:3001/order/create',
+                                // url: 'create_order',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: data,
+                                success: function(data) {
+                                    if(trade == "buy"){
+                                        $(".btn-buy").find("i").remove();
+                                        $(".amount-buy").val("");
+                                        $(".btn-buy").addClass("disabled");
+                                    }else if( trade == "sell"){
+                                        $(".btn-sell").find("i").remove();
+                                        $(".amount-sell").val("");
+                                        $(".btn-sell").addClass("disabled");
+                                    }
+
+                                    if (data['status'] === 'fail') {
+                                        Trade.trade_fail_alert();
+                                    }
+                                },
+                                error: function(error) {
+                                    console.log(error);
+                                }
+                            });
+                        }catch(e){
+                            console.log(e);
+                            if(trade == 'buy'){
+                                $(".btn-buy").find("i").remove();
+                                $(".amount-buy").val("");
+                                $(".btn-buy").addClass("disabled");
+                            }else if (trade == 'sell'){
+                                $(".btn-sell").find("i").remove();
+                                $(".amount-sell").val("");
+                                $(".btn-sell").addClass("disabled");
+                            }
+                        }
+
+                    };
+                    gen_order_with_WBTC().catch(console.error)
+
+                }
+
+
+
+            }
+            function delete_order(id){
+                data = {
+                    detail_id:id
+                }
+                $.ajax({
+                    url: 'delete_order',
+                    type: 'POST',
+                    dataType: 'json',
+                    data:data,
+                    success: function(data){
+
+                    },
+                    error: function (error){
+                        console.log(error)
+                    }
+
+                });
+            }
+            function update_order(id,amount){
+                data = {
+                    detail_id:id,
+                    amount:amount
+                };
+                $.ajax({
+                    url: 'update_order',
+                    type: 'POST',
+                    dataType: 'json',
+                    data:data,
+                    success: function(data){
+
+                    },
+                    error: function (error){
+                        console.log(error)
+                    }
+
+                });
+            }
+            function create_trade_history(price,amount,maker_addr,taker_addr,type,symbol,base_token,txHash){
+                data = {
+                    price:price,
+                    amount:amount,
+                    type:type,
+                    maker_addr:maker_addr,
+                    taker_addr:taker_addr,
+                    symbol:symbol,
+                    base_token:base_token,
+                    txHash:txHash
+                }
+                $.ajax({
+                    url: 'create_trade_history',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: data,
+                    success: function(data) {
+
+                    },
+                    error: function(error) {
+                        console.log(error);
+
+                    }
+
+                });
+
+            }
+            function get_token_balance(token_addr){
+                if(currentWalletAddress != "" && currentWalletAddress != null){
+                    try{
+                        address = currentWalletAddress    //Wallet Address
+                        var contractAddress = token_addr; // Token Address
+                        var contractABI = human_standard_token_abi;
+                        //Get token balance;
+                        var tokenContract = web3js.eth.contract(contractABI).at(contractAddress);
+                        tokenContract.decimals((error,decimal)=>{
+                            token_decimal = decimal.toNumber();
+                            tokenContract.balanceOf(address,(error,balance) =>{
+                                token_balance = (balance.toNumber() / Math.pow(10,token_decimal));
+                                return token_balance;
+                            });
+                        });
+                    }catch(e){
+                        console.log("Error:get token amount");
+                        return "error token balance";
+                    }
+
+                }else{
+                    return "wallet not connected"
+                }
+            }
+            function change_price(pri_val,thisobj,trade_val){
+                let that = thisobj;
+                let price = pri_val;
+                let trade = trade_val;
+                if( price == "" ){
+                    let alert = "<span>Price required</span>";
+                    that.next().children().remove();
+                    that.next().append(alert);
+                    if(trade === "buy"){
+                        $(".total-buy").text("0.00");
+                        $(".btn-buy").addClass("disabled");
+                        $(".price-buy").attr("data-lock","true");
+                    }else if(trade === "sell"){
+                        $(".total-sell").text("0.00");
+                        $(".btn-sell").addClass("disabled");
+                        $(".price-sell").attr("data-lock","true");
+                    }
+                }else if(price != ""){
+                    that.next().children().remove();
+                    if(isNaN(price)){
+                        let alert = "<span>Price must be a number</span>";
+                        that.next().append(alert);
+                        if(trade === "buy"){
+                            $(".total-buy").text("0.00");
+                            $(".btn-buy").addClass("disabled");
+                            $(".price-buy").attr("data-lock","true");
+                        }else if(trade === "sell"){
+                            $(".total-sell").text("0.00");
+                            $(".btn-sell").addClass("disabled");
+                            $(".price-sell").attr("data-lock","true");
+                        }
+                    }else{
+                        price_num = Number(price)
+                        if(price_num === 0){
+                            let alert = "<span>Price cannot be 0</span>";
+                            that.next().append(alert);
+                            if(trade === "buy"){
+                                $(".total-buy").text("0.00");
+                                $(".btn-buy").addClass("disabled");
+                                $(".price-buy").attr("data-lock","true");
+                            }else if(trade === "sell"){
+                                $(".total-sell").text("0.00");
+                                $(".btn-sell").addClass("disabled");
+                                $(".price-sell").attr("data-lock","true");
+                            }
+                            return false;
+                        }else if(decimalPlaces(price_num) > 8 ){
+                            let alert = "<span>Price cannot be less than 0.00000001</span>";
+                            that.next().append(alert);
+                            if(trade === "buy"){
+                                $(".total-buy").text("0.00");
+                                $(".btn-buy").addClass("disabled");
+                                $(".price-buy").attr("data-lock","true");
+                            }else if(trade === "sell"){
+                                $(".total-sell").text("0.00");
+                                $(".btn-sell").addClass("disabled");
+                                $(".price-sell").attr("data-lock","true");
+                            }
+                        }
+                        else{
+                            if(trade === "buy"){
+                                $(".price-buy").attr("data-lock","false");
+                                let amount = $("#trade .amount-buy").val();
+                                let amount_lock = $(".amount-buy").attr("data-lock");
+                                if(!isNaN(amount) && amount != "" && amount != 0 && amount_lock == "false"){
+                                    let fee = $("#trade .fee-buy").attr("value");
+                                    //let total = ((parseFloat(price) * parseFloat(amount)) + parseFloat(fee)).toFixed(10);
+                                    let total = Math.floor((parseFloat(price) * parseFloat(amount)) * Math.pow(10, 6)) / Math.pow(10, 6);
+                                    base_token = $(".token-info").attr('base_token');
+                                    let fee_price = calculate_fee(total,base_token).toFixed(5);
+                                    $("#trade .fee-buy").next().text(fee_price);
+                                    let real_price = Math.floor((parseFloat(total) + parseFloat(fee_price)) * Math.pow(10, 6)) / Math.pow(10, 6);
+                                    $(".total-buy").text(real_price);
+
+                                    let token_addr = wethAddress;
+                                    if(currentWalletAddress != "" && currentWalletAddress != null){
+                                        let token_balance = parseFloat($(".buy-token-available").text());
+                                        if(token_balance < real_price){
+                                            let alert = "<span>" + "Insufficient Balance" + "</span>";
+                                            that.parent().next().children(":nth-child(5)").children().remove();
+                                            that.parent().next().children(":nth-child(5)").append(alert);
+                                            if(trade === "buy"){
+                                                $(".btn-buy").addClass("disabled");
+                                            }else if(trade === "sell"){
+                                                $(".btn-sell").addClass("disabled");
+                                            }
+                                        }else{
+                                            if( base_token == "WETH" ){
+                                                max_trading = max_trading_eth;
+
+                                            }else if( base_token == "TM" ){
+                                                max_trading = max_trading_tm;
+
+                                            }else if( base_token == "USDC" ){
+                                                max_trading = max_trading_usdc;
+                                            }else if( base_token == "WBTC" ){
+                                                max_trading = max_trading_wbtc;
+
+                                            }
+                                            if(parseFloat(real_price) > parseFloat(max_trading)){
+                                                let base_token = $(".token-info").attr("base_token");
+                                                let alert = "<span>" + "Max trade size is" +max_trading +" " + base_token + "</span>";
+                                                that.parent().next().children(":nth-child(5)").children().remove();
+                                                that.parent().next().children(":nth-child(5)").append(alert);
+
+                                                $(".btn-buy").addClass("disabled");
+
+                                            }else{
+                                                $(".total-buy").attr("value",real_price);
+                                                $(".amount-buy").next().children().remove();
+                                                $(".btn-buy").removeClass("disabled");
+                                            }
+
+                                        }
+
+                                    }else{
+                                        let alert = "<span>" + "Not connect wallet" + "</span>";
+                                        that.parent().next().children(":nth-child(5)").children().remove();
+                                        that.parent().next().children(":nth-child(5)").append(alert);
+                                        if(trade === "buy"){
+                                            $(".total-buy").text("0.00");
+                                            $(".btn-buy").addClass("disabled");
+                                        }else if(trade === "sell"){
+                                            $(".total-sell").text("0.00");
+                                            $(".btn-sell").addClass("disabled");
+                                        }
+                                    }
+                                }
+                            }else if(trade === "sell"){
+                                $(".price-sell").attr("data-lock","false");
+                                let amount = $("#trade .amount-sell").val();
+                                let amount_lock = $(".amount-sell").attr("data-lock");
+                                if(!isNaN(amount) && amount != "" && amount != 0 && amount_lock == "false"){
+                                    let fee = $("#trade .fee-sell").attr("value");
+                                    let total = (((parseFloat(price) * parseFloat(amount))).toFixed(6));
+                                    base_token = $(".token-info").attr('base_token');
+                                    let fee_price = calculate_fee(total,base_token).toFixed(5);
+                                    $("#trade .fee-sell").next().text(fee_price);
+                                    let real_price = (parseFloat(total) - parseFloat(fee_price)).toFixed(6);
+                                    $(".total-sell").text(real_price);
+                                    if(real_price < 0){
+                                        let alert = "<span>Amount too small:total sale price less than fee</span>";
+                                        that.parent().next().children(":nth-child(5)").children().remove();
+                                        that.parent().next().children(":nth-child(5)").append(alert);
+                                        //that.next().append(alert);
+                                        $(".total-sell").text("0.00");
+                                        $(".btn-sell").addClass("disabled");
+                                    }else{
+                                        let token_addr = $(".contract-address").children("a").attr("value");
+                                        if(currentWalletAddress != "" && currentWalletAddress != null){
+                                            let token_balance = parseFloat($(".sell-token-available").text());
+                                            if(token_balance < parseFloat(amount)){
+                                                let alert = "<span>" + "Insufficient Balance" + "</span>";
+                                                that.parent().next().children(":nth-child(5)").children().remove();
+                                                that.parent().next().children(":nth-child(5)").append(alert);
+                                                if(trade === "buy"){
+                                                    $(".btn-buy").addClass("disabled");
+                                                }else if(trade === "sell"){
+                                                    $(".btn-sell").addClass("disabled");
+                                                }
+                                            }else{
+                                                if( base_token == "WETH" ){
+                                                    max_trading = max_trading_eth;
+                                                }else if( base_token == "TM" ){
+                                                    max_trading = max_trading_tm;
+                                                }else if( base_token == "USDC" ){
+                                                    max_trading = max_trading_usdc;
+                                                }else if( base_token == "WBTC" ){
+                                                    max_trading = max_trading_wbtc;
+                                                }
+                                                if( parseFloat(real_price) > parseFloat(max_trading)){
+                                                    let base_token = $(".token-info").attr("base_token");
+                                                    let alert = "<span>" + "Max trade size is" +max_trading +" " + base_token + "</span>";
+                                                    that.parent().next().children(":nth-child(5)").children().remove();
+                                                    that.parent().next().children(":nth-child(5)").append(alert);
+                                                    $(".btn-sell").addClass("disabled");
+                                                }else{
+                                                    $(".total-sell").attr("value",real_price);
+                                                    that.parent().next().children(":nth-child(5)").children().remove();
+                                                    $(".btn-sell").removeClass("disabled");
+                                                }
+
+                                            }
+                                        }else{
+                                            let alert = "<span>" + "Not connect wallet" + "</span>";
+                                            that.parent().next().children(":nth-child(5)").children().remove();
+                                            that.parent().next().children(":nth-child(5)").append(alert);
+                                            if(trade === "buy"){
+                                                $(".btn-buy").addClass("disabled");
+                                            }else if(trade === "sell"){
+                                                $(".btn-sell").addClass("disabled");
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            function change_amount(amount_val,thisobj,trade_val) {
+                let base_token = $(".token-info").attr("base_token");
+
+                let that = thisobj;
+                let amount = amount_val;
+                let trade = trade_val;
+                let token_decimal = $(".token-info").attr("decimals");
+                that.next().children().remove();
+                if(amount === ""){
+                    let alert = "<span>Amount required</span>";
+                    that.next().children().remove();
+                    that.next().append(alert);
+                    if(trade === "buy"){
+                        $(".total-buy").text("0.00");
+                        $(".btn-buy").addClass("disabled");
+                        $(".amount-buy").attr("data-lock","true");
+                    }else if(trade === "sell"){
+                        $(".total-sell").text("0.00");
+                        $(".btn-sell").addClass("disabled");
+                        $(".amount-sell").attr("data-lock","true");
+                    }
+                }else if(amount !== ""){
+                    that.next().children().remove();
+                    if(isNaN(amount)){
+                        let alert = "<span>Amount must be a number</span>";
+                        that.next().append(alert);
+                        if(trade === "buy"){
+                            $(".total-buy").text("0.00");
+                            $(".btn-buy").addClass("disabled");
+                            $(".amount-buy").attr("data-lock","true");
+                        }else if(trade === "sell"){
+                            $(".total-sell").text("0.00");
+                            $(".btn-sell").addClass("disabled");
+                            $(".amount-sell").attr("data-lock","true");
+                        }
+                    }else{
+                        let amount_num = Number(amount)
+                        if(amount_num === 0){
+                            let alert = "<span>" + "Amount cannot be 0" + "</span>";
+                            that.next().append(alert);
+                            if(trade === "buy"){
+                                $(".total-buy").text("0.00");
+                                $(".btn-buy").addClass("disabled");
+                                $(".amount-buy").attr("data-lock","true");
+                            }else if(trade === "sell"){
+                                $(".total-sell").text("0.00");
+                                $(".btn-sell").addClass("disabled");
+                                $(".amount-sell").attr("data-lock","true");
+                            }
+                        }
+                        else if(amount_num < 0.1){
+                            let alert = "<span>Amount must be at least 0.1</span>";
+                            that.next().append(alert);
+                            if(trade === "buy"){
+                                $(".total-buy").text("0.00");
+                                $(".btn-buy").addClass("disabled");
+                                $(".amount-buy").attr("data-lock","true");
+                            }else if(trade === "sell"){
+                                $(".total-sell").text("0.00");
+                                $(".btn-sell").addClass("disabled");
+                                $(".amount-sell").attr("data-lock","true");
+                            }
+                        }
+
+                        else if(decimalPlaces(amount_num) > 8){
+
+                            let alert = "<span>Please enter a valid value</span>";
+                            that.next().append(alert);
+                            if(trade === "buy"){
+                                $(".total-buy").text("0.00");
+                                $(".btn-buy").addClass("disabled");
+                                $(".amount-buy").attr("data-lock","true");
+                            }else if(trade === "sell"){
+                                $(".total-sell").text("0.00");
+                                $(".btn-sell").addClass("disabled");
+                                $(".amount-sell").attr("data-lock","true");
+                            }
+                        }else if(decimalPlaces(amount_num) > token_decimal){
+                            let alert = "<span>The decimals of token is overflowing.</span>";
+                            that.next().append(alert);
+                            if(trade === "buy"){
+                                $(".total-buy").text("0.00");
+                                $(".btn-buy").addClass("disabled");
+                                $(".amount-buy").attr("data-lock","true");
+                            }else if(trade === "sell"){
+                                $(".total-sell").text("0.00");
+                                $(".btn-sell").addClass("disabled");
+                                $(".amount-sell").attr("data-lock","true");
+                            }
+
+                        }else if(amount_num > max_token_amount){
+                            let alert = "<span>Max token amount is "+ max_token_amount +"</span>";
+                            that.next().append(alert);
+                            if(trade === "buy"){
+                                $(".total-buy").text("0.00");
+                                $(".btn-buy").addClass("disabled");
+                                $(".amount-buy").attr("data-lock","true");
+                            }else if(trade === "sell"){
+                                $(".total-sell").text("0.00");
+                                $(".btn-sell").addClass("disabled");
+                                $(".amount-sell").attr("data-lock","true");
+                            }
+
+                        }
+                        else{
+                            if(trade === "buy"){
+                                $(".amount-buy").attr("data-lock","false");
+                                let price = $(".price-buy").val();
+                                let price_lock = $(".price-buy").attr("data-lock");
+                                if(!isNaN(price) && price != "" && price != 0 && price_lock == "false"){
+                                    let fee = $("#trade .fee-buy").attr("value");
+                                    let total = Math.floor((parseFloat(price) * parseFloat(amount)) * Math.pow(10, 6)) / Math.pow(10, 6);
+                                    base_token = $(".token-info").attr('base_token');
+                                    let fee_price = calculate_fee(total,base_token).toFixed(5);
+
+                                    $("#trade .fee-buy").next().text(fee_price)
+                                    let real_price = Math.floor((parseFloat(total) + parseFloat(fee_price)) * Math.pow(10, 6)) / Math.pow(10, 6);
+                                    $(".total-buy").text(real_price);
+
+                                    let token_addr = wethAddress;
+                                    if(currentWalletAddress != "" && currentWalletAddress != null){
+                                        let token_balance = parseFloat($(".buy-token-available").text());
+                                        if(token_balance < real_price){
+                                            let alert = "<span>" + "Insufficient Balance" + "</span>";
+                                            that.next().children().remove();
+                                            that.next().append(alert);
+                                            if(trade === "buy"){
+                                                $(".btn-buy").addClass("disabled");
+                                            }else if(trade === "sell"){
+                                                $(".btn-sell").addClass("disabled");
+                                            }
+                                        }else{
+                                            if( base_token == "WETH" ){
+                                                max_trading = max_trading_eth;
+
+                                            }else if( base_token == "TM" ){
+                                                max_trading = max_trading_tm;
+
+                                            }else if( base_token == "USDC" ){
+                                                max_trading = max_trading_usdc;
+                                            }else if( base_token == "WBTC" ){
+                                                max_trading = max_trading_wbtc;
+
+                                            }
+
+                                            if( parseFloat(real_price) > parseFloat(max_trading)){
+
+                                                let base_token = $(".token-info").attr("base_token");
+                                                let alert = "<span>" + "Max trade size is" +max_trading +" " + base_token + "</span>";
+                                                that.next().children().remove();
+                                                that.next().append(alert);
+                                                $(".btn-buy").addClass("disabled");
+
+
+                                            }else{
+                                                $(".total-buy").attr("value",real_price);
+                                                $(".btn-buy").removeClass("disabled");
+                                            }
+
+                                        }
+
+                                    }else{
+                                        let alert = "<span>" + "Not connect wallet" + "</span>";
+                                        that.next().append(alert);
+                                        if(trade === "buy"){
+                                            $(".total-buy").text("0.00");
+                                            $(".btn-buy").addClass("disabled");
+                                        }else if(trade === "sell"){
+                                            $(".total-sell").text("0.00");
+                                            $(".btn-sell").addClass("disabled");
+                                        }
+                                    }
+                                }
+                            }else if(trade == "sell"){
+                                $(".amount-sell").attr("data-lock","false");
+                                let price = $(".price-sell").val();
+                                let price_lock = $(".price-sell").attr("data-lock");
+                                if(!isNaN(price) && price != "" && price != 0 && price_lock == "false"){
+                                    let fee = $("#trade .fee-sell").attr("value");
+                                    let total = (parseFloat(price) * parseFloat(amount)).toFixed(6);
+                                    base_token = $(".token-info").attr('base_token');
+                                    let fee_price = calculate_fee(total,base_token).toFixed(5);
+                                    $("#trade .fee-sell").next().text(fee_price)
+                                    let real_price = (parseFloat(total) - parseFloat(fee_price)).toFixed(6);
+                                    if(real_price < 0){
+                                        let alert = "<span>Amount too small:total sale price less than fee</span>";
+                                        that.next().append(alert);
+                                        $(".total-sell").text("0.00");
+                                        $(".btn-sell").addClass("disabled");
+                                    }else{
+                                        $(".total-sell").text(real_price);
+                                        let token_addr = $(".contract-address").children("a").attr("value");
+                                        if(currentWalletAddress != "" && currentWalletAddress != null){
+                                            let token_balance = parseFloat($(".sell-token-available").text())
+                                            if(token_balance < parseFloat(amount)){
+                                                let alert = "<span>" + "Insufficient Balance" + "</span>";
+                                                that.next().append(alert);
+                                                if(trade === "buy"){
+                                                    $(".btn-buy").addClass("disabled");
+                                                }else if(trade === "sell"){
+                                                    $(".btn-sell").addClass("disabled");
+                                                }
+                                            }else{
+                                                if( base_token == "WETH" ){
+                                                    max_trading = max_trading_eth;
+                                                }else if( base_token == "TM" ){
+                                                    max_trading = max_trading_tm;
+                                                }else if( base_token == "USDC" ){
+                                                    max_trading = max_trading_usdc;
+                                                }else if( base_token == "WBTC" ){
+                                                    max_trading = max_trading_wbtc;
+                                                }
+                                                if( parseFloat(real_price) > parseFloat(max_trading)){
+                                                    let base_token = $(".token-info").attr("base_token");
+                                                    let alert = "<span>" + "Max trade size is" +max_trading +" " + base_token + "</span>";
+                                                    that.next().children().remove();
+                                                    that.next().append(alert);
+                                                    $(".btn-sell").addClass("disabled");
+                                                }else{
+                                                    $(".total-sell").attr("value",real_price);
+                                                    $(".btn-sell").removeClass("disabled");
+                                                }
+
+                                            }
+                                        }else{
+                                            let alert = "<span>" + "Not connect wallet" + "</span>";
+                                            that.next().append(alert);
+                                            if(trade === "buy"){
+                                                $(".total-buy").text("0.00");
+                                                $(".btn-buy").addClass("disabled");
+                                            }else if(trade === "sell"){
+                                                $(".total-sell").text("0.00");
+                                                $(".btn-sell").addClass("disabled");
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            function change_contract_address(addr){
+                return addr.substring(0, 7) + '...' + addr.slice(-6);
+            }
+            function change_header_info(this_obj) {
+                const that =  this_obj;
+                let token_symbol = that.attr("value");
+                let token_decimals = that.attr("decimals");
+                let token_name = that.attr("name");
+                let token_last_price = that.attr("price");
+                let token_h_price = that.attr("h_price");
+                let token_h_volume = that.attr("h_volume");
+                let token_contract_addr = that.attr("addr");
+                let contract_addr = change_contract_address(token_contract_addr);
+                let token_header_tag = $(".token-header");
+                let last_price_tag;
+                let h_price_tag;
+                if(token_last_price == "--"){
+                    last_price_tag =
+                        "<strong>" +
+                            "<span>" + "0.000000" + " ETH" + "</span>" +
+                        "</strong>";
+                }else {
+                    if(token_last_price >= 0){
+                        last_price_tag =
+                            "<strong class='text-success'>" +
+                                "<i aria-hidden='true' class='fa fa-caret-up'></i>" +
+                                "<span>" + token_last_price + " ETH" + "</span>" +
+                            "</strong>";
+                    }else{
+                        last_price_tag =
+                        "<strong class='text-danger'>" +
+                            "<i aria-hidden='true' class='fa fa-caret-down'></i>" +
+                            "<span>" + token_last_price + " ETH" + "</span>" +
+                        "</strong>";
+                    }
+                }
+                if(token_h_price == "--"){
+                    h_price_tag =
+                        "<strong>" +
+                            "<span>" + token_h_price + "</span>" +
+                        "</strong>";
+                }else {
+                    if(token_h_price >= 0){
+                        h_price_tag =
+                        "<strong class='text-success'>" +
+                            "<i aria-hidden='true' class='fa fa-caret-up'></i>" +
+                            "<span>" + token_h_price + "%" + "</span>" +
+                        "</strong>";
+
+                    }else{
+                        h_price_tag =
+                        "<strong class='text-danger'>" +
+                            "<i aria-hidden='true' class='fa fa-caret-up'></i>" +
+                            "<span>" + token_h_price + "%" + "</span>" +
+                        "</strong>";
+                    }
+                }
+                token_header_tag.find(":nth-child(1)").children(".token-info").attr("token_symbol",token_symbol);
+                token_header_tag.find(":nth-child(1)").children(".token-info").attr("decimals",token_decimals);
+                token_header_tag.find(":nth-child(1)").children(".token-info").attr("data-name",token_name);
+                token_header_tag.find(":nth-child(1)").children(".token-info").children("span").text(token_name + " (" + token_symbol + ")");
+                token_header_tag.find(":nth-child(1)").children(".contract-address").children("a").text(contract_addr);
+                token_header_tag.find(":nth-child(1)").children(".contract-address").children("a").attr("value",token_contract_addr);
+                token_header_tag.find(":nth-child(1)").children(".contract-address").children("a").attr("href",http_link + "token/"+token_contract_addr);
+                token_header_tag.find(":nth-child(2)").children("div").children(".last-price").children("strong").html(last_price_tag);
+                token_header_tag.find(":nth-child(3)").children("div").children("div").children("strong").html(h_price_tag);
+                token_header_tag.find(":nth-child(4)").children("div").children("div").children("strong").text(token_h_volume + " " + "ETH");
+
+            }
+            function change_trade_info(this_obj){
+                const that = this_obj;
+                let symbol = that.attr("value");
+                let name = that.attr("name");
+                let price = that.attr("price");
+                if(price == "--"){
+                    $("#trade .price").val("");
+                    $(".price-buy").val("");
+                    $(".price-sell").val("");
+                    $(".price-buy").attr('data-lock','true');
+                    $(".price-sell").attr('data-lock','true');
+
+                }else{
+                    //$("#trade .price").val(price);
+                    $(".price-buy").val(price);
+                    $(".price-sell").val(price);
+                    $(".price-buy").attr('data-lock','false');
+                    $(".price-sell").attr('data-lock','false');
+                }
+                $(".price-buy").trigger("change");
+                $(".price-sell").trigger("change");
+                $(".btn-buy span").text("BUY " + name + " (" + symbol + ")");
+                $(".btn-sell span").text("SELL " + name + " (" + symbol + ")");
+                $(".unit.buy").text(symbol);
+                $(".unit.sell").text(symbol);
+            }
+            function draw_myOrders(orders){
+                let tag = $("#open_order_panel").children('div').children('table').children('tbody');
+                //init table in open order widget
+                tag.html("");
+                //draw tabel header;
+                let thead ;
+
+                $.each(orders, function(index, element){
+                    let type;
+                    let expire = new Date(null);
+                    let text_color;
+                    if(element.type == 1){
+                        type = "Buy";
+                        text_color = "text-success";
+                    }else if(element.type == 0){
+                        type = "Sell";
+                        text_color = "text-danger";
+                    }
+                    expire.setTime(element.expire * 1000);
+
+                    let my_order =
+                        "<tr order_id = '"+ element.id + "'>" +
+                            "<td class='" + text_color + "'>" +
+                                "<span>" + type + "</span>" +
+                            "</td>" +
+                            "<td class=''>" +
+                                "<span>" + element.state + "</span>" +
+                            "</td>" +
+                            "<td class='text-right'>" +
+                                "<span>" + element.amount + "</span>" +
+                            "</td>" +
+                            "<td class='text-right'>" +
+                                "<span>" + element.price + "</span>" +
+                            "</td>" +
+
+                            "<td class='text-right float-right'>" +
+                                "<span class='btn-danger btn-sm cancel-order' data-toggle='confirmation'>" + "Cancel" + "</span>" +
+                            "</td>" +
+                        "</tr>";
+                    thead += my_order;
+                });
+                let ttail = "</table>";
+                thead += ttail;
+                tag.append(thead);
+
+            }
+            function isDecimal(num){
+                return (num ^ 0) !== num;
+            }
+            function convertDecimal(num){
+                return num * 1;
+            }
+            function calculate_fee(total,base_token){
+                if(base_token == "TM"){
+                    return parseFloat((total * tm_fee_percent)/100 + initial_tm_fee);
+
+                }else if(base_token == "USDC"){
+                    return parseFloat((total * usdc_fee_percent)/100 + initial_usdc_fee);
+                }else if(base_token == "WBTC"){
+                    return parseFloat((total * wbtc_fee_percent)/100 + initial_wbtc_fee);
+
+                }else{
+                    return parseFloat((total * fee_percent)/100 + initial_fee);
+                }
+
+            }
+            Number.prototype.getPrecision = function(){
+                var v = this;
+                var str = this.toString();
+                var ep = str.split("e-");
+                if (ep.length > 1){
+                    var np = Number(ep[0]);
+                    return np.getPrecision() + Number(ep[1]);
+                }
+                var dp = str.split(".");
+                if (dp.length > 1){
+                    return dp[1].length;
+                }
+                if(Math.floor(v) === v) return 0;
+
+                return 0;
+            };
+            function decimalPlaces(n){
+                let decimal = (n).getPrecision();
+                return decimal;
+
+            }
+
+            function get_eth_usd_price(that){
+                $.ajax({
+                    url: 'get_eth_usd_price',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: null,
+
+                    success: function(data) {
+                        eth_price = data.price;
+                        weth_price = that.val();
+                        real_usd_price = (eth_price * weth_price).toFixed(2);
+                        that.parent().find(".usd-price").text("$" + real_usd_price);
+                        that.parent().find(".usd-price").css("visibility","visible");
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
+
+            }
+
+            function change_eth_usd_price(that){
+                $.ajax({
+                    url: 'get_eth_usd_price',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: null,
+
+                    success: function(data) {
+                        eth_price = data.price;
+                        weth_price = that.val();
+                        real_usd_price = (eth_price * weth_price).toFixed(2);
+                        that.parent().find(".usd-price").text("$" + real_usd_price);
+                        //$(".usd-price").css("visibility","visible");
+
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
+
+            }
+
+            //get my open orders
+            function get_open_orders(){
+                if(currentWalletAddress != "" && currentWalletAddress != null){
+                    let wallet_addr = currentWalletAddress;
+                    let base_token = $(".token-header").children("li").children("div").attr("base_token");
+                    let symbol = $(".token-info").attr("token_symbol");
+                    let data = {
+                        wallet_addr:wallet_addr,
+                        base_token:base_token,
+                        token_symbol:symbol
+                    }
+                    $.ajax({
+                        url: 'get_my_open_orders',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: data,
+                        success: function(data) {
+                            if(data.status == "ok"){
+                                if(data.orders != ""){
+                                    draw_myOrders(data.orders);
+                                }else{
+                                    $("#open_order_panel").empty();
+                                }
+                            }else{
+                                $("#open_order_panel").empty();
+                            }
+                        },
+                        error: function(error) {
+                            console.log(error);
+                        }
+                    });
+                }
+            }
+
+        });
+
+    });
+
+
+</script>

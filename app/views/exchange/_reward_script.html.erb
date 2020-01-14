@@ -1,0 +1,144 @@
+<script type="text/javascript">
+    jQuery(function($) {
+        $(document).ready(function(){
+            var interval = setInterval(function () {
+                if (is_wallet_loaded) {
+                    clearInterval(interval);
+                    if(currentWalletAddress != "" && currentWalletAddress != null){
+                        $.ajax({
+                            url: '/user_sessions/get_user',
+                            type: 'GET',
+                            dataType: 'json',
+                            data: {
+                                wallet_address: currentWalletAddress
+                            },
+                            success: function (response) {
+                                console.log("Resp:", response);
+                                if(response != null){
+                                    //console.log(response);
+                                    //draw reward table;
+                                    draw_claimed_tables(currentWalletAddress);
+                                }else{
+                                    $(".reward-wallet-not-connected").show();
+                                    $(".reward-wallet-connected").hide();
+                                }
+                            }
+                        });
+        
+                    }else{
+                        $(".reward-wallet-not-connected").show();
+                        $(".reward-wallet-connected").hide();
+                    }
+
+                }
+            }, 100);
+            console.log("Address:", web3Status, " ", currentWalletAddress);
+            
+            $(document).on('click','.reward-request',function(){
+                if($(this).hasClass("disabled") == false){
+                    $(this).addClass("disabled");
+                    $.ajax({
+                        url: '/exchange/request_reward',
+                        // url: 'http://localhost:3001/order/request_reward',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            wallet_addr: currentWalletAddress
+                        },
+                        success: function (data) {
+                            if(data.state == "ok"){
+                                Trade.reward_alert();
+                                draw_claimed_tables(currentWalletAddress);
+                            } else if (data.state == "recommend_fail") {
+                                Trade.recommend_fail_alert();
+                                draw_claimed_tables(currentWalletAddress);
+                            } else {
+                                Trade.reward_fail_alert();
+                            }
+                        }
+                    });
+                }
+
+            });
+        });
+        draw_claimed_tables = function (wallet_address){
+            $.ajax({
+                url: '/exchange/get_reward',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    wallet_address: wallet_address
+                },
+                success: function (response) {
+                    if(response){
+                        draw_reward_request(response.trades, response.volume);
+                        draw_claimed(response.claimed);
+                    }
+                }
+            });
+        }
+        function draw_reward_request(trades, volume) {
+            let tag = $(".reward-pending").children("tbody");
+            tag.html("");
+            let total_transaction = 0;
+            let total_volume = volume;
+            $.each(trades, function(index, element){
+                total_transaction += 1;
+                if (element.total_amount == null || element.total_amount == 0)
+                    return;
+                if (element.taker_total_amount == null || element.taker_total_amount == 0)
+                    return;
+                // volume = (element.price * element.amount).toFixed(5)
+                // tm_point = (parseFloat(volume) * 40).toFixed(2);
+                if (element.maker_address === currentWalletAddress)
+                    tm_point = (element.amount * 100.0 / element.total_amount).toFixed(2);
+                else if (element.taker_address === currentWalletAddress)
+                    tm_point = (element.amount * 100.0 / element.taker_total_amount).toFixed(2);
+
+                let time_format = Trade.get_timeformat(element.updated_at);
+                let element_tr = "<tr>";
+                element_tr += "<td>" + time_format + "</td>";
+                // element_tr += "<td style='text-align:right'>" + volume + "</td>";
+                element_tr += "<td style='text-align:right'>" + element.amount + "</td>";
+                element_tr += "<td style='text-align:right'>" + tm_point + "</td>";
+                element_tr += "</tr>";
+                tag.append(element_tr);
+                total_volume += parseFloat(tm_point);
+            });
+            let pending_text = "( " + total_volume.toFixed(2) +" " + "/" + reward_request_amount + " " + ")";
+            $(".pending-transaction").text(pending_text);
+            if(total_volume > reward_request_amount){
+                $(".reward-request").removeClass("disabled");
+            }
+
+        }
+        function draw_claimed(claimed) {
+            let tag = $(".referral-claimed").children("tbody");
+            tag.html("");
+            total_volume = 0;
+            $.each(claimed, function(index, element){
+                if (element.status == 1) {
+                    let time_format = Trade.get_timeformat(element.created_at);
+                    let element_tr = "<tr>";
+                    element_tr += "<td class='text-left'>" +
+                                    "<a target='_blank' rel='noopener noreferrer' href='" + http_link + "tx/" + element.txHash + "'>" +
+                                        "<i class='fa fa-link' aria-hidden='true'>" +
+                                    "</a>"+
+                                  "</td>";
+                    element_tr += "<td style='text-align:center'>" + time_format + "</td>";
+                    element_tr += "<td style='text-align:right'>" + element.amount + "</td>";
+                    if (element.approved)
+                        element_tr += "<td data-i18n='approved' style='text-align:right'>" + 'Approved' + "</td>";
+                    else
+                        element_tr += "<td data-i18n='denied' style='text-align:right'>" + 'Denied' + "</td>";
+                    element_tr += "</tr>";
+                    tag.append(element_tr);
+                    total_volume += parseFloat(element.amount);
+                }
+            });
+            $(".total-claimed-amount").text(total_volume.toFixed(2));
+        }
+    });
+
+
+</script>

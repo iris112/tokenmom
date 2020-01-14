@@ -1,0 +1,1111 @@
+<script type="text/javascript">
+    jQuery(function($) {
+        $(document).ready(function() {
+            function get_wallet() {
+                return {address: localStorage.getItem('wallet_address'), privkey: localStorage.getItem('wallet_privatekey')}
+            }
+            function load_wallet() {
+                web3_load();
+                //Configure Golbal variables
+                const perPage = 20;
+                var defaultOpts = {
+                    totalPages: $(".hidden-token-contents input").length / perPage
+                };
+                const DECIMALS = 18;
+                const gas_limit = 0.02;
+                //Wrap ETH Event
+                $(document).on('click','.btn-wrap',function(e){
+                    let wrap_amount = parseFloat($(".wrap-amount").val());
+                    if(check_amount("wrap",wrap_amount)){
+                        wrap_eth(wrap_amount);
+                    }
+                    e.preventDefault();
+                });
+                //UnWrap WETH Event
+                $(document).on('click','.btn-unwrap',function(e){
+                    let unwrap_amount = $(".unwrap-amount").val();
+                    if(check_amount("unwrap",unwrap_amount)){
+                        unwrap_weth(unwrap_amount);
+                    }
+                    e.preventDefault();
+                });
+                //Wrap input value change Event
+                $(".wrap-amount").on("change paste keyup",function() {
+                    let wrap_amount = $(this).val();
+                    check_amount("wrap",wrap_amount);
+                });
+                //UnWrap input value change Event
+                $(".unwrap-amount").on("change paste keyup",function() {
+                   let unwrap_amount = $(this).val();
+                   check_amount("unwrap",unwrap_amount);
+                });
+                $(".send-max-amount").click(function() {
+                    // $(".receive-token-amount").val((Number($(".send-max-amount").text()) - 0.0003).toString());
+                    $(".receive-token-amount").val((parseFloat($(".send-max-amount").text()) - 0.0003) + "");
+                    address = $(".receive-wallet-address").val();
+                    if(check_ethereum_address(address)){
+                        $(".send-token-button").removeClass("disabled");
+                    }
+                });
+                $(".btn-confirm-modal-ok").click(function() {
+                    $("#confirm_modal").hide();
+                });
+                $(document).on('click','.send-token-button',function(e) {
+                    //Set BigDecimal Settings
+                    BigNumber.config({ EXPONENTIAL_AT:[-9,30]});
+                    // Recipient Infomations
+                    console.log("click send token");
+                    let recipient_address = $(".receive-wallet-address").val();
+                    let token_amount = Number($(".receive-token-amount").val());
+                    let token_decimal = Number($(".send-token-info").attr("data-decimal"));
+                    let token_address = $(".send-token-info").attr("data-address");
+                    if (token_address == "") {
+                        let send_eth = async () =>{
+                            if (web3Status == 1) {
+                                web3js.eth.sendTransaction({to: recipient_address, value: web3js.toWei(amount, "ether")}, function (err, transactionHash) {
+                                    if(!err){
+                                        txHash = transactionHash;
+                                        $(".receive-wallet-address").val("");
+                                        $(".receive-token-amount").val("");
+                                        $(".send-token-button").addClass("disabled");
+                                        $("#send_token_modal").modal("hide");
+                                        $("#send_token_modal").attr("aria-hidden","true");
+                                        $("#confirm_modal").show();
+                                        $("#confirm_modal").addClass("show");
+                                        $("#confirm_modal").addClass("in");
+                                        $(".transaction-hash").text(txHash);
+                                        $(".transaction-hash").attr("href", "https://etherscan.io/tx/" + txHash);
+                                        $(".transaction-hash").attr("target", "_blank");
+
+                                        console.log(txHash);
+                                    }else{
+                                        $("#send_token_modal").modal("hide");
+                                        $(".receive-wallet-address").val("");
+                                        $(".receive-token-amount").val("");
+                                        $(".send-token-button").addClass("disabled");
+                                    }
+                                });
+                            } else if ( web3Status >= 2) {
+                                let wallet = get_wallet();
+                                console.log("Wallet:", wallet);
+                                txCount = await web3js.eth.getTransactionCount(wallet.address, "pending");
+                                let rawTx = {
+                                    to: recipient_address,
+                                    nonce: txCount,
+                                    gasPrice: web3js.toHex(10000000000),
+                                    gasLimit: web3js.toHex(21000),
+                                    value: web3js.toWei(amount, "ether")
+                                }
+                                let tx = new ethereumjs.Tx(rawTx);
+                                let privkey = wallet.privkey;
+                                if ("0x" === privkey.substring(0, 2))
+                                    privkey = privkey.substring(2);
+                                var PrivKey = ethereumjs.Buffer.Buffer.from(privkey, 'hex');
+                                tx.sign(PrivKey);
+                                web3js.eth.sendRawTransaction('0x' + tx.serialize().toString('hex'), function(err, hash) {
+                                    if (!err) {
+                                        $(".receive-wallet-address").val("");
+                                        $(".receive-token-amount").val("");
+                                        $(".send-token-button").addClass("disabled");
+                                        $("#send_token_modal").modal("hide");
+                                        $("#send_token_modal").attr("aria-hidden","true");
+                                        $("#confirm_modal").show();
+                                        $("#confirm_modal").addClass("show");
+                                        $("#confirm_modal").addClass("in");
+                                        $(".transaction-hash").text(hash);
+                                        $(".transaction-hash").attr("href", "https://etherscan.io/tx/" + hash);
+                                        $(".transaction-hash").attr("target", "_blank");
+                                    } else {
+                                        console.log("Err", err);
+                                        $("#send_token_modal").modal("hide");
+                                        $(".receive-wallet-address").val("");
+                                        $(".receive-token-amount").val("");
+                                        $(".send-token-button").addClass("disabled");
+                                    }
+                                });
+                            }
+                        }
+                        send_eth().catch(console.error);
+                    } else {
+                        let send_token = async () =>{
+                            if (web3Status == 1) {
+                                var amount = zeroEx._web3Wrapper.constructor.toBaseUnitAmount(new BigNumber(token_amount.toString()), token_decimal)
+                                var to = recipient_address;
+                                var contractABI = human_standard_token_abi;
+                                var contractAddress = token_address;
+                                //Get token Contract from Smart contract and ABI;
+                                var tokenContract = web3js.eth.contract(contractABI).at(token_address);
+                                //Get transfer code from token contract;
+                                var code = tokenContract.transfer.getData(recipient_address,amount);
+                                var transaction_data = {
+                                    data:code,
+                                    to:contractAddress,
+                                }
+                                web3js.eth.sendTransaction(transaction_data,function (err, transactionHash) {
+                                    if(!err){
+                                        txHash = transactionHash;
+
+                                        $(".receive-wallet-address").val("");
+                                        $(".receive-token-amount").val("");
+                                        $(".send-token-button").addClass("disabled");
+                                        $("#send_token_modal").modal("hide");
+                                        $("#send_token_modal").attr("aria-hidden","true");
+                                        $("#confirm_modal").show();
+                                        $("#confirm_modal").addClass("show");
+                                        $("#confirm_modal").addClass("in");
+                                        $(".transaction-hash").text(txHash);
+                                        $(".transaction-hash").attr("href", "https://etherscan.io/tx/" + txHash);
+                                        console.log(txHash);
+                                    }else{
+                                        $("#send_token_modal").modal("hide");
+                                        $(".receive-wallet-address").val("");
+                                        $(".receive-token-amount").val("");
+                                        $(".send-token-button").addClass("disabled");
+                                    }
+                                });
+                            } else if (web3Status >= 2) {
+                                let wallet = get_wallet();
+                                console.log("Wallet:", wallet);
+                                txCount = await web3js.eth.getTransactionCount(wallet.address, "pending");
+                                var amount = zeroEx._web3Wrapper.constructor.toBaseUnitAmount(new BigNumber(token_amount.toString()), token_decimal)
+                                var contractABI = human_standard_token_abi;
+                                var contractAddress = token_address;
+                                //Get token Contract from Smart contract and ABI;
+                                var tokenContract = web3js.eth.contract(contractABI).at(token_address);
+                                //Get transfer code from token contract;
+                                var code = tokenContract.transfer.getData(recipient_address,amount);
+                                let rawTx = {
+                                    to: token_address,
+                                    nonce: txCount,
+                                    gasPrice: web3js.toHex(10000000000),
+                                    gasLimit: web3js.toHex(100000),
+                                    value: '0x0',
+                                    data: code
+                                }
+                                let tx = new ethereumjs.Tx(rawTx);
+                                let privkey = wallet.privkey;
+                                if ("0x" === privkey.substring(0, 2))
+                                    privkey = privkey.substring(2);
+                                var PrivKey = ethereumjs.Buffer.Buffer.from(wallet.privkey, 'hex');
+                                tx.sign(PrivKey);
+                                web3js.eth.sendRawTransaction('0x' + tx.serialize().toString('hex'), function(err, hash) {
+                                    if(!err){
+                                        txHash = hash;
+
+                                        $(".receive-wallet-address").val("");
+                                        $(".receive-token-amount").val("");
+                                        $(".send-token-button").addClass("disabled");
+                                        $("#send_token_modal").modal("hide");
+                                        $("#send_token_modal").attr("aria-hidden","true");
+                                        $("#confirm_modal").show();
+                                        $("#confirm_modal").addClass("show");
+                                        $("#confirm_modal").addClass("in");
+                                        $(".transaction-hash").text(txHash);
+                                        $(".transaction-hash").attr("href", "https://etherscan.io/tx/" + txHash);
+                                        console.log(txHash);
+                                    }else{
+                                        $("#send_token_modal").modal("hide");
+                                        $(".receive-wallet-address").val("");
+                                        $(".receive-token-amount").val("");
+                                        $(".send-token-button").addClass("disabled");
+                                    }
+                                });
+                            }
+                        }
+                        send_token().catch(console.error);
+                    }
+                });
+
+                //Receive wallet address check
+                $(".receive-wallet-address").on("change paste keyup", function() {
+                    address = $(this).val();
+                    amount = $(".receive-token-amount").val();
+                    total_balance = $(".send-token-info").attr("data-balance");
+                    if(check_ethereum_address(address)){
+                        $(".ethereum-wallet-state").css("display","none");
+                        account = currentWalletAddress;
+                        web3js.eth.getBalance(account, (error, balance) => {
+                            ETH_balance = web3js.fromWei(balance.toNumber(), "ether" );
+                            if(ETH_balance > initial_fee){
+                                if(Number(amount) < Number(total_balance) && amount != "" && amount != 0){
+                                    $(".token-balance-state").css("display","none");
+                                    $(".send-token-button").removeClass("disabled");
+                                }else{
+                                    $(".send-token-button").addClass("disabled");
+                                }
+                            }else {
+                                $(".send-token-button").addClass("disabled");
+                            }
+                        });
+                    }else {
+                        $(".ethereum-wallet-state").css("display","block");
+                        $(".send-token-button").addClass("disabled");
+                    }
+                });
+
+                $(".receive-token-amount").on("change paste keyup", function() {
+                    amount = $(this).val();
+                    address = $(".receive-wallet-address").val();
+                    token_address = $(".send-token-info").attr("data-address");
+                    account = currentWalletAddress;
+                    web3js.eth.getBalance(account, (error, balance) => {
+                        ETH_balance = web3js.fromWei(balance.toNumber(), "ether" );
+                        if(ETH_balance > initial_fee){
+                            total_balance = $(".send-token-info").attr("data-balance");
+                            if(Number(amount) < Number(total_balance) && amount != "" && amount != 0){
+                                $(".token-balance-state").css("display","none");
+                                if(check_ethereum_address(address)) {
+
+                                    $(".send-token-button").removeClass("disabled");
+                                } else {
+                                    $(".send-token-button").addClass("disabled");
+                                }
+                            }else{
+                                $(".token-balance-state").css("display","block");
+                                $(".send-token-button").addClass("disabled");
+                            }
+                            if (token_address == "" && Number(total_balance) < Number(amount) + 0.0003) {
+                                $(".token-balance-state").css("display","block");
+                                $(".send-token-button").addClass("disabled");
+                            }
+
+                        }else {
+                            $(".token-balance-state").css("display","block");
+                            $(".send-token-button").addClass("disabled");
+                        }
+                    });
+
+                });
+
+                $(document).on('click',".eth-token-transfer",function(e) {
+                    console.log("click eth token transfer");
+                    $(".receive-wallet-address").val("");
+                    $(".receive-token-amount").val("");
+                    let token_address = "";
+                    let token_decimal = $(this).data("decimal");
+
+                    let token_balance = $(".eth-balance span").text();
+                    let token_symbol = "ETH";
+                    $(".send-token-info").attr("data-decimal",token_decimal);
+                    // $(".send-token-info").attr("data-address",token_address);
+                    $(".send-token-info").attr("data-balance",token_balance);
+                    $(".send-token-info").attr("data-symbol",token_symbol);
+                    $(".send-max-amount").text(token_balance);
+                    $(".send-token-symbol").text(token_symbol + ")");
+                });
+
+                $(document).on('click',".weth-token-transfer",function(e) {
+                    console.log("click weth token transfer");
+                    $(".receive-wallet-address").val("");
+                    $(".receive-token-amount").val("");
+                    console.log("wethAddress", wethAddress, weth_decimals)
+                    let token_address = wethAddress;
+                    let token_decimal = weth_decimals;
+                    let token_balance = $(".weth-balance span").text();
+                    let token_symbol = "WETH";
+                    $(".send-token-info").attr("data-decimal",token_decimal);
+                    $(".send-token-info").attr("data-address",token_address);
+                    $(".send-token-info").attr("data-balance",token_balance);
+                    $(".send-token-info").attr("data-symbol",token_symbol);
+                    $(".send-max-amount").text(token_balance);
+                    $(".send-token-symbol").text(token_symbol + ")");
+                });
+
+                $(document).on('click',".token-transfer",function(e) {
+                    console.log("click token transfer");
+                    $(".receive-wallet-address").val("");
+                    $(".receive-token-amount").val("");
+                    let token_address = $(this).parent().prev().prev().prev().children("a").text();
+                    let token_decimal = $(this).data("decimal");
+                    let token_balance = $(this).parent().prev().prev().children(".wb-value").text();
+                    let token_symbol = $(this).parent().prev().prev().prev().prev().prev().children("a").text();
+                    $(".send-token-info").attr("data-decimal",token_decimal);
+                    $(".send-token-info").attr("data-address",token_address);
+                    $(".send-token-info").attr("data-balance",token_balance);
+                    $(".send-token-info").attr("data-symbol",token_symbol);
+                    $(".send-max-amount").text(token_balance);
+                    $(".send-token-symbol").text(token_symbol + ")");
+                });
+
+                $(document).on('click', ".wallet-search-btn", function(e){
+                    var search      = $(".wallet-search-input").val();
+                    var prev_search = $(".wallet-prev-search").val();
+                    if(search != prev_search){
+                        $(".wallet-prev-search").val(search);
+                        _handlePageClick(1);
+                        _initPagination();
+                    }
+                });
+                $(document).on('change keyup', ".wallet-search-input", function(){
+                    var search      = $(".wallet-search-input").val();
+                    var prev_search = $(".wallet-prev-search").val();
+                    if(search != prev_search){
+                        $(".wallet-prev-search").val(search);
+                        _handlePageClick(1);
+                        _initPagination();
+                    }
+                });
+                $(document).on('change', "#wallet_my_tokens", function (e) {
+                    _handlePageClick(1);
+                    _initPagination();
+                });
+                $(document).on('change',".wal-weth-allow",function(e){
+                    let element = $(this);
+                    let parent = $(this).parent().parent();
+
+                    web3js.eth.getBalance(currentWalletAddress,(error,balance)=>{
+                        let eth_balance = parseFloat(web3js.fromWei(balance.toNumber(),"ether"));
+                        let status = $(this).prop("checked");
+                        parent.find("i").css("display","block");
+                        parent.find("label").css("display","none");
+                        if (eth_balance < 0.01) {
+                            $(this).prop("checked", !status);
+                            Trade.allow_token_fail_alert();
+                            parent.find("i").css("display","none");
+                            parent.find("label").css("display","block");
+                            return;
+                        }
+
+                        if(this.checked){
+                            $(this).prop('checked', false);
+                            var set_allowance = async () =>{
+                                try {
+                                    const setAllowTxHash = await zeroEx.erc20Token.setUnlimitedProxyAllowanceAsync(wethAddress, currentWalletAddress, txOpts);
+                                    const reception_message   = await zeroEx._web3Wrapper.awaitTransactionMinedAsync(setAllowTxHash);
+                                    if(reception_message.status === 1){
+                                        element.prop('checked', true);
+                                    }
+                                } catch (e) {
+
+                                } finally {
+                                    parent.find("i").css("display","none");
+                                    parent.find("label").css("display","block");
+                                }
+                            };
+                            set_allowance().catch(console.error);
+                        } else {
+                            $(this).prop('checked', true);
+                            var set_unallowance = async () =>{
+                                try {
+                                    const unallowamount     = new BigNumber(0);
+                                    const setUnallowTxHash  = await zeroEx.erc20Token.setProxyAllowanceAsync(wethAddress, currentWalletAddress, unallowamount, txOpts);
+                                    const reception_message_unallowance = await zeroEx._web3Wrapper.awaitTransactionMinedAsync(setUnallowTxHash);
+                                    if(reception_message_unallowance.status === 1){
+                                        element.prop('checked', false);
+                                        //$(".token-item-" + td_symbol.text()).data("balance", false);
+                                    }
+                                } catch (e) {
+                                } finally {
+                                    parent.find("i").css("display","none");
+                                    parent.find("label").css("display","block");
+                                }
+                            };
+                            set_unallowance().catch(console.error);
+                        }
+                    });
+                });
+                $(document).on('change', ".wallet-token-allow", function(e){
+                    let element     = $(this);
+                    let td_parent   = element.parent().parent().parent();
+                    let td_addr     = td_parent.prev().prev();
+                    let td_symbol   = td_addr.prev().prev();
+                    let token_addr  = td_addr.text();
+                    web3js.eth.getBalance(currentWalletAddress,(error,balance)=>{
+                        let eth_balance = parseFloat(web3js.fromWei(balance.toNumber(),"ether"));
+                        let status = $(this).prop("checked");
+                        td_parent.removeClass("wallet-allowance-loaded").addClass("wallet-allowance-loading");
+                        if (eth_balance < 0.01) {
+                            $(this).prop("checked", !status);
+                            Trade.allow_token_fail_alert();
+                            td_parent.removeClass("wallet-allowance-loading").addClass("wallet-allowance-loaded");
+                            return;
+                        }
+                        if(this.checked){
+                            $(this).prop('checked', false);
+                            var set_allowance = async () =>{
+                                try {
+                                    const setTakerAllowTxHash = await zeroEx.erc20Token.setUnlimitedProxyAllowanceAsync(token_addr, currentWalletAddress, txOpts);
+                                    const reception_message   = await zeroEx._web3Wrapper.awaitTransactionMinedAsync(setTakerAllowTxHash);
+                                    if(reception_message.status === 1){
+                                        element.prop('checked', true);
+                                        $(".token-item-" + td_symbol.text()).data("balance", true);
+                                    }
+                                } catch (e) {
+
+                                } finally {
+                                    td_parent.removeClass("wallet-allowance-loading").addClass("wallet-allowance-loaded");
+                                }
+                            };
+                            set_allowance().catch(console.error);
+                        } else {
+                            $(this).prop('checked', true);
+                            var set_unallowance = async () =>{
+                                try {
+                                    const unallowamount     = new BigNumber(0);
+                                    const setUnallowTxHash  = await zeroEx.erc20Token.setProxyAllowanceAsync(token_addr, currentWalletAddress, unallowamount, txOpts);
+                                    const reception_message_unallowance = await zeroEx._web3Wrapper.awaitTransactionMinedAsync(setUnallowTxHash);
+                                    if(reception_message_unallowance.status === 1){
+                                        element.prop('checked', false);
+                                        $(".token-item-" + td_symbol.text()).data("balance", false);
+                                    }
+                                } catch (e) {
+
+                                } finally {
+                                    td_parent.removeClass("wallet-allowance-loading").addClass("wallet-allowance-loaded");
+                                }
+                            };
+                            set_unallowance().catch(console.error);
+                        }
+                    });
+                });
+                $(document).on('click','.eth-sync',function(e){
+                    $(".eth-balance").find("i").css("display","block");
+                    $(".eth-balance").find("span").css("display","none");
+                    //get eth balance
+                    web3js.eth.getBalance(currentWalletAddress,(error,balance)=>{
+                        let eth_balance = parseFloat(web3js.fromWei(balance.toNumber(),"ether")).toFixed(6);
+                        $(".eth-balance").find("i").css("display","none");
+                        $(".eth-balance").find("span").css("display","block");
+                        $(".eth-balance").find("span").text(eth_balance);
+                    });
+                });
+                $(document).on('click','.weth-sync',function(e){
+                    $(".weth-balance").find("i").css("display","block");
+                    $(".weth-balance").find("span").css("display","none");
+                     //get weth balance
+                    let contract_abi = human_standard_token_abi;
+                    let token_contract_addr = wethAddress;  // WETH Address;
+                    let token_contract = web3js.eth.contract(contract_abi).at(token_contract_addr);
+                    token_contract.balanceOf(currentWalletAddress,(error,balance) =>{
+                        let weth_balance = parseFloat(web3js.fromWei(balance.toNumber(),"ether")).toFixed(6);
+                        $(".weth-balance").find("i").css("display","none");
+                        $(".weth-balance").find("span").css("display","block");
+                        $(".weth-balance").find("span").text(weth_balance);
+                    });
+                });
+                $(document).on('click', '.wb-sync', function (e) {
+                    let td_balance    = $(this).parent();
+                    let td_address    = td_balance.prev();
+                    let td_name       = td_address.prev();
+                    let td_symbol     = td_name.prev();
+                    let td_allowance  = td_balance.next();
+                    let token_addr    = td_address.text();
+                    td_balance.removeClass("wallet-balance-loaded").addClass("wallet-balance-loading");
+                    // get balance
+                    let contractABI   = human_standard_token_abi;
+                    let tokenContract = web3js.eth.contract(contractABI).at(token_addr);
+                    try{
+                        let token_decimal;
+                        tokenContract.decimals((error,decimal)=>{
+                            token_decimal = decimal.toNumber();
+                            tokenContract.balanceOf(address,(error,balance) =>{
+                                token_balance = (balance.toNumber() / Math.pow(10,token_decimal));
+                                td_balance.find(".wb-value").text(token_balance);
+                                $(".token-item-" + td_symbol.text()).data("balance", token_balance);
+                            });
+                        });
+                    } catch (e) {
+                        td_balance.find(".wb-value").text(0);
+                        $(".token-item-" + td_symbol.text()).data("balance", 0);
+                    } finally {
+                        td_balance.removeClass("wallet-balance-loading").addClass("wallet-balance-loaded");
+                    }
+                });
+
+                if(location.href.indexOf("/wallet") != -1) {
+                    get_balance();
+                    _queryAllTokens();
+                    window.wallet_pagination = $('#pagination').twbsPagination({
+                        totalPages: Math.ceil($(".hidden-token-contents input").length / perPage),
+                        visiblePages: 10,
+                        startPage: 1,
+                        first: '<<',
+                        prev: '<',
+                        next: '>',
+                        last: '>>',
+                        onPageClick: function (event, page) {
+                            console.log("Page:", page)
+                            _handlePageClick(page);
+                        }
+                    });
+                }
+
+                $(document).on('click','#wallet_btn', function(e){
+                    if(currentWalletAddress !== undefined){
+                        $(".navbar-collapse").removeClass("in");
+                        var url = window.location.protocol + "//" + window.location.host + "/" + $(this).data("url");
+                        if (e.ctrlKey){
+                            window.open(url, '_blank');
+                        } else {
+                            window.location = url;
+                        }
+                        // $("#overview_widget").children("aside").removeClass("is-active");
+                        // document.getElementById("wallet_widget").children[0].classList.add('is-active');
+                        // get_balance();
+                        // _queryAllTokens();
+                        // window.wallet_pagination = $('#pagination').twbsPagination({
+                        //     totalPages: Math.ceil($(".hidden-token-contents input").length / perPage),
+                        //     visiblePages: 10,
+                        //     startPage: 1,
+                        //     first: '<<',
+                        //     prev: '<',
+                        //     next: '>',
+                        //     last: '>>',
+                        //     onPageClick: function (event, page) {
+                        //         _handlePageClick(page);
+                        //     }
+                        // });
+                    } else {
+                        //alert("You must connect a wallet");
+                        $("#no_wallet").css("display","block");
+                        window.setTimeout(function(){
+                            $("#no_wallet").css("display","none");
+                        },2000);
+                    }
+                });
+                $(document).on('click', ".closebtn", function (e) {
+                    document.getElementById("wallet_widget").children[0].classList.remove('is-active');
+                });
+                $(document).on('click', ".wallet-token-symbol",function(e) {
+                    sort_table_by_symbol();
+                    /* data = {
+                        type:"symbol",
+                        dir:"desc"
+                    };
+                    $.ajax({
+                        url: 'get_sort_token_list',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: data,
+                        success: function(data) {
+                            console.log("----");
+
+                        },
+                        error: function(error) {
+                            console.log(error);
+                        }
+                    });  */
+
+
+                });
+                $(document).on('click', ".wallet-token-name",function(e) {
+                    sort_table_by_name();
+                });
+                $(document).on('click', ".wallet-token-balance",function(e) {
+                    sort_table_by_balance();
+                });
+                function sort_table_by_symbol(){
+                    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+                    table = document.getElementsByClassName("wallet-token-list")[0];
+                    switching = true;
+                    dir = "asc";
+                    while (switching) {
+                        switching = false;
+                        rows = table.rows;
+                        for(i = 0; i< (rows.length - 1); i ++){
+                            shouldSwitch = false;
+                            x = rows[i].getElementsByTagName("TD")[0];
+                            y = rows[i + 1].getElementsByTagName("TD")[0];
+
+                            if(dir == "asc") {
+                                if(x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()){
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            } else if(dir == "desc") {
+                                if(x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()){
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (shouldSwitch) {
+                            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                            switching = true;
+                            switchcount ++;
+                        } else {
+                            if (switchcount == 0 && dir == "asc") {
+                                dir = "desc";
+                                switching = true;
+                            }
+                        }
+                    }
+                }
+                function sort_table_by_balance(){
+                    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+                    table = document.getElementsByClassName("wallet-token-list")[0];
+                    switching = true;
+                    dir = "asc";
+                    while (switching) {
+                        switching = false;
+                        rows = table.rows;
+                        for(i = 0; i< (rows.length - 1); i ++){
+                            shouldSwitch = false;
+                            x = rows[i].getElementsByTagName("TD")[3].children[1].innerHTML;
+                            y = rows[i + 1].getElementsByTagName("TD")[3].children[1].innerHTML;
+
+                            if(dir == "asc") {
+                                if(Number(x) > Number(y)){
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            } else if(dir == "desc") {
+                                if(Number(x) < Number(y)){
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (shouldSwitch) {
+                            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                            switching = true;
+                            switchcount ++;
+                        } else {
+                            if (switchcount == 0 && dir == "asc") {
+                                dir = "desc";
+                                switching = true;
+                            }
+                        }
+                    }
+                }
+                function sort_table_by_name(){
+                    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+                    table = document.getElementsByClassName("wallet-token-list")[0];
+                    switching = true;
+                    dir = "asc";
+                    while (switching) {
+                        switching = false;
+                        rows = table.rows;
+                        for(i = 0; i< (rows.length - 1); i ++){
+                            shouldSwitch = false;
+                            x = rows[i].getElementsByTagName("TD")[1];
+                            y = rows[i + 1].getElementsByTagName("TD")[1];
+
+                            if(dir == "asc") {
+                                if(x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()){
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            } else if(dir == "desc") {
+                                if(x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()){
+                                    shouldSwitch = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (shouldSwitch) {
+                            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                            switching = true;
+                            switchcount ++;
+                        } else {
+                            if (switchcount == 0 && dir == "asc") {
+                                dir = "desc";
+                                switching = true;
+                            }
+                        }
+                    }
+                }
+                function wrap_eth(amount){
+                    let wrap_eth = async () => {
+                        $(".btn-wrap").addClass("disabled");
+                        $(".btn-wrap").append("<i class='fa fa-spinner fa-spin'></i>");
+                        const ethAmount = new BigNumber(amount.toString());
+                        const ethToConvert = zeroEx._web3Wrapper.constructor.toBaseUnitAmount(ethAmount,DECIMALS);
+                        const weth_addr = wethAddress;
+
+                        try{
+                            const convertEthTxHash = await zeroEx.etherToken.depositAsync(weth_addr,ethToConvert,currentWalletAddress,txOpts);
+                            await zeroEx._web3Wrapper.awaitTransactionMinedAsync(convertEthTxHash);
+                        //refresh amount
+                            get_balance();
+                            $(".btn-wrap").find("i").remove();
+
+                            $(".wrap-amount").val("");
+
+
+                        }catch(e){
+                            $(".btn-wrap").find("i").remove();
+
+                            $(".wrap-amount").val("");
+
+                        }
+                    };
+                    wrap_eth().catch(console.error);
+                }
+                function unwrap_weth(amount){
+                    let unwrap_weth = async () => {
+                        $(".btn-unwrap").addClass("disabled");
+                        $(".btn-unwrap").append("<i class='fa fa-spinner fa-spin'></i>");
+                        const ethAmount = new BigNumber(amount.toString());
+                        const ethToConvert = zeroEx._web3Wrapper.constructor.toBaseUnitAmount(ethAmount,DECIMALS);
+                        const weth_addr = wethAddress;
+
+                        try{
+                            const convertEthTxHash = await zeroEx.etherToken.withdrawAsync(weth_addr,ethToConvert,currentWalletAddress,txOpts);
+                            await zeroEx._web3Wrapper.awaitTransactionMinedAsync(convertEthTxHash);
+                            get_balance();
+                            $(".btn-unwrap").find("i").remove();
+
+                            $(".unwrap-amount").val("");
+                        }catch(e){
+                            $(".btn-unwrap").find("i").remove();
+
+                            $(".unwrap-amount").val("");
+                        }
+                    };
+                    unwrap_weth().catch(console.error)
+                }
+                function check_amount(type,amount){
+                    $(".wrap-alert").text("");
+                    $(".unwrap-alert").text("");
+                    if(isNaN(amount) || amount == null || amount == ''){
+                        if(type == "wrap"){
+                            $(".wrap-alert").text("Amount required");
+                            $(".btn-wrap").addClass("disabled");
+                        }else if(type == "unwrap"){
+                            $(".unwrap-alert").text("Amount required");
+                            $(".btn-wrap").addClass("disabled");
+                        }
+                        return false;
+                    }else{
+                        if(type == "wrap"){
+                            let wallet_amount = parseFloat($(".eth-balance").find("span").text());
+                            if(amount == 0){
+                                $(".wrap-alert").text("Amount can not 0");
+                                $(".btn-wrap").addClass("disabled");
+
+                            }
+                            else if(amount > wallet_amount){
+                                $(".wrap-alert").text("Insuffient Amount");
+                                $(".btn-wrap").addClass("disabled");
+                                return false;
+                            }else{
+                                if(parseFloat(amount) + gas_limit > wallet_amount){
+                                    $(".wrap-alert").text("You have to think of gas costs");
+                                    $(".btn-wrap").addClass("disabled");
+                                    return false;
+                                }else{
+                                    $(".btn-wrap").removeClass("disabled");
+                                    return true;
+                                }
+                            }
+
+                        }else if(type == "unwrap"){
+                            let wallet_amount = parseFloat($(".weth-balance").find("span").text());
+                            if(amount == 0){
+                                $(".unwrap-alert").text("Amount can not 0");
+                                $(".btn-unwrap").addClass("disabled");
+                            }
+                            else if(amount > wallet_amount){
+                                $(".unwrap-alert").text("Insuffient Amount");
+                                $(".btn-unwrap").addClass("disabled");
+                                return false;
+                            }else {
+                                $(".btn-unwrap").removeClass("disabled");
+                                return true;
+                            }
+                        }
+                    }
+                }
+                function get_balance(){
+                    //get weth balance
+                    let contract_abi = human_standard_token_abi;
+                    let token_contract_addr = wethAddress;  // WETH Address;
+                    let token_contract = web3js.eth.contract(contract_abi).at(token_contract_addr);
+                    token_contract.balanceOf(currentWalletAddress,(error,balance) =>{
+                        let weth_balance = parseFloat(web3js.fromWei(balance.toNumber(),"ether")).toFixed(6);
+                        $(".weth-balance").find("i").css("display","none");
+                        $(".weth-balance").find("span").css("display","block");
+                        $(".weth-balance").find("span").text(weth_balance);
+                        if($(".wallet-balance-WETH") != undefined && $(".wallet-balance-WETH" != null)){
+                            $(".wallet-balance-WETH .wb-value").text(weth_balance);
+                        }
+                    });
+                    //get eth balance
+                    web3js.eth.getBalance(currentWalletAddress,(error,balance)=>{
+                        let eth_balance = parseFloat(web3js.fromWei(balance.toNumber(),"ether")).toFixed(6);
+                        $(".eth-balance").find("i").css("display","none");
+                        $(".eth-balance").find("span").css("display","block");
+                        $(".eth-balance").find("span").text(eth_balance);
+                    });
+                    //get weth allowance
+                    //get token allowance;
+                    let get_allowance = async () => {
+                        try {
+                            let weth_allowed = false;
+                            //get weth allowance;
+                            let weth_status = await zeroEx.erc20Token.getProxyAllowanceAsync(wethAddress, currentWalletAddress);
+                            if(weth_status.toNumber() === 0){
+                                weth_allowed = false;
+                            }else{
+                                weth_allowed = true;
+                            }
+                            if(weth_allowed == true){
+                                $('.wallet-weth-allow').find('label').find('input').prop('checked',true);
+                                $('.wallet-weth-allow').find('i').css('display','none');
+                                $('.wallet-weth-allow').find('label').css('display','block');
+                            }else{
+                                $('.wallet-weth-allow').find('label').find('input').prop('checked',false);
+                                $('.wallet-weth-allow').find('i').css('display','none');
+                                $('.wallet-weth-allow').find('label').css('display','block');
+                            }
+
+                        }catch(e){
+                     }finally{
+                     }
+                    };
+                    get_allowance().catch(console.error);
+                }
+                function web3_load(){
+                    var contract_abi = human_standard_token_abi;
+                    var provider;
+                }
+                function delay(ms) {
+                    var cur_d = new Date();
+                    var cur_ticks = cur_d.getTime();
+                    var ms_passed = 0;
+                    while(ms_passed < ms) {
+                        var d = new Date();  // Possible memory leak?
+                        var ticks = d.getTime();
+                        ms_passed = ticks - cur_ticks;
+                        // d = null;  // Prevent memory leak?
+                    }
+                }
+                var curIndex = 0;
+                var myInterval;
+                
+                function queryTokens() {
+                    const MAX_COUNT = 500;
+                    
+                    if (curIndex >= $(".hidden-token-contents input").length) {
+                        clearInterval(myInterval);
+                    }
+                    let len = $(".hidden-token-contents input").length > curIndex + MAX_COUNT ? curIndex + MAX_COUNT : $(".hidden-token-contents input").length;
+                    for (var index = curIndex; index < len; index ++) {
+                        let curItem = $(".hidden-token-contents input")[index];
+                        
+                        let element     = $(curItem);
+                        let symbol      = $(curItem).data("symbol");
+                        let name        = $(curItem).data("name");
+                        let token_addr  = $(curItem).data("address");
+                        let token_decimal = $(curItem).data("decimal");
+                        $(curItem).data("balance", undefined);
+                        $(curItem).data("allowance", false);
+                        // get balance
+                        let contractABI   = human_standard_token_abi;
+                        let tokenContract = web3js.eth.contract(contractABI).at(token_addr);
+                        let get_balance = async () => {
+                            try {
+                                token_contract_addr = token_addr    //Token Address
+                                var contractAddress = token_contract_addr; // Token Address
+                                let address = currentWalletAddress;
+                                // let token_decimal;
+                                // tokenContract.decimals((error,decimal)=>{
+                                    // token_decimal = decimal.toNumber();
+                                    tokenContract.balanceOf(address,(error,balance) =>{
+                                        token_balance = (balance.toNumber() / Math.pow(10,token_decimal));
+                                        if(token_decimal > 8){
+                                            token_balance = token_balance.toFixed(8);
+                                        }else{
+                                            token_balance = token_balance.toFixed(token_decimal);
+                                        }
+                                        element.data("balance", parseFloat(token_balance));
+                                        if($(".wallet-balance-" + symbol) !== undefined){
+                                            let tb_element = $(".wallet-balance-" + symbol);
+                                            tb_element.find(".wb-value").text(parseFloat(token_balance));
+                                            tb_element.removeClass("wallet-balance-loading").addClass("wallet-balance-loaded");
+                                        }
+                                    });
+                                // });
+                            } catch (e) {
+                                element.data("balance", 0);
+                                if($(".wallet-balance-" + symbol) !== undefined){
+                                    let tb_element = $(".wallet-balance-" + symbol);
+                                    tb_element.find(".wb-value").text(0);
+                                    tb_element.removeClass("wallet-balance-loading").addClass("wallet-balance-loaded");
+                                }
+                            }
+                        };
+                        get_balance().catch(console.error);
+                        // get allowance status
+                        let get_allowance = async () => {
+                            try {
+                                let allow_status = await zeroEx.erc20Token.getProxyAllowanceAsync(token_addr, currentWalletAddress);
+                                let is_allowed = false;
+                                if (allow_status.toNumber() === 0) {
+                                    element.data("allowance", false);
+                                    is_allowed = false;
+                                } else {
+                                    element.data("allowance", true);
+                                    is_allowed = true;
+                                }
+                                if($(".wallet-allowance-" + symbol) !== undefined){
+                                    let ta_element = $(".wallet-allowance-" + symbol);
+                                    if(is_allowed){
+                                        ta_element.find(".wallet-token-allow").prop('checked', true);
+                                    } else {
+                                        ta_element.find(".wallet-token-allow").prop('checked', false);
+                                    }
+                                }
+                            } catch (e) {
+                                if($(".wallet-allowance-" + symbol) !== undefined){
+                                    $(".wallet-allowance-" + symbol).find(".wallet-token-allow").prop('disabled', true);
+                                }
+                            } finally {
+                                if($(".wallet-allowance-" + symbol) !== undefined){
+                                    $(".wallet-allowance-" + symbol).removeClass("wallet-allowance-loading").addClass("wallet-allowance-loaded");
+                                }
+                            }
+                        };
+                        get_allowance().catch(console.error);
+                    }
+                    curIndex = len;
+                }
+                function _queryAllTokens(){
+                    if(currentWalletAddress !== undefined && currentWalletAddress != null && currentWalletAddress !== 0){
+                        console.log($(".hidden-token-contents input").length)
+                        queryTokens();
+                        myInterval = setInterval(queryTokens, 0);
+                    }
+                }
+                function _handlePageClick(page){
+                    $(".wallet-token-list").empty();
+                    var search      = $(".wallet-search-input").val();
+                    var count_index = 0;
+                    var from_index  = perPage * (page - 1) + 1;
+                    var to_index    = perPage * page;
+                    let lower_limit = Number.NEGATIVE_INFINITY;
+                    if($("#wallet_my_tokens").is(':checked')){
+                        lower_limit = 0;
+                    }
+                    $(".hidden-token-contents input").each(function(index){
+                        let symbol    = $(this).data("symbol");
+                        let name      = $(this).data("name");
+                        let address   = $(this).data("address");
+                        let balance   = $(this).data("balance");
+                        let allowance = $(this).data("allowance");
+                        let decimal = $(this).data("decimal");
+                        if(search === "" || symbol.toLowerCase().indexOf(search.toLowerCase()) != -1 || name.toLowerCase().indexOf(search.toLowerCase()) != -1){
+                            if(balance === undefined){
+                                if(lower_limit === 0){
+                                } else {
+                                    count_index++;
+                                    if(count_index >= from_index && count_index <= to_index){
+                                        let html = '<tr>';
+                                        html += '<td><a data-turbolinks="false" href="/exchange/'+symbol + '-WETH'+'">' + symbol + '</a></td>';
+                                        html += '<td><a data-turbolinks="false" href="/exchange/'+symbol + '-WETH'+'">' + name + '</a></td>';
+                                        html += '<td>' + '<a href="'+http_link+'token/' + address + '" rel="noopener noreferrer" target="_blank">' + address + '</a>' + '</td>';
+                                        html += '<td class="wallet-balance-' + symbol + ' wallet-balance-loading">';
+                                        html +=   '<div class="wb-loader fa fa-spinner fa-spin"></div>';
+                                        html +=   '<div class="wb-value">0</div>';
+                                        html +=   '<i class="fa fa-sync wb-sync"></i>';
+                                        html += '</td>';
+                                        if(allowance === undefined){
+                                            html += '<td class="wallet-allowance-' + symbol + ' wallet-allowance-loading">';
+                                        } else {
+                                            html += '<td class="wallet-allowance-' + symbol + ' wallet-allowance-loaded">';
+                                        }
+                                        html +=   '<div class="wb-loader fa fa-spinner fa-spin"></div>';
+                                        html +=   '<div class="wallow-toggle">';
+                                        html +=     '<label class="switch">';
+                                        html +=       '<input type="checkbox" class="wallet-token-allow"';
+                                        if(allowance){
+                                            html += ' checked ';
+                                        }
+                                        html +=       '>';
+                                        html +=       '<span class="slider round"></span>';
+                                        html +=     '</label>';
+                                        html +=   '</div>';
+                                        html += '<td><button class="token-transfer btn btn-success" data-i18n="send" data-toggle="modal" data-target="#send_token_modal" data-decimal = "'+decimal+'">Send</button></td>';
+
+                                        html += '</td>';
+                                        html += '</tr>';
+                                        $(".wallet-token-list").append(html);
+                                    }
+                                }
+                            } else {
+                                if(balance > lower_limit){
+                                    count_index++;
+                                    if(count_index >= from_index && count_index <= to_index){
+                                        let html = '<tr>';
+                                        html += '<td><a data-turbolinks="false" href="/exchange/'+symbol + '-WETH'+'">' + symbol + '</a></td>';
+                                        html += '<td><a data-turbolinks="false" href="/exchange/'+symbol + '-WETH'+'">' + name + '</a></td>';
+                                        html += '<td>' + '<a href="' + http_link + 'token/' + address + '" rel="noopener noreferrer" target="_blank">' + address + '</a>' + '</td>';
+                                        html += '<td class="wallet-balance-' + symbol + ' wallet-balance-loaded">';
+                                        html +=   '<div class="wb-loader fa fa-spinner fa-spin"></div>';
+                                        html +=   '<div class="wb-value">' + balance + '</div>';
+                                        html +=   '<i class="fa fa-sync wb-sync"></i>';
+                                        html += '</td>';
+                                        if(allowance === undefined){
+                                            html += '<td class="wallet-allowance-' + symbol + ' wallet-allowance-loading">';
+                                        } else {
+                                            html += '<td class="wallet-allowance-' + symbol + ' wallet-allowance-loaded">';
+                                        }
+                                        html +=   '<div class="wb-loader fa fa-spinner fa-spin"></div>';
+                                        html +=   '<div class="wallow-toggle">';
+                                        html +=     '<label class="switch">';
+                                        html +=       '<input type="checkbox" class="wallet-token-allow"';
+                                        if(allowance){
+                                            html += ' checked ';
+                                        }
+                                        html +=       '>';
+                                        html +=       '<span class="slider round"></span>';
+                                        html +=     '</label>';
+                                        html +=   '</div>';
+                                        html += '</td>';
+                                        html += '<td><button class="token-transfer btn btn-success" data-i18n="send" data-toggle="modal" data-target="#send_token_modal" data-decimal = "'+decimal+'">Send</button></td>';
+                                        html += '</tr>';
+                                        $(".wallet-token-list").append(html);
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                function _initPagination(){
+                    let search      = $(".wallet-search-input").val();
+                    let count_index = 0;
+                    $(".hidden-token-contents input").each(function(index){
+                        let symbol  = $(this).data("symbol");
+                        let name    = $(this).data("name");
+                        if(search === "" || symbol.toLowerCase().indexOf(search.toLowerCase()) !== -1 || name.toLowerCase().indexOf(search.toLowerCase()) !== -1){
+                            count_index++;
+                        }
+                    });
+                    window.wallet_pagination.twbsPagination('destroy');
+                    window.wallet_pagination = $('#pagination').twbsPagination($.extend({}, defaultOpts, {
+                        startPage: 1,
+                        totalPages: Math.ceil(count_index / perPage),
+                        visiblePages: 10,
+                        first: '<<',
+                        prev: '<',
+                        next: '>',
+                        last: '>>',
+                        onPageClick: function (event, page) {
+                            _handlePageClick(page);
+                        }
+                    }));
+                }
+                function send_token(address,decimal,amount) {
+
+                }
+                function check_ethereum_address(address) {
+                    if(web3js.isAddress(address)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+                function check_amount_available(amount) {
+
+                }
+            }
+            var intervalId = setInterval(function () {
+                if (zeroEx != null) {
+                    load_wallet()
+                    clearInterval(intervalId)
+                }
+            }, 500);
+        });
+    });
+</script>

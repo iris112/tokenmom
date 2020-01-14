@@ -1,0 +1,67 @@
+%aside.overview
+    .overview-header
+        %span{'data-i18n' => 'account'} Account
+        %button.btn.btn-danger.btn-close-overview
+            %i.fa.fa-power-off
+    .overview-content.row.flex-container
+        .col-md-6.flex.flex-1
+            .box.flex.flex-1.flex-column
+                .box-header
+                    %span{'data-i18n' => 'all_open_orders'} ALL OPEN ORDERS
+                    %span.total-orders.d-none 
+                        %span{'data-i18n' => 'total:'}
+                        %span 
+                        %span.text-success 
+                        %span
+                        %span.text-danger                        
+                    %span.float-right.cancel-all-btn.btn-danger.d-none{'data-i18n' => 'cancel_all'}
+                .flex-1
+                    .flex.flex-column.orders
+                        .flex.flex-1.relative
+                            %table.table.my-orders
+                                %thead
+                                    %tr
+                                        %th
+                                            %span{'data-i18n' => 'time'} Time
+                                        %th
+                                            %span{'data-i18n' => 'token'} Token
+                                        %th
+                                            %span{'data-i18n' => 'side'} Side
+                                        %th.text-right
+                                            %span{'data-i18n' => 'price'} Price
+                                        %th.text-right
+                                            %span{'data-i18n' => 'amount'} Amount
+                                        %th.text-right
+                                            %span{'data-i18n' => 'action'} Action
+                                %tbody
+
+
+
+        .col-md-6.flex.flex-1.flex-column
+            .box.flex.flex-1.flex-column
+                .box-header
+                    %span{'data-i18n' => 'all_trades'} ALL TRADES
+                    %span.total-trades.d-none
+                        %span{'data-i18n' => 'total:'} 
+                        %span 
+                        %span.text-success 
+                        %span
+                        %span.text-danger
+                .flex-1{:style => "overflow-y:auto"}
+                    .flex.flex-column.trades
+                        %table.table.my-trades
+                            %thead
+                                %tr
+                                    %th
+                                        %i.fa.fa-link{"aria-hidden" => "true"}
+                                    %th
+                                        %span{'data-i18n' => 'time'} Time
+                                    %th
+                                        %span{'data-i18n' => 'token'} Token
+                                    %th
+                                        %span{'data-i18n' => 'side'} Side
+                                    %th.text-right
+                                        %span{'data-i18n' => 'price'} Price
+                                    %th.text-right
+                                        %span{'data-i18n' => 'amount'} Amount                                    
+                            %tbody

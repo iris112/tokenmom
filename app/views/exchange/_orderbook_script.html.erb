@@ -1,0 +1,54 @@
+<script type="text/javascript">
+    jQuery(function($) {
+        $(document).ready(function() {            
+            //Change token list
+            
+            //Change token in market-widget
+            $(document).on('click','.market-status-row',function(){
+                let token_symbol = $(this).find(":nth-child(1)").find("div").attr("symbol");
+                //let token_price = $(this).find(":nth-child(2)").find("strong").attr("value");
+                Trade.get_orders(token_symbol);
+            });            
+            $(document).on('click', '.hover-row', function(){
+                let price = $(this).find(":nth-child(3)").find("strong").text();
+                let amount = $(this).find(":nth-child(5)").find("strong").text();
+                let parent = $(this).parent().attr("class");
+                amount = Trade.removeTrailingZeros(amount);
+                price = Trade.removeTrailingZeros(price);              
+                //Fill price and amount in trade widget
+                if(parent == "orderbook-asks"){
+                    $(".amount-buy").val((amount));
+                    $(".price-buy").val((price));
+                    $(".amount-buy").trigger("change");
+                    $(".price-buy").attr('data-lock','false');
+                    $(".price-buy").trigger("change");
+                }else if(parent == "orderbook-bids"){
+                    $(".amount-sell").val((amount));                
+                    $(".price-sell").val((price));              
+                    $(".amount-sell").trigger("change");  
+                    $(".price-sell").attr('data-lock','false');  
+                    $(".price-sell").trigger("change");                       
+                }    
+               
+                   
+            });
+            function removeTrailingZeros(value) {
+                value = value.toString();
+                //if not containing a dot, we do not need to do anything
+                if (value.indexOf('.') === -1) {
+                    return value;
+                }
+                //as long as the last character is a 0 or a dot, remove it
+                while((value.slice(-1) === '0' || value.slice(-1) === '.') && value.indexOf('.') !== -1) {
+                    value = value.substr(0, value.length - 1);
+                }
+                return value;
+            }
+            
+            
+         
+        });
+
+    });
+
+</script>

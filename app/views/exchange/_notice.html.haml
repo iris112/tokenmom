@@ -1,0 +1,8 @@
+.wrong-network-warning{:style => "display:none"}
+    %span{"data-i18n" => "wrong_network"} Warning you are on the wrong network.Please open MetaMask and switch over to the Mainnet Ethereum Network.
+
+- @notifications.each do |notification|
+    - if notification.visible
+        .server-notice
+            #{notification.message}
+

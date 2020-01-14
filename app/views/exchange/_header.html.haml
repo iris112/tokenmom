@@ -1,0 +1,351 @@
+%nav.tokenmom-header.navbar.navbar-dark.navbar-expand.is-nightmode
+  #plugins-anchor
+  .container-fluid
+    .navbar-header{:base_token => "ETH"}
+      %button.navbar-toggler{"aria-controls" => "navbarSupportedContent", "aria-expanded" => "false", "aria-label" => "Toggle navigation", "data-target" => "#bs-example-navbar-collapse-1", "data-toggle" => "collapse", :type => "button"}
+        %span.navbar-toggler-icon
+      %a.navbar-brand{:href => "/",:refer_id => @refer_id}
+        = image_tag("tmom_logo.png", id: "logo")
+      %ul#nav-tokens{:style => "display:none"}
+        %div
+          %li#pairs-dropdown.dropdown
+            %a.selected.dropdown-toggle.token-link{"aria-expanded" => "false", "aria-haspopup" => "true", "data-toggle" => "dropdown", :href => "javascript:void(0)", :role => "button"}
+
+    #bs-example-navbar-collapse-1.collapse.navbar-collapse
+      %ul.token-header.nav.navbar-nav.mr-auto
+        %li
+          .token-info{:base_token => @base_token,:token_symbol => @zrxtoken.symbol,:decimals => @zrxtoken.token_decimals}
+            %span
+              #{@zrxtoken.name} (#{@zrxtoken.symbol})
+            .contract-address
+              %span{"data-i18n" => "contract_address"} Contract Address:
+              %a{:href => "'https://etherscan.io/token/" + @zrxtoken.contract_address + "'", :rel => "noopener noreferrer", :target => "_blank",:value => @zrxtoken.contract_address} #{@changed_contract}
+        %li
+          .trade-info
+            .trade-info-number.last-price
+              %strong
+                %strong
+                  - if @zrxtoken.last_price(@base_token) == "--"
+                    %span 0.000000 #{@base_token}
+                  - else
+                    - if @zrxtoken.last_price(@base_token)
+                      %span #{@zrxtoken.last_price(@base_token)} #{@base_token}
+            .trade-info-label
+              %span{"data-i18n" => "last_price"}
+        %li
+          .trade-info
+            .trade-info-number
+              %strong
+                - if @zrxtoken.h_price(@base_token) == "--"
+                  %strong
+                    %span --
+                - else
+                  - if @zrxtoken.h_price(@base_token)  > 0
+                    %strong.text-success
+                      %i.fa.fa-caret-up{"aria-hidden" => "true"}
+                      %span #{@zrxtoken.h_price(@base_token)}%
+                  - else
+                    %strong.text-danger
+                      %i.fa.fa-caret-down{"aria-hidden" => "true"}
+                      %span #{@zrxtoken.h_price(@base_token)}%
+            .trade-info-label
+              %span{"data-i18n" => "24h_price"} 24H Price
+        %li
+          .trade-info
+            .trade-info-number
+              %strong #{@zrxtoken.h_volume(@base_token).round(2)} #{@base_token}
+            .trade-info-label
+              %span{"data-i18n" => "24h_volume"} 24H Volume
+      .btn-group
+        %button.btn.btn-sm.btn-info.btn-trade-by-addr
+          %span{"data-i18n" => "trade_by_addr"} Trade by Address
+          %i.fas.fa-file-alt
+        %button.navbar-toggle.collapsed{:type => "button", "aria-expanded" => "false", :data => {:toggle => "collapse", :target => "#bs-example-navbar-collapse-1"}}
+          %span.sr-only Toggle navigation
+          %span.icon-bar
+          %span.icon-bar
+          %span.icon-bar
+
+      %ul.nav.navbar-nav.navbar-right
+        %li.nightmode-item
+          %span.theme_desc{"data-i18n" => "days_night_mode"} Day / Night
+          %i#theme_mode.far.fa-sun
+        %li.dropdown.nav-item.nav-link-info
+          %a.dropdown-toggle.nav-link{"aria-expanded" => "false", "aria-haspopup" => "true",  :href => "javascript:void(0)", :role => "button"}
+            %img.country-icon{:alt => "", :src => "/assets/en.fba4238a.svg"}/
+            %span English
+            %span.caret
+          %ul.dropdown-menu.language
+            %li.lang-switch{:value => "1","data-locale" => "en"}
+              %a{:href => "javascript:void(0)"}
+                %img.country-icon{:alt => "", :src => "/assets/en.fba4238a.svg"}>/
+                English
+            %li.lang-switch{:value => "2","data-locale" => "ko"}
+              %a{:href => "javascript:void(0)"}
+                %img.country-icon{:alt => "", :src => "/assets/ko.4d71266b.svg"}>/
+                한국어
+            %li.lang-switch{:value => "3","data-locale" => "zh"}
+              %a{:href => "javascript:void(0)"}
+                %img.country-icon{:alt => "", :src => "/assets/zh.fee5842f.svg"}>/
+                简体中文
+            %li.lang-switch{:value => "4","data-locale" => "ja"}
+              %a{:href => "javascript:void(0)"}
+                %img.country-icon{:alt => "", :src => "/assets/ja.e0b7a3ef.svg"}>/
+                日本語
+            %li.lang-switch{:value => "6","data-locale" => "es"}
+              %a{:href => "javascript:void(0)"}
+                %img.country-icon{:alt => "", :src => "/assets/es.df343f44.svg"}>/
+                Español
+            %li.lang-switch{:value => "7","data-locale" => "ru"}
+              %a{:href => "javascript:void(0)"}
+                %img.country-icon{:alt => "", :src => "/assets/ru.ru563p41.svg"}>/
+                русский
+            %li.lang-switch{:value => "8","data-locale" => "de"}
+              %a{:href => "javascript:void(0)"}
+                %img.country-icon{:alt => "", :src => "/assets/de.5d71266b.svg"}>/
+                Deutsch
+            %li.lang-switch{:value => "9","data-locale" => "fr"}
+              %a{:href => "javascript:void(0)"}
+                %img.country-icon{:alt => "", :src => "/assets/fr.faa5842f.svg"}>/
+                français
+            %li.lang-switch{:value => "10","data-locale" => "it"}
+              %a{:href => "javascript:void(0)"}
+                %img.country-icon{:alt => "", :src => "/assets/it.e0b7a3it.svg"}>/
+                italiano
+            %li.lang-switch{:value => "11","data-locale" => "ar"}
+              %a{:href => "javascript:void(0)"}
+                %img.country-icon{:alt => "", :src => "/assets/ar.da343r44.svg"}>/
+                العربية
+            %li.lang-switch{:value => "12","data-locale" => "hi"}
+              %a{:href => "javascript:void(0)"}
+                %img.country-icon{:alt => "", :src => "/assets/hi.iu563h41.svg"}>/
+                हिन्दी
+            %li.lang-switch{:value => "13","data-locale" => "vi"}
+              %a{:href => "javascript:void(0)"}
+                %img.country-icon{:alt => "", :src => "/assets/vi.5e71211b.svg"}>/
+                tiếng Việt
+            %li.lang-switch{:value => "14","data-locale" => "tr"}
+              %a{:href => "javascript:void(0)"}
+                %img.country-icon{:alt => "", :src => "/assets/tr.4e31t64b.svg"}>/
+                Türk
+            %li.lang-switch{:value => "15","data-locale" => "th"}
+              %a{:href => "javascript:void(0)"}
+                %img.country-icon{:alt => "", :src => "/assets/th.3l75t62z.svg"}>/
+                ไทย
+            %li.lang-switch{:value => "16","data-locale" => "pl"}
+              %a{:href => "javascript:void(0)"}
+                %img.country-icon{:alt => "", :src => "/assets/pl.9h36y78d.svg"}>/
+                Polski
+            %li.lang-switch{:value => "17","data-locale" => "nl"}
+              %a{:href => "javascript:void(0)"}
+                %img.country-icon{:alt => "", :src => "/assets/nl.5u79dep4.svg"}>/
+                Nederlands
+            %li.lang-switch{:value => "18","data-locale" => "pt"}
+              %a{:href => "javascript:void(0)"}
+                %img.country-icon{:alt => "", :src => "/assets/pt.4is16jb9.svg"}>/
+                Português
+            %li.lang-switch{:value => "19","data-locale" => "ms"}
+              %a{:href => "javascript:void(0)"}
+                %img.country-icon{:alt => "", :src => "/assets/ms.j45t4dsa.svg"}>/
+                Malay
+            %li.lang-switch{:value => "20","data-locale" => "fa"}
+              %a{:href => "javascript:void(0)"}
+                %img.country-icon{:alt => "", :src => "/assets/fa.d645hf3s.svg"}>/
+                فارسی
+            %li.lang-switch{:value => "21","data-locale" => "uk"}
+              %a{:href => "javascript:void(0)"}
+                %img.country-icon{:alt => "", :src => "/assets/uk.dh57sf19.svg"}>/
+                Українська
+        %li#exchange.nav-link-info
+          %a.nav-link{:href => "/exchange/" + params[:trade_pair], "data-turbolinks" => "false"}
+            %strong
+              %span{"data-i18n" => "trade"} Trade
+        %li.nav-link-info.wallet{controller.action_name == "wallet" ? {:style => "display: none"} : {}}
+          %a.nav-link#wallet_btn{:href => "javascript:void(0)", "data-url" => "exchange/" + params[:trade_pair] + "/wallet"}
+            %strong
+              %span{"data-i18n" => "wallet"} Wallet
+            %span#no_wallet.popuptext{"data-i18n" => "connect_your_wallet"} You have to connect your wallet.
+
+        %li.nav-link-info.orders{controller.action_name == "overview" ? {:style => "display: none"} : {}}
+          %a.nav-link#overview_btn{:href => "javascript:void(0)", "data-url" => "exchange/" + params[:trade_pair] + "/orders"}
+            %strong
+              %span{"data-i18n" => "orders"} Orders
+        %li.nav-link-info
+          %a.nav-link{:href => "/reward", "data-turbolinks" => "false"}
+            %strong
+              %span{"data-i18n" => "reward"} Reward
+        %li.nav-link-info
+          %a.nav-link{:href => "/referral", "data-turbolinks" => "false"}
+            %strong
+              %span{"data-i18n" => "referral"} Referral
+        %li.nav-link-info
+          %a.nav-link#api_btn.btn-link.has-popover{:href => "https://docs.tokenmom.com",:rel => "noopener noreferrer", :target => "_blank"}
+            %strong
+              %span{"data-i18n" => "api"} API
+        %li.nav-link-info
+          %a.nav-link#help_btn.btn-link.has-popover{:href => "https://tokenmom.freshdesk.com",:rel => "noopener noreferrer", :target => "_blank"}
+            %strong
+              %span{"data-i18n" => "help"} Help
+        %li.header-accounts
+          %a.nav-link{:href => "/account", "data-turbolinks" => "false"}
+            %span#detect_account
+              .text-wrapper
+                #connected_wallet{"data-i18n" => "please_login"} Please Login
+                #connected_info{"data-i18n" => "with_your_wallet"} to your wallet
+              #connection_status.connection-status.not-connected
+                = image_tag("lock.svg")
+
+.popup
+  #detect_popup.detect-popup
+    %div{ :style => "padding: 1.5625rem;" }
+      #sign_in{ :style => "display: block;" }
+        %span{"data-i18n" => "connect_wallet"} Connect a Wallet
+        %div{:style => "position:relative;"}
+          %input{"data-i18n" => "[placeholder]nick_name",:placeholder => "Set your nickname", :type => "text",:id =>'nick_name'}
+          %span.text-danger{:style => "position:absolute; left:0; right:0; bottom:-20px; text-align:left;"}
+        .btn-success.flex-button
+          .icon-wrapper
+            = image_tag("metamask.svg")
+          %span.flex-button-text#metamask_login{"data-i18n" => "metamask"} METAMASK
+        .btn-success.flex-button
+          .icon-wrapper
+            = image_tag("ledger.svg")
+          %span.flex-button-text#ledger_login{"data-i18n" => "ledger"} LEDGER
+        .btn-success.flex-button
+          .icon-wrapper
+            = image_tag("create-wallet.png")
+          %span.flex-button-text#create_tokenmom_wallet{"data-i18n" => "create_a_tokenmom_wallet"} Create a Tokenmom Wallet
+        .btn-success.flex-button
+          .icon-wrapper
+            = image_tag("import-wallet.png")
+          %span.flex-button-text#import_tokenmom_wallet{"data-i18n" => "import_an_existing_wallet"} Import an Existing Wallet
+      #metamask_logined{ :style => "display: none;" }
+        %div
+          %span.icon-white
+            = image_tag("metamask.svg")
+        %div{ :style => "margin-top: 0.625rem;" }
+          %span{"data-i18n" => "metamask_connected"} Metamask Connected
+        %div
+          .green-circle
+          %span{"data-i18n" => "ethereum_main"} Ethereum Main
+        %a#wallet_address{ :style => "margin-top: 0.9375rem;",:rel => "noopener noreferrer",:target => "_blank" }
+        %div
+          %span{} Nickname :
+          %span#metamask_nick_name
+        .flex-button-text#metamask_disconnect{ :style => "margin-top: 0.9375rem;","data-i18n" => "disconnect" } DISCONNECT
+      #metamask_install{ :style => "display: none;" }
+        %div{ :style => "margin-top: 0.625rem;" }
+          %span No Metamask Installed
+        .btn-success.flex-button
+          .icon-wrapper
+            = image_tag("metamask.svg")
+          %span.flex-button-text#metamask_install_button INSTALL METAMASK
+        .flex-button-text#cancel_metamask_install{ :style => "margin-top: 0.9375rem;" } CANCEL
+      #metamask_logoutted{ :style => "display: none;" }
+        %div{ :style => "margin-top: 0.625rem;" }
+          %span{"data-i18n" => "login_metamask"} Login to MetaMask
+        .flex-button-text#cancel_metamask_login{ :style => "margin-top: 0.9375rem;","data-i18n" => "cancel"} CANCEL
+      #tokenmom_logined{ :style => "display: none;" }
+        %div
+          %span.icon-white
+            = image_tag("create-wallet.png")
+        %div{ :style => "margin-top: 0.625rem;" }
+          %span{"data-i18n" => "tokenmom_connected"} Tokenmom Wallet Connected
+        %div
+          .green-circle
+          %span{"data-i18n" => "ethereum_main"} Ethereum Main
+        %a#tokenmom_wallet_address{ :style => "margin-top: 0.9375rem;",:rel => "noopener noreferrer",:target => "_blank" }
+        %div
+          %span{} Nickname :
+          %span#tokenmom_nick_name
+        .flex-button-text#tokenmom_disconnect{ :style => "margin-top: 0.9375rem;","data-i18n" => "disconnect" } DISCONNECT
+    .grey-back
+      %div{"data-i18n" => "need_help"} NEED HELP?
+      %div{"data-i18n" => "why_do_i_need_a_wallet"} Why do I need a wallet?
+      %div{"data-i18n" => "tokenmom"} TOKENMOM
+
+#tradebyAddress.modal.wallet-modal.fade{:role => "dialog"}
+  .modal-dialog
+    .modal-content
+      .modal-header
+        %h4.modal-title{"data-i18n" => "trade_notlistedtoken"}
+      .modal-body
+        .control-wrapper
+          .item-label
+            %label{:title => "Token address","data-i18n" => "token_address"}
+          .item-control.has-error
+            %span
+              %input.token-address-input{:name => "address", :placeholder => "0x0", :type => "text", :value => ""}
+            %span.text-danger
+      .modal-footer
+        %button.btn.btn-danger.btn-cancel-tradebyaddr{:type => "button","data-dismiss" => "modal"}
+          %span{"data-i18n" => "cancel"}
+        %button.btn.btn-success.trade-by-address.disabled{:type => "button"}
+          %span{"data-i18n" => "submit"}
+
+#noToken.modal.fade{:role => "dialog"}
+  .modal-dialog
+    .modal-content
+      .modal-header
+        %h4{"data-i18n" => "cannot_find_token_byaddr"} Couldn't find token by address
+      .modal-body
+        %p{"data-i18n" => "no_token_with_address"} There are no deployed ERC20 token with such address.
+        %p{"data-i18n" => "please_check_address"} Please double check the address.
+      .modal-footer
+        %button.btn.btn-info.btn-no-token{:type => "button", "data-dismiss" => "modal"}
+          %span{"data-i18n" => "ok"}
+
+#createBrowserWallet.modal.wallet-modal.fade{:role => "dialog"}
+  .modal-dialog
+    .modal-content
+      .modal-header
+        %h4.modal-title{"data-i18n" => "create_a_browser_wallet"}
+      .modal-body
+        .control-wrapper
+          .item-label
+            %label{:title => "Wallet Address","data-i18n" => "wallet_address"}
+          .item-control.has-error
+            %span
+              %a.token-address
+            %span.text-danger
+        .control-wrapper
+          .item-label
+            %label{:title => "Private Key","data-i18n" => "private_key", "data-toggle" => "popover",  "title" => "Popover title" }
+          .item-control.has-error
+            %span
+              %a.token-key{:href => "javascript:void(0);"}
+            %span.text-danger
+      .modal-footer
+        %button.btn.btn-danger.btn-cancel-tradebyaddr{:type => "button","data-dismiss" => "modal"}
+          %span{"data-i18n" => "ok"}
+
+#importBrowserWallet.modal.wallet-modal.fade{:role => "dialog"}
+  .modal-dialog
+    .modal-content
+      .modal-header
+        %h4.modal-title{"data-i18n" => "import_an_existing_wallet"}
+      .modal-body
+        .control-wrapper
+          .item-label
+            %label{:title => "Private Key","data-i18n" => "private_key"}
+          .item-control.has-error
+            %span
+              %input.token-address-input{:name => "address", :placeholder => "0x0", :type => "text", :value => ""}
+            %span.text-danger
+      .modal-footer
+        %button.btn.btn-danger.btn-cancel-tradebyaddr{:type => "button","data-dismiss" => "modal"}
+          %span{"data-i18n" => "cancel"}
+        %button.btn.btn-success.trade-by-address.disabled{:type => "button"}
+          %span{"data-i18n" => "submit"}
+
+#browserWalletResult.modal.wallet-modal.fade{:role => "dialog"}
+  .modal-dialog
+    .modal-content
+      .modal-header
+        %h4.modal-title
+      .modal-body.result
+        .item-label.text-message
+          %label{:style =>"font-size:12px;"}
+      .modal-footer
+        %button.btn.btn-danger.btn-cancel-tradebyaddr{:type => "button","data-dismiss" => "modal"}
+          %span{"data-i18n" => "close"}

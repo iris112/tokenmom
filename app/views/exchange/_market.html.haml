@@ -1,0 +1,219 @@
+#market-status.box.box-mb.flex.flex-column.flex-1
+  .box-header
+    %span.mobile-hide.market-status-title{"data-i18n" => "markets"}
+      MARKETS
+    .market-status-search.form-inline.pull-right
+      .form-group  
+        .position-relative  
+          %input#symbol_input.form-control{:onkeyup => "search_function()", 'data-i18n' => '[placeholder]search..', :title => "Type in a name", :type => "text",:placeholder => "Search.."}  
+          %i.fa.fa-search{"aria-hidden" => "true"}
+  .box-content.flex.flex-1.flex-column.relative.market-status-content{"style"=>"overflow: hidden;"}
+    %ul.nav.nav-tabs#market_tab
+      %li.nav-item.market-tab.market-weth
+        %a.nav-link.active{'data-toggle' => 'tab', 'data-target' => '#market_eth'} WETH
+      %li.nav-item.market-tab.market-wbtc
+        %a.nav-link{'data-toggle' => 'tab', 'data-target' => '#market_wbtc'} WBTC
+      %li.nav-item.market-tab.market-tm
+        %a.nav-link{'data-toggle' => 'tab', 'data-target' => '#market_tm'} TM
+      %li.nav-item.market-tab.market-usdc
+        %a.nav-link{'data-toggle' => 'tab', 'data-target' => '#market_usdc'} USDC
+      
+    .tab-content.eth-tm.flex.flex-column.flex-1{'role' => 'tablelist'}
+      .tab-pane.active#market_eth{'role' => 'tabpanel'}
+        %table#market_table.table.table-striped.d-flex.flex-column
+          %thead
+            %tr
+              %th#pair_name.text-left
+                %span{"data-i18n" => "pair"} Pair
+              %th#price_name.text-right
+                %span{"data-i18n" => "last_price"} Last Price
+              %th#pricechange_name.text-right
+                %span{"data-i18n" => "24h_price"} 24h Price
+              %th#favorite.text-right
+                %i.fas.fa-star
+          %tbody            
+            -# - @tokenlist.each do |token|
+            -#   %tr.market-status-row{:value => token.contract_address,:decimals => token.token_decimals}
+            -#     %td.text-center
+            -#       .pair{:symbol => token.symbol,:name => token.name} #{token.symbol}-WETH
+            -#     %td.text-center
+            -#       %strong{:value => token.last_price('WETH')}
+            -#         %strong
+            -#           %span= number_with_precision(token.last_price('WETH'), precision:7)
+            -#     - if token.h_price('WETH') != nil && token.h_price('WETH') != '--'
+            -#       - if token.h_price('WETH') > 0
+            -#         %td.text-center
+            -#           %strong{:value => token.h_price('WETH')}
+            -#             %strong.text-success
+            -#               %i.fa.fa-caret-up{"aria-hidden" => "true"}
+            -#                 %span #{token.h_price('WETH')}% 
+            -#       - elsif token.h_price('WETH') == 0
+            -#         %td.text-center
+            -#           %strong{:value => token.h_price('WETH')}
+            -#             %strong
+            -#               %span #{token.h_price('WETH')}%        
+            -#       - else
+            -#         %td.text-center
+            -#           %strong{:value => token.h_price('WETH')}
+            -#             %strong.text-danger
+            -#               %i.fa.fa-caret-down{"aria-hidden" => "true"}
+            -#                 %span #{token.h_price('WETH')}%
+            -#     - else 
+            -#       %td.text-center
+            -#         %strong{:value => "--"}
+            -#           %strong
+            -#             %span #{token.h_price('WETH')}
+            -#     %td.text-center
+            -#       %strong{:value =>token.h_volume('WETH')} #{token.h_volume('WETH')} 
+            -#     %td.text-center.favorite
+            -#       %i.far.fa-star{:value => token.id, :fav => 0 }     
+      .tab-pane#market_tm{'role' => 'tabpanel'}        
+        %table#market_table.table.table-striped.d-flex.flex-column
+          %thead
+            %tr
+              %th#pair_name.text-left
+                %span{"data-i18n" => "pair"} Pair
+              %th#price_name.text-right
+                %span{"data-i18n" => "last_price"} Last Price
+              %th#pricechange_name.text-right
+                %span{"data-i18n" => "24h_price"} 24h Price
+              %th#favorite.text-right
+                %i.fas.fa-star
+          %tbody
+            -# - @tmtokenlist.each do |token|
+            -#   %tr.market-status-row{:value => token.contract_address}
+            -#     %td.text-center
+            -#       .pair{:symbol => token.symbol,:name => token.name} #{token.symbol}-TM
+            -#     %td.text-center
+            -#       %strong{:value => token.last_price('TM')}
+            -#         %strong
+            -#           %span= number_with_precision(token.last_price('TM'), precision:7)
+            -#     - if token.h_price('TM') != nil && token.h_price('TM') != '--'
+            -#       - if token.h_price('TM') > 0
+            -#         %td.text-center
+            -#           %strong{:value => token.h_price('TM')}
+            -#             %strong.text-success
+            -#               %i.fa.fa-caret-up{"aria-hidden" => "true"}
+            -#                 %span #{token.h_price('TM')}% 
+            -#       - elsif token.h_price('TM') == 0
+            -#         %td.text-center
+            -#           %strong{:value => token.h_price('TM')}
+            -#             %strong
+            -#               %span #{token.h_price('TM')}%        
+            -#       - else
+            -#         %td.text-center
+            -#           %strong{:value => token.h_price('TM')}
+            -#             %strong.text-danger
+            -#               %i.fa.fa-caret-down{"aria-hidden" => "true"}
+            -#                 %span #{token.h_price('TM')}%
+            -#     - else 
+            -#       %td.text-center
+            -#         %strong{:value => "--"}
+            -#           %strong
+            -#             %span #{token.h_price('TM')}
+            -#     %td.text-center
+            -#       %strong{:value =>token.h_volume('TM')} #{token.h_volume('TM')} 
+            -#     %td.text-center.favorite
+            -#       %i.far.fa-star{:value => token.id, :fav => 0 }  
+      .tab-pane#market_usdc{'role' => 'tabpanel'}        
+        %table#market_table.table.table-striped.d-flex.flex-column
+          %thead
+            %tr
+              %th#pair_name.text-left
+                %span{"data-i18n" => "pair"} Pair
+              %th#price_name.text-right
+                %span{"data-i18n" => "last_price"} Last Price
+              %th#pricechange_name.text-right
+                %span{"data-i18n" => "24h_price"} 24h Price
+              %th#volume_name.text-right.selected
+                %i.fas.fa-star
+          %tbody
+            -# - @tmtokenlist.each do |token|
+            -#   %tr.market-status-row{:value => token.contract_address}
+            -#     %td.text-center
+            -#       .pair{:symbol => token.symbol,:name => token.name} #{token.symbol}-TM
+            -#     %td.text-center
+            -#       %strong{:value => token.last_price('TM')}
+            -#         %strong
+            -#           %span= number_with_precision(token.last_price('TM'), precision:7)
+            -#     - if token.h_price('TM') != nil && token.h_price('TM') != '--'
+            -#       - if token.h_price('TM') > 0
+            -#         %td.text-center
+            -#           %strong{:value => token.h_price('TM')}
+            -#             %strong.text-success
+            -#               %i.fa.fa-caret-up{"aria-hidden" => "true"}
+            -#                 %span #{token.h_price('TM')}% 
+            -#       - elsif token.h_price('TM') == 0
+            -#         %td.text-center
+            -#           %strong{:value => token.h_price('TM')}
+            -#             %strong
+            -#               %span #{token.h_price('TM')}%        
+            -#       - else
+            -#         %td.text-center
+            -#           %strong{:value => token.h_price('TM')}
+            -#             %strong.text-danger
+            -#               %i.fa.fa-caret-down{"aria-hidden" => "true"}
+            -#                 %span #{token.h_price('TM')}%
+            -#     - else 
+            -#       %td.text-center
+            -#         %strong{:value => "--"}
+            -#           %strong
+            -#             %span #{token.h_price('TM')}
+            -#     %td.text-center
+            -#       %strong{:value =>token.h_volume('TM')} #{token.h_volume('TM')} 
+            -#     %td.text-center.favorite
+            -#       %i.far.fa-star{:value => token.id, :fav => 0 } 
+      .tab-pane#market_wbtc{'role' => 'tabpanel'}        
+        %table#market_table.table.table-striped.d-flex.flex-column
+          %thead
+            %tr
+              %th#pair_name.text-left
+                %span{"data-i18n" => "pair"} Pair
+              %th#price_name.text-right
+                %span{"data-i18n" => "last_price"} Last Price
+              %th#pricechange_name.text-right
+                %span{"data-i18n" => "24h_price"} 24h Price
+              %th#volume_name.text-right.selected
+                %i.fas.fa-star
+          %tbody
+            -# - @tmtokenlist.each do |token|
+            -#   %tr.market-status-row{:value => token.contract_address}
+            -#     %td.text-center
+            -#       .pair{:symbol => token.symbol,:name => token.name} #{token.symbol}-TM
+            -#     %td.text-center
+            -#       %strong{:value => token.last_price('TM')}
+            -#         %strong
+            -#           %span= number_with_precision(token.last_price('TM'), precision:7)
+            -#     - if token.h_price('TM') != nil && token.h_price('TM') != '--'
+            -#       - if token.h_price('TM') > 0
+            -#         %td.text-center
+            -#           %strong{:value => token.h_price('TM')}
+            -#             %strong.text-success
+            -#               %i.fa.fa-caret-up{"aria-hidden" => "true"}
+            -#                 %span #{token.h_price('TM')}% 
+            -#       - elsif token.h_price('TM') == 0
+            -#         %td.text-center
+            -#           %strong{:value => token.h_price('TM')}
+            -#             %strong
+            -#               %span #{token.h_price('TM')}%        
+            -#       - else
+            -#         %td.text-center
+            -#           %strong{:value => token.h_price('TM')}
+            -#             %strong.text-danger
+            -#               %i.fa.fa-caret-down{"aria-hidden" => "true"}
+            -#                 %span #{token.h_price('TM')}%
+            -#     - else 
+            -#       %td.text-center
+            -#         %strong{:value => "--"}
+            -#           %strong
+            -#             %span #{token.h_price('TM')}
+            -#     %td.text-center
+            -#       %strong{:value =>token.h_volume('TM')} #{token.h_volume('TM')} 
+            -#     %td.text-center.favorite
+            -#       %i.far.fa-star{:value => token.id, :fav => 0 } 
+            
+          
+
+    
+
+    

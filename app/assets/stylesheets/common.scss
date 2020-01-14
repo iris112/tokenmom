@@ -1,0 +1,482 @@
+// media queries
+$breakpoint_380_low: "(max-width : 379px)";
+$breakpoint_380_high: "(min-width : 380px)";
+$breakpoint_450_low: "(max-width : 449px)";
+$breakpoint_450_high: "(min-width : 450px)";
+$breakpoint_576_low: "(max-width : 575px)";
+$breakpoint_576_high: "(min-width : 576px)";
+$breakpoint_768_low: "(max-width : 767px)";
+$breakpoint_768_high: "(min-width : 768px)";
+$breakpoint_992_low: "(max-width : 991px)";
+$breakpoint_992_high: "(min-width : 992px)";
+$breakpoint_1200_low: "(max-width : 1199px)";
+$breakpoint_1200_high: "(min-width : 1200px)";
+$breakpoint_1350_low: "(max-width : 1349px)";
+$breakpoint_1350_high: "(min-width : 1350px)";
+$breakpoint_1400_low: "(max-width : 1399px)";
+$breakpoint_1400_high: "(min-width : 1400px)";
+
+$orientation-landscape: "(orientation: landscape)";
+$orientation-portrait: "(orientation: portrait)";
+
+//mixins
+
+// flex properties
+@mixin flexbox {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+@mixin flex-wrap($value: nowrap) {
+  -webkit-flex-wrap: $value;
+  @if $value == nowrap {
+    -ms-flex-wrap: none;
+  } @else {
+    -ms-flex-wrap: $value;
+  }
+  flex-wrap: $value;
+}
+
+@mixin flex-direction($value: row) {
+  @if $value == row-reverse {
+    -webkit-box-direction: reverse;
+    -webkit-box-orient: horizontal;
+    -moz-box-direction: reverse;
+    -moz-box-orient: horizontal;
+  } @else if $value == column {
+    -webkit-box-direction: normal;
+    -webkit-box-orient: vertical;
+    -moz-box-direction: normal;
+    -moz-box-orient: vertical;
+  } @else if $value == column-reverse {
+    -webkit-box-direction: reverse;
+    -webkit-box-orient: vertical;
+    -moz-box-direction: reverse;
+    -moz-box-orient: vertical;
+  } @else {
+    -webkit-box-direction: normal;
+    -webkit-box-orient: horizontal;
+    -moz-box-direction: normal;
+    -moz-box-orient: horizontal;
+  }
+  -webkit-flex-direction: $value;
+  -ms-flex-direction: $value;
+  flex-direction: $value;
+}
+
+@mixin flex-flow($values: (row nowrap)) {
+  // No Webkit/FF Box fallback.
+  -webkit-flex-flow: $values;
+  -ms-flex-flow: $values;
+  flex-flow: $values;
+}
+
+@mixin order($int: 0) {
+  -webkit-box-ordinal-group: $int + 1;
+  -moz-box-ordinal-group: $int + 1;
+  -webkit-order: $int;
+  -ms-flex-order: $int;
+  order: $int;
+}
+
+@mixin flex-grow($int: 1) {
+  -webkit-box-flex: $int;
+  -moz-box-flex: $int;
+  -webkit-flex-grow: $int;
+  -ms-flex: $int;
+  flex-grow: $int;
+}
+
+@mixin flex-shrink($int: 0) {
+  -webkit-flex-shrink: $int;
+  -moz-flex-shrink: $int;
+  -ms-flex: $int;
+  flex-shrink: $int;
+}
+
+@mixin flex-basis($value: auto) {
+  -webkit-flex-basis: $value;
+  flex-basis: $value;
+}
+
+@mixin flex($fg: 1, $fs: 0, $fb: auto) {
+
+  // Set a variable to be used by box-flex properties
+  $fg-boxflex: $fg;
+
+  // Box-Flex only supports a flex-grow value so lets grab the
+  // first item in the list and just return that.
+  @if type-of($fg) == 'list' {
+    $fg-boxflex: nth($fg, 1);
+  }
+
+  -webkit-box: $fg-boxflex;
+  -moz-box: $fg-boxflex;
+  -webkit-flex: $fg $fs $fb;
+  -ms-flexbox: $fg $fs $fb;
+  flex: $fg $fs $fb;
+}
+
+@mixin justify-content($value: flex-start) {
+  @if $value == flex-start {
+    -webkit-box-pack: start;
+    -moz-box-pack: start;
+    -ms-flex-pack: start;
+  } @else if $value == flex-end {
+    -webkit-box-pack: end;
+    -moz-box-pack: end;
+    -ms-flex-pack: end;
+  } @else if $value == space-between {
+    -webkit-box-pack: justify;
+    -moz-box-pack: justify;
+    -ms-flex-pack: justify;
+  } @else if $value == space-around {
+    -ms-flex-pack: distribute;
+  } @else {
+    -webkit-box-pack: $value;
+    -moz-box-pack: $value;
+    -ms-flex-pack: $value;
+  }
+  -webkit-justify-content: $value;
+  justify-content: $value;
+}
+
+@mixin align-items($value: stretch) {
+  @if $value == flex-start {
+    -webkit-box-align: start;
+    -moz-box-align: start;
+    -ms-flex-align: start;
+  } @else if $value == flex-end {
+    -webkit-box-align: end;
+    -moz-box-align: end;
+    -ms-flex-align: end;
+  } @else {
+    -webkit-box-align: $value;
+    -moz-box-align: $value;
+    -ms-flex-align: $value;
+  }
+  -webkit-align-items: $value;
+  align-items: $value;
+}
+
+@mixin align-self($value: auto) {
+  // No Webkit Box Fallback.
+  -webkit-align-self: $value;
+  @if $value == flex-start {
+    -ms-flex-item-align: start;
+  } @else if $value == flex-end {
+    -ms-flex-item-align: end;
+  } @else {
+    -ms-flex-item-align: $value;
+  }
+  align-self: $value;
+}
+
+@mixin align-content($value: stretch) {
+  // No Webkit Box Fallback.
+  -webkit-align-content: $value;
+  @if $value == flex-start {
+    -ms-flex-line-pack: start;
+  } @else if $value == flex-end {
+    -ms-flex-line-pack: end;
+  } @else {
+    -ms-flex-line-pack: $value;
+  }
+  align-content: $value;
+}
+
+// for responsive, set the minimum value for a property
+@mixin width($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      width: $value !important;
+    } @else {
+      width: $value;
+    }
+  }
+}
+
+@mixin min-width($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      min-width: $value !important;
+    } @else {
+      min-width: $value;
+    }
+  }
+}
+
+@mixin max-width($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      max-width: $value !important;
+    } @else {
+      max-width: $value;
+    }
+  }
+}
+
+@mixin height($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      height: $value !important;
+    } @else {
+      height: $value;
+    }
+  }
+}
+
+@mixin min-height($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      min-height: $value !important;
+    } @else {
+      min-height: $value;
+    }
+  }
+}
+
+@mixin max-height($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      max-height: $value !important;
+    } @else {
+      max-height: $value;
+    }
+  }
+}
+
+
+@mixin left($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      left: $value !important;
+    } @else {
+      left: $value;
+    }
+  }
+}
+
+@mixin right($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      right: $value !important;
+    } @else {
+      right: $value;
+    }
+  }
+}
+
+@mixin top($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      top: $value !important;
+    } @else {
+      top: $value;
+    }
+  }
+}
+
+@mixin bottom($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      bottom: $value !important;
+    } @else {
+      bottom: $value;
+    }
+  }
+}
+
+@mixin font-size($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      font-size: $value !important;
+    } @else {
+      font-size: $value;
+    }
+  }
+}
+
+@mixin border-radius($ref, $top:null, $right:null, $bottom:null, $left:null, $important: false) {
+  @if $right == null {
+    $right: $top;
+  }
+  @if $bottom == null {
+    $bottom: $top;
+  }
+  @if $left == null {
+    $left: $right;
+  }
+
+  @media (max-width : $ref) {
+    @if $important == true {
+      border-top-left-radius-: $top !important;
+      border-top-right-radius: $right !important;
+      border-bottom-right-radius: $bottom !important;
+      border-bottom-left-radius: $left !important;
+    } @else {
+      border-top-left-radius: $top;
+      border-top-right-radius: $right;
+      border-bottom-right-radius: $bottom;
+      border-bottom-left-radius: $left;
+    }
+  }
+}
+
+@mixin margin($ref, $top:null, $right:null, $bottom:null, $left:null, $important: false) {
+  @if $right == null {
+    $right: $top;
+  }
+  @if $bottom == null {
+    $bottom: $top;
+  }
+  @if $left == null {
+    $left: $right;
+  }
+
+  @media (max-width : $ref) {
+    @if $important == true {
+      margin-top: $top !important;
+      margin-right: $right !important;
+      margin-bottom: $bottom !important;
+      margin-left: $left !important;
+    } @else {
+      margin-top: $top;
+      margin-right: $right;
+      margin-bottom: $bottom;
+      margin-left: $left;
+    }
+  }
+}
+
+@mixin margin-left($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      margin-left: $value !important;
+    } @else {
+      margin-left: $value;
+    }
+  }
+}
+
+
+
+@mixin margin-bottom($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      margin-bottom: $value !important;
+    } @else {
+      margin-bottom: $value;
+    }
+  }
+}
+
+
+@mixin padding($ref, $top:null, $right:null, $bottom:null, $left:null, $important: false) {
+  @if $right == null {
+    $right: $top;
+  }
+  @if $bottom == null {
+    $bottom: $top;
+  }
+  @if $left == null {
+    $left: $right;
+  }
+
+  @media (max-width : $ref) {
+    @if $important == true {
+      padding-top: $top !important;
+      padding-right: $right !important;
+      padding-bottom: $bottom !important;
+      padding-left: $left !important;
+    } @else {
+      padding-top: $top;
+      padding-right: $right;
+      padding-bottom: $bottom;
+      padding-left: $left;
+    }
+  }
+}
+
+@mixin padding-left($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      padding-left: $value !important;
+    } @else {
+      padding-left: $value;
+    }
+  }
+}
+
+@mixin padding-right($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      padding-right: $value !important;
+    } @else {
+      padding-right: $value;
+    }
+  }
+}
+
+@mixin flex-basis($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      flex-basis: $value !important;
+    } @else {
+      flex-basis: $value;
+    }
+  }
+}
+
+@mixin clear($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      clear: $value !important;
+    } @else {
+      clear: $value;
+    }
+  }
+}
+
+@mixin float($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      float: $value !important;
+    } @else {
+      float: $value;
+    }
+  }
+}
+
+@mixin display($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      display: $value !important;
+    } @else {
+      display: $value;
+    }
+  }
+}
+
+@mixin line-height($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      line-height: $value !important;
+    } @else {
+      line-height: $value;
+    }
+  }
+}
+
+@mixin background($ref, $value, $important: false) {
+  @media (max-width : $ref) {
+    @if $important == true {
+      background: $value !important;
+    } @else {
+      background: $value;
+    }
+  }
+}

@@ -1,0 +1,1380 @@
+
+html,body{
+  background: #101010;
+  font-family:MicrosoftYaHei;
+}
+.walletModule{
+  min-height: 770px;
+  height: 790px;
+  overflow-y: hidden;
+  background:#f9f9f9 url("../../images/walletBanner.png") no-repeat 100% 100%;
+  background-position: 0% -50%;
+  padding-top: 80px;
+}
+header p{
+ text-align: center;
+ font-size: 36px;
+ letter-spacing: 2px;
+ color:#333;
+ font-weight: 600;
+  font-family: "Cera", "Open Sans", sans-serif;
+}
+
+.walletList > div{
+  width:235px;
+  height:300px;
+  border-radius:8px;
+  float: left;
+  margin:0 25px 40px 25px;
+  position: relative;
+  box-sizing: border-box;
+}
+.walletList > div{
+  background:black;
+  transition: all 0.4s;
+}
+.walletList:hover > div{
+  position: relative;
+  top: 0px;
+  border: 2px solid #1476DB;
+  box-shadow: 0px 1px 10px #1476DB;
+  transform:scale(1.05,1.05);
+}
+.walletList .walletInfoTip{
+  font-size: 16px;
+    font-weight: 800;
+    color: #1476DB;
+    line-height: 40px;
+    text-align: center;
+    font-family: "Cera", "Open Sans", sans-serif;
+}
+.walletTip{
+  padding: 10px 15px;
+  text-align: center;
+  font-size: 14px;
+  color: rgba(153,153,153,1);
+  line-height: 16px;
+}
+.walletList .walletIntroduce{
+  padding: 10px 15px;
+  min-height:65px;
+  font-size:14px;
+  color:rgba(153,153,153,1);
+  line-height:16px;
+  text-align: center
+}
+.walletBtn{
+  width: 130px;
+  margin: 40px auto 0;
+  position: absolute;
+  bottom: 25px;
+  left: 50%;
+  margin-left: -63px;
+  text-align: center;
+  cursor: pointer;
+  background: #1476DB;
+  border-radius: 20px;
+}
+
+.gotoBtn{
+  width: 130px;
+  margin: 40px auto 0;
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  margin-left: -63px;
+  text-align: center;
+  cursor: pointer;
+  background: #1476DB;
+  border-radius: 20px;
+}
+
+.newWallet .walletBtn{
+  border-radius: 20px;
+}
+.clear_btn{
+  position: relative;
+}
+.walletBtn .hoverBtn,.gotoBtn .hoverBtn,.exportWalletBtn .hoverBtn,.clearBtn .coverBtn {
+  display: inline-block;
+  height: 27px;
+  width: 1px;
+  position: absolute;
+  top: 0;
+  left: 68.5px;
+  z-index: -1;
+  border-radius: 20px;
+  background: rgba(0,0,0,0.3);
+  transition: all 0.6s;
+}
+.walletBtn:hover .hoverBtn,.gotoBtn:hover .hoverBtn,.exportWalletBtn >span:hover .hoverBtn,.clearBtn:hover .coverBtn{
+  transform:scale(137,1);
+  z-index: 1;
+}
+.exportWalletBtn .hoverBtn{
+  left: 70px;
+}
+.exportWalletBtn >span:hover .hoverBtn{
+  transform:scale(142,1);
+}
+.clearBtn:hover .coverBtn{
+  transform: scale(146,1)
+}
+.exportWalletBtn{
+  margin: 20px auto;
+  text-align: center;
+  position: absolute;
+  bottom: -10px;
+}
+.clearWalletBtn{
+  width: 60%;
+  margin-left: 20%;
+}
+.clearWalletBtn .clearBtn{
+  margin: 5px 0;
+  display: inline-block;
+}
+/* .exportWalletBtn .hoverBtn{
+  top: 5px;
+} */
+.walletBtn span{
+  width:40px;
+  font-size:14px;
+  color:rgba(255,255,255,1);
+  line-height:27px;
+}
+.gotoBtn span{
+  width:40px;
+  font-size:14px;
+  color:rgba(255,255,255,1);
+  line-height:27px;
+}
+.exportWalletBtn span{
+  margin-bottom: 10px;
+  display: inline-block;
+  width: 142px;
+  height: 37px;
+  background: #1476DB;
+  font-size:12px;
+  border-radius: 20px;
+  color:rgba(255,255,255,1);
+  line-height: 37px;
+  cursor: pointer;
+}
+.clearBtn,.exportWalletBtn .clearBtn{
+  background: #ffc000;
+}
+.walletList .headerImg{
+  height: 50px;
+  width:auto;
+  display: block;
+  margin: 30px auto 0;
+}
+.walletBtn img{
+  width:16px;
+  height:11px;
+  margin: -6px 0 0 10px;
+}
+.gotoBtn img{
+  width:16px;
+  height:11px;
+  margin: -6px 0 0 10px;
+}
+.walletBalance{
+  font-size: 14px;
+  text-align: left;
+  color: rgba(153,153,153,1);
+  margin-top: 12px;
+  margin-left: 19px;
+}
+.walletBalance p span{
+  color: #1476DB;
+  cursor: pointer;
+}
+.walletBalance .addressImg{
+  width: 12px;
+  margin-left: 3px;
+  cursor: pointer;
+}
+.walletTopTip{
+  background: url("../../images/walletTipBg.png") no-repeat;
+  position: absolute;
+  top:0;
+  left: -4px;
+  width: 161px;
+  height: 161px;
+  text-align: center;
+}
+.walletTopTip span{
+  display: block;
+  width:130px;
+  height:56px;
+  font-size:12px;
+  font-weight:400;
+  letter-spacing: 1px;
+  color:rgba(255,255,255,1);
+  line-height:90px;
+  margin-left: -33px;
+  transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  -moz-transform:rotate(-45deg);
+  -webkit-transform:rotate(-45deg);
+  -o-transform:rotate(-45deg);
+}
+.walletCon .reminder{
+  background: #f9f9f9;
+  width:310px;
+  height:410px;
+  border:1px solid rgba(219,219,219,1);
+  border-radius:8px;
+}
+.reminderTitle{
+  height:44px;
+  font-size:24px;
+  font-family:MicrosoftYaHei;
+  font-weight:400;
+  color:rgba(51,51,51,1);
+  line-height:36px;
+  text-align: center;
+  margin-top: 45px;
+}
+.reminderInfo{
+  width:245px;
+  height:159px;
+  font-size:14px;
+  font-family:MicrosoftYaHei;
+  font-weight:400;
+  color:rgba(153,153,153,1);
+  line-height:36px;
+  margin: 35px auto 0;
+}
+.frameCon{
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.5);
+}
+.frameCon >section{
+  width: 470px;
+  height: 500px;
+  background: #fff;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -236px 0 0 -318px;
+  z-index:2;
+}
+.frameCon >section header{
+  height: 56px;
+  background: #1476DB;
+  position: relative;
+}
+.frameCon >section header p,.createWallet .layretrade-head p{
+  font-size:19px;
+  font-weight:400;
+  color:rgba(255,255,255,1);
+  line-height:56px;
+  text-align: center;
+}
+.frameCon >section header span{
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  font-size: 16px;
+  color: #fff;
+  cursor: pointer;
+}
+.frameCon >section >section{
+  padding-left: 32px;
+}
+.frameCon >section >section .label{
+  display: inline-block;
+  width: 18px;
+  font-size:14px;
+  line-height: 16px;
+  font-weight:400;
+  color:rgba(102,102,102,1);
+}
+.frameCon >section >section .label i{
+  display: inline-block;
+  width: 20px;
+  height: 30px;
+  text-align: left;
+  color: #FF7B83;
+  font-size:20px;
+  position: relative;
+  top: 5px;
+}
+.frameCon .inpCon{
+  display: inline-block;
+  width: 406px;
+  height: 40px;
+  margin-top: 25px;
+}
+.frameCon .inpCon > input,.frameCon .inpCon textarea{
+  border: 1px solid #E0E0E0;
+  padding-left: 13px;
+  width: 84%;
+  height: 100%;
+  font-size: 14px;
+  color:rgba(153,153,153,1);
+  line-height: 25px;
+}
+::-webkit-input-placeholder {
+  color: #B0B0B0;
+}
+:-moz-placeholder {
+  color: #B0B0B0;
+}
+::-moz-placeholder {
+  color: #B0B0B0;
+}
+:-ms-input-placeholder {
+  color: #B0B0B0;
+}
+.frameCon .verificationCode .inpCon{
+  width: 275px;
+}
+.frameCon .verificationCode input{
+  width: 130px;
+}
+.frameCon .verificationCode .inpCon span{
+  display: inline-block;
+  width: 112px;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  color: #fff;
+  background: #3F8BE2;
+  margin-left: 12px;
+  font-size:18px;
+  position: relative;
+  top: 3px;
+}
+.frameCon .verificationCode .inpCon p{
+  height:12px;
+  font-size:12px;
+  font-weight:400;
+  color:rgba(153,153,153,1);
+  margin-top: 2px;
+  position: absolute;
+}
+.code{
+  letter-spacing: 5px;
+}
+.CodeTip{
+  position: relative;
+}
+.CodeTip p{
+  position: absolute;
+  font-size:12px;
+  color:rgba(255,75,87,1);
+  top: 44px;
+  left: 0;
+}
+.textareaCon{
+  position: relative;
+  padding-left: 22px;
+}
+.languageStyle .textareaCon{
+  padding-left: 30px;
+}
+.textareaCon .label{
+  position: absolute;
+  top: 56%;
+  left: 0;
+}
+.textareaCon .inpCon{
+  margin-top: 36px;
+}
+.setUpBtn{
+  font-size:16px;
+  line-height: 48px;
+  text-align: center;
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  margin-left: -142px;
+}
+.setUpBtnBlue{
+  width: 160px;
+  height: 48px;
+  background: #3F8BE2;
+  color: #fff;
+}
+.setUpBtnGray{
+  width: 160px;
+  height: 48px;
+  background: #D2D2D2;
+  color: #fff;
+}
+.frameCon .privateKeyInp{
+  height: 550px;
+  margin: -326px 0 0 -318px;
+}
+.privateKeyBtn{
+  text-align: right;
+  position: absolute;
+  bottom: 20px;
+  right: 92px;
+}
+.hardWallet .privateKeyBtn{
+  bottom: 21px;
+  right: 10px;
+}
+.privateKeyBtn button{
+  height: 43px;
+  border: 0;
+  line-height: 30px;
+  width: 78%;
+}
+.frameCon .inpCon textarea{
+  height: 75px;
+  resize: vertical;
+  margin-top: 20px;
+}
+.frameCon #fileId{
+  border:0;
+  position: absolute;
+  opacity:0;
+  filter:alpha(opacity=0);
+  left: 38px;
+  width: 64px;
+}
+.frameCon .inpCon .upLoadBtn{
+  position: absolute;
+  width: 64px;
+  height: 22px;
+  border: 1px solid #999;
+  background: #eee;
+}
+.frameCon .inpCon .jsonFileName{
+  display: inline-block;
+  width: 180px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin-left: 70px;
+  line-height: 20px;
+}
+textarea:-moz-placeholder {
+  height: 75px;
+  line-height: 75px;
+}
+textarea::-moz-placeholder {
+  height: 75px;
+  line-height: 75px;
+}
+textarea::-webkit-input-placeholder{
+  height: 75px;
+  line-height: 75px;
+}
+textarea:-ms-input-placeholder{
+  height: 75px;
+  line-height: 75px
+}
+.setUp{
+  background: #3F8BE1;
+  color: #fff;
+  margin-left: 10px;
+  width: 120px;
+}
+.cancel{
+  background: #D2D2D2;
+  color: #333;
+  width: 100px;
+}
+.chooseFile{
+  display: flex;
+  margin-bottom: 12px;
+}
+.chooseFile p{
+  flex: 1;
+}
+.frameCon .hardWallet{
+  width: 800px;
+  margin-left: -386px;
+}
+.hardWallet select{
+  width: 614px;
+  height: 32px;
+}
+.hardWallet select option span{
+  color: #666;
+}
+.hardWallet table{
+  width: 770px;
+}
+.hardWallet table tr:nth-child(odd){
+  background: #F5F5F5;
+}
+.hardWallet table .tablaHeader{
+  background: #FFFFFF!important;
+}
+.hardWallet table td{
+  height: 38px;
+  line-height: 38px;
+}
+.hardWallet table td{
+  height: 38px;
+  line-height: 38px;
+}
+.hardWallet .address{
+  width: 425px;
+  padding-left: 5px;
+}
+.hardWallet .td2,.hardWallet .td3{
+  width: 172px;
+}
+.hardWallet .address span{
+  color: #000000;
+}
+.hardWallet .label{
+  margin-bottom: 30px;
+}
+.hardWallet .walletAddress{
+  width: 148px!important;
+  margin-bottom: 45px;
+}
+.hardWallet .td2{
+  color: #2C82E0;
+}
+.addressCon .tablaHeader td{
+  color: #3A3A3A;
+}
+.tablaHeader{
+  border-bottom: 1px solid #e1e1e1;
+}
+.frameCon >.hardWallet >section{
+  padding-left: 16px;
+}
+.addressCon{
+  position: relative;
+  padding-bottom: 20px;
+}
+.moreAddress{
+  color:rgba(44,130,224,1);
+  font-size: 14px;
+  position: absolute;
+  bottom: -5px;
+  right: 16px;
+}
+.frameCon >.pin_table_btn >section{
+  padding-left: 0;
+  padding-top: 130px;
+}
+.trezor_wallet_con{
+  padding-top: 100px;
+}
+.trezor_wallet_con p,.trezor_wallet_con div{
+  font-size: 46px;
+  text-align: center;
+}
+
+.trezor_wallet_con p{
+  color: #999;
+  line-height: 60px;
+}
+.trezor_wallet_con div{
+  color: #666;
+  letter-spacing: 2px;
+}
+header p img{
+  width: 26px;
+  height: 39px;
+  margin-right: 10px;
+}
+.address span{
+  margin-left: 17px;
+}
+.frameCon .trezor_wallet_enterpoint{
+  padding-left: 0;
+  padding-top: 30px;
+}
+.trezor_wallet_enterpoint p{
+  text-align: center;
+}
+.trezor_wallet_enterpoint > p:first-child{
+  font-size: 34px;
+  color: #999;
+}
+.trezor_wallet_enterpoint > p:nth-child(2){
+  font-size: 22px;
+}
+.trezor_wallet_enterpoint section{
+  padding-left: 147px;
+  overflow: hidden;
+}
+.pin_table_btn{
+  width: 96px;
+  height: 96px;
+  background:url("../../images/rectangle_gray.png") no-repeat 100% 100%;
+  position: relative;
+  margin-right: 28px;
+  margin-top: 30px;
+  float: left;
+  border: 0;
+  font-size: 26px;
+  font-weight: 600;
+  color: #aaa;
+}
+.pin_table_btn:hover{
+  background:url("../../images/rectangle_blue.png") no-repeat 100% 100%;
+  color: #1476DB;
+}
+.trezor_wallet_poing img{
+  width: 12px;
+  height: 12px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -6px 0 0 -6px;
+}
+.frameCon .trezor_wallet{
+  height: 739px;
+  margin-top: -332px;
+}
+.trezor_wallet_password{
+  width: 344px;
+  height: 40px;
+  border-bottom: 1px solid #3F8BE2;
+  margin: 23px auto 0;
+  position: relative;
+}
+.trezor_wallet_password input{
+  width: 86%;
+  height: 100%;
+  font-size: 30px;
+  color: #3F8BE2;
+  letter-spacing: 18px;
+}
+.trezor_wallet_password img{
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  right: 0;
+}
+.sureBtn{
+  width: 344px;
+  height: 48px;
+  background: #3F8BE2;
+  font-size:16px;
+  color:rgba(254,254,254,1);
+  text-align: center;
+  margin: 43px auto 0;
+  line-height: 48px;
+}
+.languageStyle{
+  padding-left: 20px!important;
+}
+.languageStyle .label{
+  width: 27px!important;
+}
+.languageStyle .code{
+  letter-spacing: 1px;
+}
+input::-webkit-input-placeholder{
+  color:#DBDBDB;
+}
+input::-moz-placeholder{
+  color:#DBDBDB;
+}
+input:-moz-placeholder{
+  color:#DBDBDB;
+}
+input:-ms-input-placeholder{
+  color:#DBDBDB;
+}
+textarea::-webkit-input-placeholder{
+  color:#DBDBDB;
+}
+textarea::-moz-placeholder{
+  color:#DBDBDB;
+}
+textarea:-moz-placeholder{
+  color:#DBDBDB;
+}
+textarea:-ms-input-placeholder{
+  color:#DBDBDB;
+}
+.errorMessage{
+  background: #FF4B57;
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  box-sizing: border-box;
+  text-align: center;
+  color: #fff;
+}
+.createWallet{
+  background: #fff;
+  padding-top: 0;
+}
+.createWallet .layretrade-head,.modal-header{
+  height: 56px;
+  background: #1476DB;
+  position: relative;
+}
+.createWallet .layretrade-body .mnebackintroduce{
+  color: #666;
+}
+.createWallet .layretrade-body p.mnebackwords{
+  background-color: #e1e1e1;
+  color: #666;
+}
+.createWallet .layer-trade-close,.modal-header .close{
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  font-size: 16px;
+  color: #fff;
+  cursor: pointer;
+}
+.createWallet .layretrade-head p{
+  font-size: 20px;
+}
+#mnemonicModel{
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.6);
+  display: none;
+}
+.modal-dialog{
+  width: 500px;
+  min-height: 540px;
+  margin: 0 auto;
+  padding-bottom: 55px;
+  margin-top: 20px;
+  position: relative;
+}
+.modal-header .close{
+  font-size: 26px;
+  background: transparent;
+  border: 0;
+}
+.modal-header{
+  height: 48px;
+}
+.modal-header .modal-title{
+  font-size: 16px;
+  color: #fff;
+  text-align: center;
+  line-height: 48px;
+}
+.alert {
+  position: absolute !important;
+  right: 10px;
+  bottom: 0;
+}
+
+.alert-danger,.alert-danger a{
+  background: #ff173e;
+  padding: 10px 5px;
+  color: #fff;
+  font-size: 14px;
+  text-align: center;
+  line-height: 30px;
+}
+.chooseAddress{
+  overflow: hidden;
+  width: 100%;
+  padding: 10px;
+}
+.chooseAddress > div{
+  width: 80%;
+  float: left;
+  height: 70px;
+  font-size: 16px;
+  padding:20px 10px;
+  background: #fff;
+  box-shadow: 0px 2px 10px #e1e1e1;
+  margin: 10px 30px;
+  box-sizing: border-box;
+}
+.chooseAddress > div p.small{
+  font-size: 12px;
+  margin-left: 18px;
+  line-height: 16px;
+  color: #999;
+}
+.form-control{
+  border: 1px solid #eee;
+  width: 220px;
+  height: 30px;
+}
+#modalTitle2{
+  color: #666;
+  font-size: 16px;
+  padding-left: 10px;
+}
+.table td.walletAddr{
+  text-align: left;
+  padding: 0 40px;
+}
+.table-striped > tbody >tr{
+  width: 100%;
+}
+.table-striped .walletAddrCon:nth-child(odd){
+  background: #F5F5F5;
+}
+.m-addresses td a{
+  color: #1476DB;
+}
+.buttonCon{
+  position: absolute;
+  bottom: 10px;
+  right: 20px;
+}
+.rightBtn{
+  width: 120px;
+  height: 50px;
+  color: #666;
+  background: #D2D2D2;
+  margin-right: 20px!important;
+}
+.leftBtn{
+  width: 160px;
+  height: 50px;
+  color: #fff;
+  background: #1476DB;
+}
+.table .walletAddrCon .linkImg{
+  padding-right: 40px;
+  position: relative;
+}
+.table .walletAddrCon .linkImg a{
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+}
+.codeInp .verificationCode{
+  margin-top: 40px;
+  padding: 0 30px 30px;
+}
+.codeInp .verificationCode .label{
+  display: inline-block;
+  width: 140px;
+  font-size: 14px;
+  line-height: 16px;
+  font-weight: 400;
+  color: rgba(102,102,102,1);
+  position: relative;
+  top: -28px;
+}
+.codeInp .label i{
+  display: inline-block;
+  width: 20px;
+  height: 30px;
+  text-align: left;
+  color: #FF7B83;
+  font-size: 20px;
+  position: relative;
+  top: 5px;
+}
+.inpCon i{
+  display: inline-block;
+  width: 20px;
+  height: 30px;
+  text-align: left;
+  color: #FF7B83;
+  font-size: 20px;
+  position: relative;
+  top: 5px;
+}
+.codeInp .inpCon{
+  width: 390px;
+  height: 40px;
+  padding-left: 20px;
+}
+.codeInp .inpCon input{
+  border: 1px solid #E0E0E0;
+  padding-left: 13px;
+  width: 100%;
+  height: 100%;
+  font-size: 14px;
+  color: rgba(153,153,153,1);
+  line-height: 25px;
+}
+.codeInp .layretrade-captchaimg {
+  width: 38%;
+  float: right;
+  background-color: #fff;
+  cursor: pointer;
+}
+.clearWallet,.clearTop{
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background: rgba(0,0,0,0.6);
+}
+.clearTop{
+  z-index: 1;
+}
+.sureClearWallet{
+  width: 500px;
+  min-height: 300px;
+  background: #fff;
+  margin: 200px auto 0;
+  position: relative;
+  z-index: 2;
+}
+.sureClearWallet header{
+  height: 60px;
+  text-align: right;
+  background: #1476DB;
+  position: relative;
+}
+.sureClearWallet header p{
+  text-align: center;
+  color: #fff;
+  font-size: 20px;
+  line-height: 60px;
+}
+.sureClearWallet header span{
+  font-size: 20px;
+  color: #fff;
+  display: inline-block;
+  padding: 20px;
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+.sureClearWallet div{
+  padding-top:20px;
+}
+.sureClearWallet .passwordInp{
+  padding:0 20px;
+}
+.sureClearWallet .passwordInp .label{
+  display: inline-block;
+  width: 60px;
+  font-size: 14px;
+  line-height: 16px;
+  font-weight: 400;
+  color: rgba(102,102,102,1);
+}
+.sureClearWallet .passwordInp .label i{
+  display: inline-block;
+  width: 60px;
+  height: 30px;
+  text-align: left;
+  color: #FF7B83;
+  font-size: 20px;
+  position: relative;
+  top: 5px;
+  text-align: center;
+}
+.sureClearWallet .layerbtn{
+  /* margin-top: 10px; */
+}
+.sureClearWallet .passwordInp .inpCon{
+  display: inline-block;
+  width: 300px;
+  height: 40px;
+  margin-top: 35px;
+}
+.sureClearWallet .passwordInp .inpCon input{
+  border: 1px solid #E0E0E0;
+  padding-left: 13px;
+  width: 100%;
+  height: 100%;
+  font-size: 14px;
+  color: rgba(153,153,153,1);
+  line-height: 25px;
+}
+.sureClearWallet div p{
+  font-size: 16px;
+  font-weight: 600;
+  color: #666;
+  text-align: center;
+  line-height: 26px;
+}
+.sureClearWallet .layerbtn{
+  padding: 68px 0px 30px;
+}
+.sureClearWallet .layerbtn button{
+  width: 300px;
+}
+.sureClearWallet .CodeTip {
+  position: relative;
+}
+.sureClearWallet .CodeTip p{
+  position: absolute;
+  font-size: 12px;
+  color: rgba(255,75,87,1);
+  top: 70px;
+  left: 0;
+}
+.alertTip,.clickCon{
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background: rgba(0,0,0,0.5);
+}
+.clickCon{
+  z-index: 1;
+}
+.alertInfo{
+  width: 400px;
+  min-height: 200px;
+  background: #fff;
+  position: absolute;
+  top: 200px;
+  left: 50%;
+  margin-left: -150px;
+  z-index: 2;
+  padding-bottom: 25px;
+}
+.alertInfo header{
+  height: 45px;
+  background: #e44d5c;
+  position: relative;
+}
+.alertInfo header span{
+  position: absolute;
+  top: 12px;
+  right: 18px;
+  font-size: 16px;
+  color: #fff;
+  cursor: pointer;
+}
+.alertInfo p{
+  font-size: 16px;
+  padding: 40px 30px 30px;
+  color: #666;
+  text-align: center;
+  line-height: 24px;
+  min-height: 48px;
+}
+.alertInfo .closeBtn{
+  text-align: center;
+}
+.alertInfo .closeBtn button{
+  width: 200px;
+  box-shadow: 5px 5px 15px #888888;
+  background: #1476DB;
+  font-size: 19px;
+  color: #fff;
+  font-size: 18px;
+  height: 40px;
+  line-height: 40px;
+}
+.walletAgreement,.closeDiv{
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.6);
+}
+.closeDiv{
+  z-index: 1;
+}
+.agreementList{
+  width: 600px;
+  height: 400px;
+  background: #fff;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -200px 0 0 -300px;
+  z-index: 2;
+}
+.agreementList header{
+  height: 56px;
+  background: #1476DB;
+  font-size: 16px;
+  text-align: center;
+  line-height: 56px;
+  color: #fff;
+  margin-bottom: 35px;
+  position: relative;
+}
+.agreementList header span{
+  position: absolute;
+  right: 18px;
+  font-size: 16px;
+  color: #fff;
+  cursor: pointer;
+}
+.agreementList section div{
+  padding: 0 15px 0;
+  margin-top: 25px;
+  display: flex;
+  cursor: pointer;
+}
+.agreementList section div input{
+  width: 20px;
+  height: 20px;
+  flex: 0 20px;
+  cursor: pointer;
+}
+.agreementList section div p{
+  flex: 1;
+  font-size: 14px;
+  line-height: 16px;
+}
+.setNewUpBtn{
+  text-align: center;
+}
+.setNewUpBtn button{
+  height: 40px;
+  width: 290px;
+  box-shadow: 5px 5px 15px #888888;
+  background: #3CB371;
+  font-size: 19px;
+  margin-top: 65px;
+  color: #fff;
+}
+.qrCode,.closeQrCode{
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+}
+.closeQrCode{
+  z-index: 1;
+}
+.qrCodeCon{
+  width:350px;
+  height:350px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -175px 0 0 -175px;
+  background: #fff;
+  z-index: 2;
+}
+.qrCodeCon header{
+  height: 40px;
+  text-align: right;
+  background: #1476DB;
+  position: relative;
+}
+.qrCodeCon header span{
+  font-size: 20px;
+  color: #fff;
+  display: inline-block;
+  padding: 10px;
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+.qrCodeInfo p{
+  font-size: 14px;
+  color: #666;
+  text-align: center;
+  padding: 25px 20px;
+  word-break: break-all;
+}
+/*#qrcode img{
+  margin: 0 auto;
+  width: 200px;
+  height: 200px;
+}*/
+.downloadJSON{
+  height: 50px;
+  padding-top: 25px;
+}
+.downloadJSON button{
+  width: 300px;
+  height: 40px;
+  background: #1476DB;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  border-radius: 3px;
+}
+.mnemonicCon{
+  width: 800px;
+  background: #fff;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -310px 0 0 -460px;
+}
+.mnemonicConTitle{
+  font-size: 20px;
+  line-height: 56px;
+  margin-bottom: 10px;
+  height: 56px;
+  text-align: center;
+  background: #1476DB;
+  color: #fff;
+}
+.mnemonicList,.mnemonicRandomList{
+  padding: 13px 30px 30px;
+}
+.backUpTip{
+  font-size: 14px;
+  color: #666;
+  line-height: 20px;
+}
+.mnemonicCon ul{
+  width: 580px;
+  margin: 20px auto 10px;
+  overflow: hidden;
+  padding: 10px 20px;
+  box-shadow: 0px 0 10px #e1e1e1;
+}
+.mnemonicCon ul li{
+  float: left;
+  padding: 5px;
+  margin: 5px;
+  font-size: 14px;
+}
+.mnemonicCon ul li i{
+  -moz-user-select: none;
+  -o-user-select:none;
+  -khtml-user-select:none;
+  -webkit-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
+  color: #333;
+}
+.mnemonicCon ul li span{
+  color: #333;
+  font-weight: 500;
+}
+.mnemonicBtn{
+  text-align: center;
+  padding-top: 20px;
+}
+.mnemonicBtn button{
+  min-width: 200px;
+  padding: 0 12px;
+  font-size: 14px;
+  background: #1476DB;
+  color: #fff;
+  height: 40px;
+  line-height: 40px;
+  border: 0;
+  border-radius: 2px;
+}
+.mnemonicBtn .emptyMnemonicBtn{
+  background: #D2D2D2;
+}
+.mnemonicRandomList{
+  display: none;
+  position: relative;
+}
+.hideRandomList{
+  position: absolute;
+  top: 50%;
+  left: 20px;
+  font-size: 32px;
+  cursor: pointer;
+  color: #666;
+  margin-top: -25px;
+}
+.mnemonicRandomList ul li{
+  cursor: pointer;
+}
+.mnemonicRandomList ul .blueColor{
+  background: #1476DB;
+  border-radius: 4px;
+}
+.mnemonicRandomList ul .blueColor i,.mnemonicRandomList ul .blueColor span{
+  color: #fff;
+}
+.mnemonicRandomList .verificationCode{
+  width: 340px;
+  margin: 5px auto 20px;
+}
+.mnemonicRandomList .label{
+  display: inline-block;
+  width: 18px;
+  font-size: 14px;
+  line-height: 16px;
+  font-weight: 400;
+  color: rgba(102,102,102,1);
+}
+.mnemonicRandomList .label i{
+  display: inline-block;
+  width: 20px;
+  height: 30px;
+  text-align: left;
+  color: #FF7B83;
+  font-size: 20px;
+  position: relative;
+  top: 5px;
+}
+.mnemonicRandomList .inpCon{
+  display: inline-block;
+  width: 275px;
+  height: 40px;
+  margin-top: 25px;
+}
+.mnemonicRandomList.layretrade-captchaimg {
+  width: 45%;
+  float: right;
+  background-color: #fff;
+  cursor: pointer;
+}
+.mnemonicRandomList input{
+  border: 1px solid #E0E0E0;
+  padding-left: 13px;
+  width:130px;
+  height: 100%;
+  font-size: 14px;
+  color: rgba(153,153,153,1);
+  line-height: 25px;
+}
+.mnemonicList ul{
+  position:relative;
+  padding-top: 20px;
+}
+.copyMnemonicCon{
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  cursor: pointer;
+}
+.copyMnemonicCon .addressImg{
+ width: 18px;
+}
+.mnemonicCon .messageNewAccount{
+  height: 30px;
+}
+.mnemonicCon .errorMessage{
+  position:absolute;
+  top:56px;
+  left:0;
+  right: 0;
+}
+.copyMnemonicCon #copyMnemonic{
+  position: fixed;
+  top: -999px;
+  z-index: -99;
+}
+@media (min-width: 768px) {
+  .account-info .col-md-3 {
+      flex: 1;
+      max-width: 100%;
+  }
+}
+@media (max-width: 767px) {
+  .walletList > div{
+    width: -webkit-fill-available;
+    border-radius:8px;
+    float: left;
+    margin: 0 0 40px 0;
+    position: relative;
+    box-sizing: border-box;
+  }
+}

@@ -1,0 +1,9 @@
+<% if Rails.env.production? %>
+    User-Agent: *
+    Allow: /
+    Disallow: /manager
+    Sitemap: https://tokenmom.com/sitemap.xml
+<% else %>
+    User-Agent: *
+    Disallow: /
+<% end %>
